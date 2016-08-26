@@ -191,14 +191,24 @@
                 "VpcId": {
                     "Ref": "VPCID"
                 },
-                "SecurityGroupIngress": [{
+                "SecurityGroupIngress": [
+                {
                     "IpProtocol": "tcp",
                     "FromPort": "22",
                     "ToPort": "22",
                     "CidrIp": {
                         "Ref": "AccessCIDR"
                     }
-                }],
+                },
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": "0",
+                    "ToPort": "65535",
+                    "CidrIp": {
+                        "Ref": "VPCCIDR"
+                    }
+                },
+                ],
                 "Tags": [{
                     "Key": "Name",
                     "Value": "ConsulMasterSecGroup"
