@@ -1,0 +1,26 @@
+[
+    {
+        "ParameterKey": "AccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "us-east-1a,us-east-1b,us-east-1c"
+    },
+    {
+        "ParameterKey": "ConsulInstanceType",
+        "ParameterValue": "m3.medium"
+    },
+    {
+        "ParameterKey": "ConsulNodes",
+        "ParameterValue": "1"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "tonynv"
+    },
+    {
+        "ParameterKey": "NATInstanceType",
+        "ParameterValue": "t2.small"
+    }
+]
