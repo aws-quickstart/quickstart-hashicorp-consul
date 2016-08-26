@@ -134,11 +134,13 @@
       "Description": "The CIDR IP range that is permitted to access Consul",
       "Type": "String"
     },
-        "AtlasToken": {
-            "Type": "String",
-            "Description": "Optional - Atlas token - used to check Consul nodes into Atlas"
-        }
-
+    "AtlasToken": {
+      "Type": "String",
+      "Description": "Optional - Atlas token - used to check Consul nodes into Atlas"
+    },
+    "ConsulNodes": {
+      "Type": "String",
+      "Description": "Not Implemeted yet!"
     },
     "Mappings": {
         "AWSAMIRegionMap": {
