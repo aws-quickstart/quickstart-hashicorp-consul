@@ -361,12 +361,6 @@
                 }
               ]
             },
-            "VPC": {
-              "Fn::GetAtt": [
-                "VPCStack",
-                "Outputs.VPCID"
-              ]
-            },
             "PrivateSubnet1ID": {
               "Fn::GetAtt": [
                   "VPCStack",
