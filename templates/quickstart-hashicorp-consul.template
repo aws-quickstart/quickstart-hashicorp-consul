@@ -97,19 +97,26 @@
         "ConsulMaster": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "AvailabilityZone": {
-                    "Fn::Select": [
-                        "0",
-                        {
-                            "Fn::GetAZs": {
-                                "Ref": "AWS::Region"
-                            }
-                        }
-                    ]
+                "AvailabilityZones": {
+                    "Ref": "AvailabilityZones"
                 },
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
+                "NetworkInterfaces": [
+                    {
+                        "DeleteOnTermination": "true",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "PublicSubnet1ID"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "ConsulSecGroup"
+                            }
+                        ]
+                    }
+                ],
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
@@ -207,10 +214,19 @@
                 "MinSize": "2",
                 "MaxSize": "2",
                 "DesiredCapacity": "2",
-                "AvailabilityZones": {
-                    "Fn::GetAZs": {
-                        "Ref": "AWS::Region"
+                                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "PrivateSubnet1ID"
+                    },
+                    {
+                        "Ref": "PrivateSubnet2ID"
+                    },
+                    {
+                        "Ref": "PrivateSubnet3ID"
                     }
+                ],
+                "AvailabilityZones": {
+                    "Ref" : "AvailabilityZones"
                 },
                 "Tags": [
                     {
