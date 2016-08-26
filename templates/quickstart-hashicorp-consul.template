@@ -208,9 +208,6 @@
         "ConsulMaster": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "AvailabilityZones": {
-                    "Ref": "AvailabilityZones"
-                },
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
