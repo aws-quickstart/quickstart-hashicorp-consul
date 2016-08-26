@@ -56,146 +56,148 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160406"
-            },
-            "eu-west-1": {
-                "US1404HVM": "ami-ed82e39e"
+                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160627"
             },
             "ap-northeast-1": {
-                "US1404HVM": "ami-f5bbab9b"
+                "US1404HVM": "ami-2e63924f"
             },
             "ap-northeast-2": {
-                "US1404HVM": "ami-45975c2b"
+                "US1404HVM": "ami-979258f9"
             },
             "ap-south-1": {
-                "US1404HVM": "ami-42569022"
+                "US1404HVM": "ami-4a90fa25"
             },
             "ap-southeast-1": {
-                "US1404HVM": "ami-b6c613d5"
+                "US1404HVM": "ami-ea2bf989"
             },
             "ap-southeast-2": {
-                "US1404HVM": "ami-2a644649"
+                "US1404HVM": "ami-396a415a"
             },
             "eu-central-1": {
-                "US1404HVM": "ami-821cfded"
+                "US1404HVM": "ami-4bd03b24"
+            },
+            "eu-west-1": {
+                "US1404HVM": "ami-02b62c71"
             },
             "sa-east-1": {
-                "US1404HVM": "ami-6008870c"
+                "US1404HVM": "ami-d952c7b5"
             },
             "us-east-1": {
-                "US1404HVM": "ami-2b594f41"
+                "US1404HVM": "ami-2d39803a"
             },
             "us-west-1": {
-                "US1404HVM": "ami-12512d72"
+                "US1404HVM": "ami-992661f9"
             },
             "us-west-2": {
-                "US1404HVM": "ami-63ac5803"
+                "US1404HVM": "ami-42569022"
             }
         }
     },
     "Resources": {
-      "ConsulMaster": {
-          "Type": "AWS::EC2::Instance",
-          "Properties": {
-              "AvailabilityZone": {
-                "Fn::Select": [
-                    "0",
-                    {
-                        "Fn::GetAZs": {
+        "ConsulMaster": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        "0",
+                        {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "ConsulInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
                             "Ref": "AWS::Region"
+                        },
+                        "US1404HVM"
+                    ]
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "20",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
+                                "chmod +x consul_bootstrap.sh\n",
+                                "./consul_bootstrap.sh\n",
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "ConsulMaster"
+                                ]
+                            ]
                         }
                     }
                 ]
-              },
-              "InstanceType": {
-                  "Ref": "ConsulInstanceType"
-              },
-              "KeyName": {
-                  "Ref": "KeyPair"
-              },
-              "ImageId": {
-                  "Fn::FindInMap": [
-                      "AWSAMIRegionMap", {
-                          "Ref": "AWS::Region"
-                      },
-                      "US1404HVM"
-                  ]
-              },
-              "BlockDeviceMappings": [
-                  {
-                      "DeviceName": "/dev/sda1",
-                      "Ebs": {
-                          "VolumeSize": "20",
-                          "VolumeType": "gp2"
-                      }
-                  }
-              ],
-              "UserData": {
-                  "Fn::Base64": {
-                      "Fn::Join": [
-                          "", [
-                              "#!/bin/bash\n",
-                              "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
-                              "chmod +x consul_bootstrap.sh\n",
-                              "./consul_bootstrap.sh\n",
-                              "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3"
-                          ]
-                      ]
-                  }
-              },
-              "Tags": [
-                  {
-                      "Key": "Name",
-                      "Value": {
-                          "Fn::Join": [
-                              "-",
-                              [
-                                  {
-                                      "Ref": "AWS::StackName"
-                                  },
-                                  "ConsulMaster"
-                              ]
-                          ]
-                      }
-                  }
-              ]
-          }
-      },
-      "ConsulMasterRecoveryAlarm": {
-          "Type": "AWS::CloudWatch::Alarm",
-          "Properties": {
-              "AlarmDescription": "EC2 Autorecovery for Consul Master. Autorecover if we fail EC2 status checks for 5 minutes.",
-              "Namespace": "AWS/EC2",
-              "MetricName": "StatusCheckFailed_System",
-              "Statistic": "Minimum",
-              "Period": "60",
-              "EvaluationPeriods": "5",
-              "ComparisonOperator": "GreaterThanThreshold",
-              "Threshold": "0",
-              "AlarmActions": [
-                  {
-                      "Fn::Join": [
-                          "",
-                          [
-                              "arn:aws:automate:",
-                              {
-                                  "Ref": "AWS::Region"
-                              },
-                              ":ec2:recover"
-                          ]
-                      ]
-                  }
-              ],
-              "Dimensions": [
-                  {
-                      "Name": "InstanceId",
-                      "Value": {
-                          "Ref": "ConsulMaster"
-                      }
-                  }
-              ]
-          }
-      },
+            }
+        },
+        "ConsulMasterRecoveryAlarm": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "EC2 Autorecovery for Consul Master. Autorecover if we fail EC2 status checks for 5 minutes.",
+                "Namespace": "AWS/EC2",
+                "MetricName": "StatusCheckFailed_System",
+                "Statistic": "Minimum",
+                "Period": "60",
+                "EvaluationPeriods": "5",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "Threshold": "0",
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:aws:automate:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":ec2:recover"
+                            ]
+                        ]
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "InstanceId",
+                        "Value": {
+                            "Ref": "ConsulMaster"
+                        }
+                    }
+                ]
+            }
+        },
         "ConsulAsg": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
@@ -210,19 +212,23 @@
                         "Ref": "AWS::Region"
                     }
                 },
-                "Tags": [{
-                    "Key": "Name",
-                    "Value": {
-                        "Fn::Join": [
-                            "-", [{
-                                    "Ref": "AWS::StackName"
-                                },
-                                "Consul Node"
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "Consul Node"
+                                ]
                             ]
-                        ]
-                    },
-                    "PropagateAtLaunch": "true"
-                }]
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
             }
         },
         "ConsulLC": {
@@ -237,7 +243,8 @@
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "AWSAMIRegionMap", {
+                        "AWSAMIRegionMap",
+                        {
                             "Ref": "AWS::Region"
                         },
                         "US1404HVM"
@@ -246,14 +253,18 @@
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
-                            "", [
+                            "",
+                            [
                                 "#!/bin/bash\n",
                                 "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
                                 "chmod +x consul_bootstrap.sh\n",
                                 "./consul_bootstrap.sh\n",
                                 "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3 -join ",
                                 {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                    "Fn::GetAtt": [
+                                        "ConsulMaster",
+                                        "PrivateIp"
+                                    ]
                                 }
                             ]
                         ]
@@ -262,4 +273,4 @@
             }
         }
     }
-  }
+}
