@@ -172,7 +172,8 @@
     },
     "AtlasToken": {
       "Description": "Optional - Atlas token - used to check Consul nodes into Atlas",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "ConsulNodes": {
       "Type": "Number",
