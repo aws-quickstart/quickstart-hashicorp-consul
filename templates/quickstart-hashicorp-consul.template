@@ -138,7 +138,7 @@
                               "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
                               "chmod +x consul_bootstrap.sh\n",
                               "./consul_bootstrap.sh\n",
-                              "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3",
+                              "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3"
                           ]
                       ]
                   }
