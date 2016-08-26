@@ -403,14 +403,32 @@
                     "Outputs.PublicSubnet3ID"
                 ]
             },
-            "VPCCIDR": {
-                "Ref": "VPCCIDR"
-            },
             "VPCID": {
                 "Fn::GetAtt": [
                     "VPCStack",
                     "Outputs.VPCID"
                 ]
+            },
+            "PrivateSubnet1CIDR": {
+              "Ref": "PublicSubnet1CIDR"
+            },
+            "PrivateSubnet2CIDR": {
+              "Ref": "PublicSubnet2CIDR"
+            },
+            "PrivateSubnet3CIDR": {
+              "Ref": "PublicSubnet3CIDR"
+            },
+            "PublicSubnet1CIDR": {
+              "Ref": "PublicSubnet1CIDR"
+            },
+            "PublicSubnet2CIDR": {
+              "Ref": "PublicSubnet2CIDR"
+            },
+            "PublicSubnet3CIDR": {
+              "Ref": "PublicSubnet3CIDR"
+            },
+            "VPCCIDR": {
+                "Ref": "VPCCIDR"
             },
             "AtlasToken": {
               "Ref": "AtlasToken"
