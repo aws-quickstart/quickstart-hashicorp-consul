@@ -106,6 +106,12 @@
             "Description": "CIDR Block for the public DMZ subnet 3 located in Availability Zone 3",
             "Type": "String"
         },
+        "QuickStartS3URL": {
+            "ConstraintDescription": "S3Url",
+            "Default": "https://s3.amazonaws.com",
+            "Description": "AWS S3 Url",
+            "Type": "String"
+        },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -256,10 +262,33 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
+                                "CONSUL_BOOTSTRAP=",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                }, 
+                                "/",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "/",
+                                "consul_bootstrap.sh",
+                                "\n",
+                                "echo ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "wget ${CONSUL_BOOTSTRAP}",
+                                "\n",
                                 "chmod +x consul_bootstrap.sh\n",
                                 "./consul_bootstrap.sh\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3"
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect ",
+                                {
+                                    "Ref": "ConsulNodes"
+                                },
+                                "'",
+                                " -join ",
                             ]
                         ]
                     }
@@ -374,12 +403,13 @@
                                 "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
                                 "chmod +x consul_bootstrap.sh\n",
                                 "./consul_bootstrap.sh\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect",
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect ",
                                 {
                                     "Ref": "ConsulNodes"
                                 },
                                 "'",
-                                " -join ", {
+                                " -join ",
+                                {
                                     "Fn::GetAtt": [
                                         "ConsulMaster",
                                         "PrivateIp"

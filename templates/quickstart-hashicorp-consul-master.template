@@ -86,7 +86,7 @@
   },
   "Parameters": {
     "AvailabilityZones": {
-      "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 2 AZs are used for this deployment.",
+      "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved (3 AZs are used for this deployment)",
       "Type": "List<AWS::EC2::AvailabilityZone::Name>"
     },
     "KeyPairName": {
@@ -439,9 +439,19 @@
             "AccessCIDR": {
               "Ref": "AccessCIDR"
             },
-            "QSS3BucketName": {
-              "Ref": "QSS3BucketName"
-            },
+            "QuickStartS3URL": {
+            "Fn::Join": [
+                "/", [{
+                    "Fn::FindInMap": [
+                      "AWSInfoRegionMap", {
+                          "Ref": "AWS::Region"
+                          },
+                        "QuickStartS3URL"
+                      ]
+                    }
+                  ]
+                ]
+              },
             "QSS3KeyPrefix": {
               "Ref": "QSS3KeyPrefix"
             }
