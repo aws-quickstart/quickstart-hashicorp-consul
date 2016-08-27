@@ -184,34 +184,31 @@
         }
     },
     "Resources": {
-        "ConsulMasterSecGroup": {
+        "ConsulSecGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "Enables SSH access to the Consul Master.",
                 "VpcId": {
                     "Ref": "VPCID"
                 },
-                "SecurityGroupIngress": [
-                {
+                "SecurityGroupIngress": [{
                     "IpProtocol": "tcp",
                     "FromPort": "22",
                     "ToPort": "22",
                     "CidrIp": {
                         "Ref": "AccessCIDR"
                     }
-                },
-                {
+                }, {
                     "IpProtocol": "tcp",
                     "FromPort": "0",
                     "ToPort": "65535",
                     "CidrIp": {
                         "Ref": "VPCCIDR"
                     }
-                },
-                ],
+                }],
                 "Tags": [{
                     "Key": "Name",
-                    "Value": "ConsulMasterSecGroup"
+                    "Value": "ConsulSecGroup"
                 }]
             }
         },
@@ -228,7 +225,7 @@
                         "Ref": "PublicSubnet1ID"
                     },
                     "GroupSet": [{
-                        "Ref": "ConsulMasterSecGroup"
+                        "Ref": "ConsulSecGroup"
                     }]
                 }],
                 "KeyName": {
@@ -346,6 +343,9 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
+                "SecurityGroups": [{
+                    "Ref": "ConsulSecGroup"
+                }],
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
