@@ -136,7 +136,8 @@
         },
         "ConsulNodes": {
             "Type": "String",
-            "Description": "Not implemented yet!"
+            "Description": "Sets DesiredCapacity and MaxSize (@TODO Split into seprate params",
+                "Default": "3"
         },
         "AtlasToken": {
             "Type": "String",
@@ -190,28 +191,32 @@
                 "GroupDescription": "Enables SSH access to the Consul Master.",
                 "VpcId": {
                     "Ref": "VPCID"
-                },
-                "SecurityGroupIngress": [{
-                    "IpProtocol": "tcp",
-                    "FromPort": "22",
-                    "ToPort": "22",
-                    "CidrIp": {
-                        "Ref": "AccessCIDR"
+                    },
+                    "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "AccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "0",
+                        "ToPort": "65535",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
                     }
-                }, {
-                    "IpProtocol": "tcp",
-                    "FromPort": "0",
-                    "ToPort": "65535",
-                    "CidrIp": {
-                        "Ref": "VPCCIDR"
-                    }
-                }],
+                ],
                 "Tags": [{
                     "Key": "Name",
                     "Value": "ConsulSecGroup"
                 }]
             }
         },
+
         "ConsulMaster": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
@@ -309,8 +314,12 @@
                     "Ref": "ConsulLC"
                 },
                 "MinSize": "2",
-                "MaxSize": "2",
-                "DesiredCapacity": "2",
+                "MaxSize": {
+                            "Ref": "ConsulNodes"
+                           },
+                "DesiredCapacity": {
+                            "Ref": "ConsulNodes"
+                           },
                 "VPCZoneIdentifier": [{
                     "Ref": "PrivateSubnet1ID"
                 }, {
@@ -365,7 +374,12 @@
                                 "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
                                 "chmod +x consul_bootstrap.sh\n",
                                 "./consul_bootstrap.sh\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect 3 -join ", {
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect",
+                                {
+                                    "Ref": "ConsulNodes"
+                                },
+                                "'",
+                                " -join ", {
                                     "Fn::GetAtt": [
                                         "ConsulMaster",
                                         "PrivateIp"
