@@ -13,7 +13,7 @@
     },
     {
         "ParameterKey": "ConsulNodes",
-        "ParameterValue": "1"
+        "ParameterValue": "4"
     },
     {
         "ParameterKey": "KeyPairName",
