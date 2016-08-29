@@ -173,7 +173,7 @@ curl -s  $UPSTARTCONF -o ${UPSTARTFILE}
 chkstatus
 
 # Check Consul configuration
-curl  ${S3SCRIPT_PATH}/base.json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
+curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
 chkstatus
 
 # Consul config
