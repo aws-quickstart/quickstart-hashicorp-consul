@@ -18,10 +18,12 @@
 * Added Consul Nodes Parameter (Sets ASG parms)
 
 ## New bootstrapping script `v2`
-* Takes input from template UserData and Dynamicly builds base.json
-* Consul now looks at generated config to get hints on jow many nodes to expect during build
+* Takes input from template UserData and Dynamically builds base.json
+* Consul now looks at generated config to get hints on how many nodes to expect during build
 * New bootstrapping script takes parameterized values via Userdata and executes build according to specified values in: `ConsulNodes, S3URL, S3BucketName, S3KeyPrefix`
 
 ## Todo
 - Enable Atlas Token
 - Add wait handles for better failure detection
+- Create Deployment Docs
+
