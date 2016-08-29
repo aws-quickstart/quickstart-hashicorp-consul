@@ -262,6 +262,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v2.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -269,26 +270,39 @@
                                 "/",
                                 {
                                     "Ref": "QSS3BucketName"
-                                }, 
+                                },
                                 "/",
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                "/",
-                                "consul_bootstrap.sh",
+                                "/scripts/",
+                                "${CONSUL_BOOTSTRAP_FILE}",
                                 "\n",
                                 "echo ${CONSUL_BOOTSTRAP}",
                                 "\n",
                                 "wget ${CONSUL_BOOTSTRAP}",
                                 "\n",
-                                "chmod +x consul_bootstrap.sh\n",
-                                "./consul_bootstrap.sh\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect ",
+                                "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
+                                "./${CONSUL_BOOTSTRAP_FILE} ",
+                                "--consul_expect ",
                                 {
                                     "Ref": "ConsulNodes"
                                 },
-                                "'",
-                                " -join ",
+                                " --s3url ",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                " --s3bucket ",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                " --s3prefix ",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "\n",
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data",
+                                "\n"
                             ]
                         ]
                     }
@@ -400,26 +414,54 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "wget https://s3-us-west-2.amazonaws.com/43d3.brandonchav.is/consul_bootstrap.sh\n",
-                                "chmod +x consul_bootstrap.sh\n",
-                                "./consul_bootstrap.sh\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -bootstrap-expect ",
+                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v2.sh\n",
+                                "CONSUL_BOOTSTRAP=",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "/scripts/",
+                                "${CONSUL_BOOTSTRAP_FILE}",
+                                "\n",
+                                "echo ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "wget ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
+                                "./${CONSUL_BOOTSTRAP_FILE} ",
+                                "--consul_expect ",
                                 {
                                     "Ref": "ConsulNodes"
                                 },
-                                "'",
-                                " -join ",
+                                " --s3url ",
                                 {
-                                    "Fn::GetAtt": [
-                                        "ConsulMaster",
-                                        "PrivateIp"
-                                    ]
-                                }
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                " --s3bucket ",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                " --s3prefix ",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "\n",
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                },
+                                "\n"
                             ]
                         ]
                     }
-                }
-            }
+            }    }
         }
     }
 }
