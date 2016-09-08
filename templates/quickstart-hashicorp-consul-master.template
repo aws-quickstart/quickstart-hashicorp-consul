@@ -175,8 +175,15 @@
       "Type": "String",
       "Default": ""
     },
-    "ConsulNodes": {
-      "Type": "Number",
+    "ConsulServerNodes": {
+      "Type": "String",
+      "Description": "Sets DesiredCapacity and MaxSize ",
+      "AllowedValues": ["3","5","7"],
+      "Default": "3"
+    },
+    "ConsulClientNodes": {
+      "Type": "String",
+      "Description": "Sets DesiredCapacity and MaxSize ",
       "Default": "3"
     },
     "ConsulInstanceType": {
@@ -427,8 +434,11 @@
             "AtlasToken": {
               "Ref": "AtlasToken"
             },
-            "ConsulNodes": {
-              "Ref": "ConsulNodes"
+            "ConsulServerNodes": {
+              "Ref": "ConsulServerNodes"
+            },
+            "ConsulClientNodes": {
+              "Ref": "ConsulClientNodes"
             },
             "ConsulInstanceType": {
               "Ref": "ConsulInstanceType"

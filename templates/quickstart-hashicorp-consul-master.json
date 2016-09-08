@@ -12,8 +12,12 @@
         "ParameterValue": "m3.medium"
     },
     {
-        "ParameterKey": "ConsulNodes",
-        "ParameterValue": "4"
+        "ParameterKey": "ConsulClientNodes",
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "ConsulServerNodes",
+        "ParameterValue": "3"
     },
     {
         "ParameterKey": "KeyPairName",

@@ -140,10 +140,16 @@
             "Description": "The CIDR IP range that is permitted to access Consul",
             "Type": "String"
         },
-        "ConsulNodes": {
+        "ConsulServerNodes": {
             "Type": "String",
-            "Description": "Sets DesiredCapacity and MaxSize (@TODO Split into seprate params",
+            "Description": "Sets DesiredCapacity and MaxSize ",
+            "AllowedValues": ["3","5","7"],
                 "Default": "3"
+        },
+         "ConsulClientNodes": {
+            "Type": "String",
+            "Description": "Sets DesiredCapacity and MaxSize ",
+            "Default": "3"
         },
         "AtlasToken": {
             "Type": "String",
@@ -222,7 +228,6 @@
                 }]
             }
         },
-
         "ConsulMaster": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
@@ -286,7 +291,7 @@
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
                                 "--consul_expect ",
                                 {
-                                    "Ref": "ConsulNodes"
+                                    "Ref": "ConsulServerNodes"
                                 },
                                 " --s3url ",
                                 {
@@ -350,18 +355,115 @@
                 }]
             }
         },
+        "ConsulClients": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "InstanceType": {
+                    "Ref": "ConsulInstanceType"
+                },
+                "NetworkInterfaces": [{
+                    "DeleteOnTermination": "true",
+                    "DeviceIndex": 0,
+                    "SubnetId": {
+                        "Ref": "PublicSubnet1ID"
+                    },
+                    "GroupSet": [{
+                        "Ref": "ConsulSecGroup"
+                    }]
+                }],
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap", {
+                            "Ref": "AWS::Region"
+                        },
+                        "US1404HVM"
+                    ]
+                },
+                "BlockDeviceMappings": [{
+                    "DeviceName": "/dev/sda1",
+                    "Ebs": {
+                        "VolumeSize": "20",
+                        "VolumeType": "gp2"
+                    }
+                }],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "", [
+                                "#!/bin/bash\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v1.sh\n",
+                                "CONSUL_BOOTSTRAP=",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "/scripts/",
+                                "${CONSUL_BOOTSTRAP_FILE}",
+                                "\n",
+                                "echo ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "wget ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
+                                "./${CONSUL_BOOTSTRAP_FILE} ",
+                                " --s3url ",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                " --s3bucket ",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                " --s3prefix ",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "\n",
+                                "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Join": [
+                            "-", [{
+                                    "Ref": "AWS::StackName"
+                                },
+                                "ConsulClients"
+                            ]
+                        ]
+                    }
+                }]
+            }
+        },
         "ConsulAsg": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
                 "LaunchConfigurationName": {
-                    "Ref": "ConsulLC"
+                    "Ref": "ConsulServerLC"
                 },
                 "MinSize": "2",
                 "MaxSize": {
-                            "Ref": "ConsulNodes"
+                            "Ref": "ConsulServerNodes"
                            },
                 "DesiredCapacity": {
-                            "Ref": "ConsulNodes"
+                            "Ref": "ConsulServerNodes"
                            },
                 "VPCZoneIdentifier": [{
                     "Ref": "PrivateSubnet1ID"
@@ -380,7 +482,7 @@
                             "-", [{
                                     "Ref": "AWS::StackName"
                                 },
-                                "Consul Node"
+                                "Consul Server"
                             ]
                         ]
                     },
@@ -388,7 +490,45 @@
                 }]
             }
         },
-        "ConsulLC": {
+        "ConsulClientAsg": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "LaunchConfigurationName": {
+                    "Ref": "ConsulClientLC"
+                },
+                "MinSize": "2",
+                "MaxSize": {
+                            "Ref": "ConsulClientNodes"
+                           },
+                "DesiredCapacity": {
+                            "Ref": "ConsulClientNodes"
+                           },
+                "VPCZoneIdentifier": [{
+                    "Ref": "PrivateSubnet1ID"
+                }, {
+                    "Ref": "PrivateSubnet2ID"
+                }, {
+                    "Ref": "PrivateSubnet3ID"
+                }],
+                "AvailabilityZones": {
+                    "Ref": "AvailabilityZones"
+                },
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Join": [
+                            "-", [{
+                                    "Ref": "AWS::StackName"
+                                },
+                                "Consul Client"
+                            ]
+                        ]
+                    },
+                    "PropagateAtLaunch": "true"
+                }]
+            }
+        },
+        "ConsulServerLC": {
             "DependsOn": "ConsulMaster",
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
@@ -438,7 +578,7 @@
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
                                 "--consul_expect ",
                                 {
-                                    "Ref": "ConsulNodes"
+                                    "Ref": "ConsulServerNodes"
                                 },
                                 " --s3url ",
                                 {
@@ -454,6 +594,77 @@
                                 },
                                 "\n",
                                 "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+            }    }
+        },
+         "ConsulClientLC": {
+            "DependsOn": "ConsulClients",
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "InstanceType": {
+                    "Ref": "ConsulInstanceType"
+                },
+                "SecurityGroups": [{
+                    "Ref": "ConsulSecGroup"
+                }],
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap", {
+                            "Ref": "AWS::Region"
+                        },
+                        "US1404HVM"
+                    ]
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "", [
+                                "#!/bin/bash\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v1.sh\n",
+                                "CONSUL_BOOTSTRAP=",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "/scripts/",
+                                "${CONSUL_BOOTSTRAP_FILE}",
+                                "\n",
+                                "echo ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "wget ${CONSUL_BOOTSTRAP}",
+                                "\n",
+                                "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
+                                "./${CONSUL_BOOTSTRAP_FILE} ",
+                                " --s3url ",
+                                {
+                                    "Ref": "QuickStartS3URL"
+                                },
+                                " --s3bucket ",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                " --s3prefix ",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "\n",
+                                "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
                                 {
                                     "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
                                 },
