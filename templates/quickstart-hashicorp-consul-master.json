@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AccessCIDR",
-        "ParameterValue": "0.0.0.0/0"
+        "ParameterValue": "54.240.198.33/32"
     },
     {
         "ParameterKey": "AvailabilityZones",

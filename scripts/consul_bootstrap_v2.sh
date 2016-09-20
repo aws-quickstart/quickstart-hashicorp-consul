@@ -1,7 +1,7 @@
 #!/bin/bash -e
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
 
