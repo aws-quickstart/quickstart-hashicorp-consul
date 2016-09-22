@@ -674,5 +674,25 @@
                     }
             }    }
         }
+    },
+    "Outputs": {
+        "ConsulMasterPrivateIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ConsulMaster",
+                    "PrivateIp"
+                ]
+            },
+            "Description": "Consul Master PrivateIp"
+        },
+        "ConsulMasterPublicIP": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ConsulMaster",
+                    "PublicIp"
+                ]
+            },
+            "Description": "Consul Master PublicIp"
+        }
     }
 }
