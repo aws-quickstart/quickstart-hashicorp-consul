@@ -267,7 +267,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v2.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v3.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -394,7 +394,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v1.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v2.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -554,7 +554,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v2.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v3.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -629,7 +629,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v1.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v2.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
