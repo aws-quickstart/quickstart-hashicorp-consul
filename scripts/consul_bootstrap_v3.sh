@@ -8,6 +8,7 @@
 # Configuration 
 PROGRAM='HashiCorp Consul'
 CONSULVERSION='0.6.4'
+CONSUL_TEMPLATE_VERSION='0.15.0'
 
 ##################################### Functions
 function checkos () {
@@ -122,6 +123,7 @@ echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 # Uncomment to update on boot
 #apt-get -y update
 
+
 # SCRIPT VARIBLES
 BINDIR='/usr/local/bin'
 CONSULDIR='/opt/consul'
@@ -129,15 +131,14 @@ CONFIGDIR='${CONSULDIR}/config'
 DATADIR='${CONSULDIR}/data'
 CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
+CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart.conf"
-UPSTARTFILE="/etc/init/consul.conf"
+CONSUL_UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart.conf"
+CONSUL_UPSTARTFILE="/etc/init/consul.conf"
 
 #CONSUL VARIABLES
 echo  "Bootstrapping ${PROGRAM}"
-EX_CODE=$?
-
-
+#EX_CODE=$?
 
 ## Install dependencies
 apt-get -y install curl unzip jq
@@ -167,9 +168,9 @@ chkstatus
 
 # Upstart config
 echo "Load upstart consul.conf"
-echo "source file: ${UPSTARTCONF}"
-echo "target file: ${UPSTARTFILE}"
-curl -s  $UPSTARTCONF -o ${UPSTARTFILE}
+echo "source file: ${CONSUL_UPSTARTCONF}"
+echo "target file: ${CONSUL_UPSTARTFILE}"
+curl -s  $CONSUL_UPSTARTCONF -o ${CONSUL_UPSTARTFILE}
 chkstatus
 
 # Check Consul configuration
@@ -177,12 +178,17 @@ curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT
 chkstatus
 
 # Consul config
-#cp $CONFIGDIR/consul_client.json $CONSULCONFIGDIR/base.json
-
 ##
 echo "Install Consul Web UI"
 curl -L $CONSULWEBUI > ui.zip
 unzip ui.zip -d $CONSULDIR/ui
 chkstatus
 
-echo "Ready to start Consul Agent"
+echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
+
+echo "Install Consul Template"
+curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
+unzip  /tmp/consul_template.zip -d  /usr/local/bin 
+chmod 0755 /usr/local/bin/consul_template
+chown root:root /usr/local/bin/consul_template
+chkstatus

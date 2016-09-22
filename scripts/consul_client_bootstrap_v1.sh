@@ -1,7 +1,7 @@
 #!/bin/bash -e
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
 
@@ -50,10 +50,9 @@ checkos
 S3BUCKET='NONE'
 S3URL='NONE'
 S3PREFIX='NONE'
-CONSUL_EXPECT=3
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,verbose,consul_expect:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,verbose,,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 
@@ -70,16 +69,6 @@ while true; do
 	echo "[] DEBUG = ON"
 	VERBOSE=true; 
 	shift 
-	;;
-    --consul_expect )
-	if [ "$2" -eq "$2" ] 2>/dev/null
-	then
-		CONSUL_EXPECT="$2"; 
-		shift 2 
-	else
-    		echo "[ERROR]: vaule of consul_expect must be an [int] "
-    	exit 1
-	fi
 	;;
     --s3url )
 	S3URL="${2%/}"; 
@@ -173,7 +162,7 @@ curl -s  $UPSTARTCONF -o ${UPSTARTFILE}
 chkstatus
 
 # Check Consul configuration
-curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
+curl  ${S3SCRIPT_PATH}/client_json  >  ${CONSULCONFIGDIR}/base.json
 chkstatus
 
 # Consul config

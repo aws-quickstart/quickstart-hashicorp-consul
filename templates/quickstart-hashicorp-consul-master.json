@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AccessCIDR",
-        "ParameterValue": "0.0.0.0/0"
+        "ParameterValue": "54.240.198.33/32"
     },
     {
         "ParameterKey": "AvailabilityZones",
@@ -12,8 +12,12 @@
         "ParameterValue": "m3.medium"
     },
     {
-        "ParameterKey": "ConsulNodes",
-        "ParameterValue": "4"
+        "ParameterKey": "ConsulClientNodes",
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "ConsulServerNodes",
+        "ParameterValue": "3"
     },
     {
         "ParameterKey": "KeyPairName",
