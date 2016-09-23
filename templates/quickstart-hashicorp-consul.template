@@ -49,8 +49,8 @@
                 "i2.4xlarge",
                 "i2.8xlarge"
             ],
-            "ConstraintDescription": "Choose an instance type. m3.medium or larger recommended.",
-            "Default": "m3.medium"
+            "ConstraintDescription": "Choose an instance type.",
+            "Default": "t2.medium"
         },
         "PrivateSubnet1ID": {
             "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)",
