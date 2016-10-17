@@ -134,7 +134,7 @@ CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
 CONSUL_UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart.conf"
-CONSUL_UPSTARTFILE="/etc/init/consul.conf"
+CONSUL_UPSTARTFILE="/etc/init.d/consul"
 
 #CONSUL VARIABLES
 echo  "Bootstrapping ${PROGRAM}"
@@ -153,6 +153,9 @@ echo "Unpacking Consul to: ${BINDIR}"
 unzip  /tmp/consul.zip -d  /usr/local/bin 
 chmod 0755 /usr/local/bin/consul
 chown root:root /usr/local/bin/consul
+update-rc.d consul defaults
+update-rc.d consul enable
+
 chkstatus
 
 echo "Creating Consul Directories"

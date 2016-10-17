@@ -306,7 +306,7 @@
                                     "Ref": "QSS3KeyPrefix"
                                 },
                                 "\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data",
+                                "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data",
                                 "\n"
                             ]
                         ]
