@@ -146,15 +146,14 @@ chkstatus
 
 echo "Fetching Consul... from $CONSULDOWNLOAD"
 
-curl -L $CONSULDOWNLOAD > /tmp/consul.zip
+curl -L ${CONSULDOWNLOAD} > /tmp/consul.zip
 chkstatus
 
 echo "Unpacking Consul to: ${BINDIR}"
 unzip  /tmp/consul.zip -d  /usr/local/bin 
 chmod 0755 /usr/local/bin/consul
 chown root:root /usr/local/bin/consul
-update-rc.d consul defaults
-update-rc.d consul enable
+
 
 chkstatus
 
@@ -175,6 +174,9 @@ echo "source file: ${CONSUL_UPSTARTCONF}"
 echo "target file: ${CONSUL_UPSTARTFILE}"
 curl -s  $CONSUL_UPSTARTCONF -o ${CONSUL_UPSTARTFILE}
 chkstatus
+update-rc.d consul defaults
+update-rc.d consul enable
+chkstatus
 
 # Check Consul configuration
 curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
@@ -183,8 +185,8 @@ chkstatus
 # Consul config
 ##
 echo "Install Consul Web UI"
-curl -L $CONSULWEBUI > ui.zip
-unzip ui.zip -d $CONSULDIR/ui
+curl -L ${CONSULWEBUI} > ui.zip
+unzip ui.zip -d ${CONSULDIR}/ui
 chkstatus
 
 echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
@@ -192,6 +194,6 @@ echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
 unzip  /tmp/consul_template.zip -d  /usr/local/bin 
-chmod 0755 /usr/local/bin/consul_template
-chown root:root /usr/local/bin/consul_template
+chmod 0755 /usr/local/bin/consul-template
+chown root:root /usr/local/bin/consul-template
 chkstatus
