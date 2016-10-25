@@ -1,13 +1,15 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
+# date: oct,24,2016
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
 
 # Configuration 
-PROGRAM='HashiCorp Consul'
-CONSULVERSION='0.6.4'
+PROGRAM='HashiCorp Consul Client'
+CONSULVERSION='0.7.0'
+CONSUL_TEMPLATE_VERSION='0.15.0'
 
 ##################################### Functions
 function checkos () {
@@ -26,7 +28,7 @@ echo "$0 <usage>"
 echo " "
 echo "options:"
 echo -e  "-h, --help \t show options for this script"
-echo -e "--consul_expect \t Number of Consul nodes to expect -C(3)"
+echo -e "--masterip \t Consul master ip"
 echo -e "--s3url \t specify the s3 URL  -S3url (https://s3.amazonaws.com/)"
 echo -e "--s3bucket \t specify -s3bucket (your-bucket)"
 echo -e "--s3prefix \t specify -s3prefix (prefix/to/key | folder/folder/file)"
@@ -50,10 +52,9 @@ checkos
 S3BUCKET='NONE'
 S3URL='NONE'
 S3PREFIX='NONE'
-CONSUL_EXPECT=3
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,verbose,consul_expect:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,masterip:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 
@@ -66,20 +67,9 @@ while true; do
 	usage
 	exit 1
 	;; 
-    -v | --verbose ) 
-	echo "[] DEBUG = ON"
-	VERBOSE=true; 
+    -m | --masterip ) 
+  MASTERIP="$2"; 
 	shift 
-	;;
-    --consul_expect )
-	if [ "$2" -eq "$2" ] 2>/dev/null
-	then
-		CONSUL_EXPECT="$2"; 
-		shift 2 
-	else
-    		echo "[ERROR]: vaule of consul_expect must be an [int] "
-    	exit 1
-	fi
 	;;
     --s3url )
 	S3URL="${2%/}"; 
@@ -129,9 +119,10 @@ CONFIGDIR='${CONSULDIR}/config'
 DATADIR='${CONSULDIR}/data'
 CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
+CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart.conf"
-UPSTARTFILE="/etc/init/consul.conf"
+UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart-client.conf"
+UPSTARTFILE="/etc/init.d/consul-client"
 
 #CONSUL VARIABLES
 echo  "Bootstrapping ${PROGRAM}"
@@ -166,23 +157,28 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 # Upstart config
-echo "Load upstart consul.conf"
+echo "Load upstart consul.conf (client)"
 echo "source file: ${UPSTARTCONF}"
 echo "target file: ${UPSTARTFILE}"
-curl -s  $UPSTARTCONF -o ${UPSTARTFILE}
+curl  $UPSTARTCONF > ${UPSTARTFILE}
+echo "Updating Master IP ($MASTER_IP)"
+curl  $UPSTARTCONF  | sed -e s/__MASTER_IP__/${MASTERIP}/ >  ${UPSTARTFILE}
+chmod 755 ${UPSTARTFILE}
+chkstatus
+update-rc.d consul-client defaults
+update-rc.d consul-client enable
+chkstatus
 chkstatus
 
 # Check Consul configuration
-curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
+curl  ${S3SCRIPT_PATH}/client_json  >  ${CONSULCONFIGDIR}/base.json
 chkstatus
 
-# Consul config
-#cp $CONFIGDIR/consul_client.json $CONSULCONFIGDIR/base.json
-
-##
-echo "Install Consul Web UI"
-curl -L $CONSULWEBUI > ui.zip
-unzip ui.zip -d $CONSULDIR/ui
+echo "Install Consul Template"
+curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
+unzip  /tmp/consul_template.zip -d  /usr/local/bin 
+chmod 0755 /usr/local/bin/consul-template
+chown root:root /usr/local/bin/consul-template
 chkstatus
 
-echo "Ready to start Consul Agent"
+

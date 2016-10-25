@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Consul by HashiCorp Quickstart for AWS: Consul instances sub-template",
+    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,24,2016 ",
     "Parameters": {
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -150,10 +150,6 @@
             "Type": "String",
             "Description": "Sets DesiredCapacity and MaxSize ",
             "Default": "3"
-        },
-        "AtlasToken": {
-            "Type": "String",
-            "Description": "Optional - Atlas token - used to check Consul nodes into Atlas"
         }
     },
     "Mappings": {
@@ -188,13 +184,21 @@
             "us-east-1": {
                 "US1404HVM": "ami-2d39803a"
             },
+            "us-east-2": {
+                "US1404HVM": "ami-53eeb536"
+            },
             "us-west-1": {
                 "US1404HVM": "ami-992661f9"
             },
             "us-west-2": {
                 "US1404HVM": "ami-42569022"
             }
-        }
+        },
+      "NumOfServer" : {
+      "3" : { "servers" : 2 },
+      "5" : { "servers" : 4 },
+      "7" : { "servers" : 6 },
+      }
     },
     "Resources": {
         "ConsulSecGroup": {
@@ -267,7 +271,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v3.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -394,7 +398,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v2.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -428,6 +432,10 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
+                                " --masterip ",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                },
                                 "\n",
                                 "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
                                 {
@@ -460,11 +468,21 @@
                 },
                 "MinSize": "2",
                 "MaxSize": {
+                    "Fn::FindInMap": [
+                        "NumOfServer", {
                             "Ref": "ConsulServerNodes"
-                           },
+                        },
+                        "servers"
+                    ]
+                },
                 "DesiredCapacity": {
+                    "Fn::FindInMap": [
+                        "NumOfServer", {
                             "Ref": "ConsulServerNodes"
-                           },
+                        },
+                        "servers"
+                    ]
+                },
                 "VPCZoneIdentifier": [{
                     "Ref": "PrivateSubnet1ID"
                 }, {
@@ -498,11 +516,21 @@
                 },
                 "MinSize": "2",
                 "MaxSize": {
-                            "Ref": "ConsulClientNodes"
-                           },
+                    "Fn::FindInMap": [
+                        "NumOfServer", {
+                            "Ref": "ConsulServerNodes"
+                        },
+                        "servers"
+                    ]
+                },
                 "DesiredCapacity": {
-                            "Ref": "ConsulClientNodes"
-                           },
+                    "Fn::FindInMap": [
+                        "NumOfServer", {
+                            "Ref": "ConsulServerNodes"
+                        },
+                        "servers"
+                    ]
+                },
                 "VPCZoneIdentifier": [{
                     "Ref": "PrivateSubnet1ID"
                 }, {
@@ -554,7 +582,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap_v3.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -629,7 +657,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap_v2.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -662,6 +690,10 @@
                                 " --s3prefix ",
                                 {
                                     "Ref": "QSS3KeyPrefix"
+                                },
+                                " --masterip ",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
                                 },
                                 "\n",
                                 "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",

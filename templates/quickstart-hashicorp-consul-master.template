@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "QS(NOTASSIGNED) Hashicorp Consul template master, License: Apache 2.0 (Please do not remove)",
+  "Description": "Hashicorp Consul template master, License: Apache 2.0 (Please do not remove) Oct,24,2016",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [{
@@ -71,9 +71,6 @@
         },
         "VPCCIDR": {
           "default": "VPC CIDR"
-        },
-        "AtlasToken": {
-          "default": "Atlas Token"
         },
         "ConsulNodes": {
           "default": "Consul nodes"
@@ -169,11 +166,6 @@
       "Description": "The CIDR IP range that is permitted to access Consul Note: a value of 0.0.0.0/0 will allow access from ANY ip address",
       "Type": "String"
     },
-    "AtlasToken": {
-      "Description": "Optional - Atlas token - used to check Consul nodes into Atlas",
-      "Type": "String",
-      "Default": ""
-    },
     "ConsulServerNodes": {
       "Type": "String",
       "Description": "Sets DesiredCapacity and MaxSize ",
@@ -261,6 +253,10 @@
           "QuickStartS3URL": "https://s3.amazonaws.com"
         },
         "us-east-1": {
+          "Partition": "aws",
+          "QuickStartS3URL": "https://s3.amazonaws.com"
+        },
+        "us-east-2": {
           "Partition": "aws",
           "QuickStartS3URL": "https://s3.amazonaws.com"
         },
@@ -429,9 +425,6 @@
             },
             "VPCCIDR": {
                 "Ref": "VPCCIDR"
-            },
-            "AtlasToken": {
-              "Ref": "AtlasToken"
             },
             "ConsulServerNodes": {
               "Ref": "ConsulServerNodes"
