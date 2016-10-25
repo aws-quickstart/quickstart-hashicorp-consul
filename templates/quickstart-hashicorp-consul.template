@@ -368,6 +368,16 @@
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
+                "NetworkInterfaces": [{
+                    "DeleteOnTermination": "true",
+                    "DeviceIndex": 0,
+                    "SubnetId": {
+                        "Ref": "PrivateSubnet1ID"
+                    },
+                    "GroupSet": [{
+                        "Ref": "ConsulSecGroup"
+                    }]
+                }],
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap", {
@@ -629,6 +639,7 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
+                "AssociatePublicIpAddress": "true",
                 "SecurityGroups": [{
                     "Ref": "ConsulSecGroup"
                 }],
