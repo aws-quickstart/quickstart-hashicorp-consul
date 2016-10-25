@@ -365,16 +365,6 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
-                "NetworkInterfaces": [{
-                    "DeleteOnTermination": "true",
-                    "DeviceIndex": 0,
-                    "SubnetId": {
-                        "Ref": "PublicSubnet1ID"
-                    },
-                    "GroupSet": [{
-                        "Ref": "ConsulSecGroup"
-                    }]
-                }],
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
@@ -563,6 +553,7 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
+                "AssociatePublicIpAddress": "true",
                 "SecurityGroups": [{
                     "Ref": "ConsulSecGroup"
                 }],
