@@ -625,7 +625,10 @@
                                 "\n",
                                 "echo \"Start Services\"",
                                 "\n",
-                                "service consul start",
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                },
                                 "\n"
                             ]
                         ]
