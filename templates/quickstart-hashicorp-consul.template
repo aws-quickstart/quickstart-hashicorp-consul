@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,24,2016 ",
+    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,27,2016 ",
     "Parameters": {
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -197,7 +197,7 @@
       "NumOfServer" : {
       "3" : { "servers" : 2 },
       "5" : { "servers" : 4 },
-      "7" : { "servers" : 6 },
+      "7" : { "servers" : 6 }
       }
     },
     "Resources": {
@@ -310,7 +310,9 @@
                                     "Ref": "QSS3KeyPrefix"
                                 },
                                 "\n",
-                                "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data",
+                                "echo \"Start Services\"",
+                                "\n",
+                                "service  consul start",
                                 "\n"
                             ]
                         ]
@@ -437,10 +439,9 @@
                                     "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
                                 },
                                 "\n",
-                                "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
-                                },
+                                "echo \"Start Services\"",
+                                "\n",
+                                "service  consul-client start",
                                 "\n"
                             ]
                         ]
@@ -622,10 +623,9 @@
                                     "Ref": "QSS3KeyPrefix"
                                 },
                                 "\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
-                                },
+                                "echo \"Start Services\"",
+                                "\n",
+                                "service consul start",
                                 "\n"
                             ]
                         ]
@@ -698,10 +698,9 @@
                                     "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
                                 },
                                 "\n",
-                                "consul agent -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
-                                },
+                                "echo \"Start Services\"",
+                                "\n",
+                                "service consul-client start",
                                 "\n"
                             ]
                         ]
