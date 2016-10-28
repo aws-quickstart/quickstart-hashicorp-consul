@@ -459,7 +459,7 @@
                                 "\n",
                                 "echo \"Start Services\"",
                                 "\n",
-                                "service  consul-client start",
+                                "service consul start",
                                 "\n"
                             ]
                         ]
@@ -602,7 +602,7 @@
                         "Fn::Join": [
                             "", [
                                 "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_bootstrap.sh\n",
+                                "CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh\n",
                                 "CONSUL_BOOTSTRAP=",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -624,10 +624,6 @@
                                 "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
-                                "--consul_expect ",
-                                {
-                                    "Ref": "ConsulServerNodes"
-                                },
                                 " --s3url ",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -640,13 +636,14 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                "\n",
-                                "echo \"Start Services\"",
-                                "\n",
-                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul-data -join ",
+                                " --masterip ",
                                 {
                                     "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
                                 },
+                                "\n",
+                                "echo \"Start Services\"",
+                                "\n",
+                                "service consul start",
                                 "\n"
                             ]
                         ]
@@ -721,7 +718,7 @@
                                 "\n",
                                 "echo \"Start Services\"",
                                 "\n",
-                                "service consul-client start",
+                                "service consul start",
                                 "\n"
                             ]
                         ]

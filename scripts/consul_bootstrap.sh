@@ -135,9 +135,9 @@ CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-CONSUL_INITCONF="${S3SCRIPT_PATH}/consul-init-server.conf"
+CONSUL_INITCONF="${S3SCRIPT_PATH}/consul-init-master.conf"
 CONSUL_INITFILE="/etc/init.d/consul"
-CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-server.conf"
+CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-master.conf"
 CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
 #CONSUL VARIABLES
@@ -186,13 +186,6 @@ chkstatus
 
 # Check Consul configuration
 curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
-chkstatus
-
-# Consul config
-##
-echo "Install Consul Web UI"
-curl -L ${CONSULWEBUI} > ui.zip
-unzip ui.zip -d ${CONSULDIR}/ui
 chkstatus
 
 echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
