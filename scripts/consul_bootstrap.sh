@@ -135,9 +135,9 @@ CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-CONSUL_INITCONF="${S3SCRIPT_PATH}/consul-init-master.conf"
+CONSUL_INITCONF="${S3SCRIPT_PATH}/consul-init-seed.conf"
 CONSUL_INITFILE="/etc/init.d/consul"
-CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-master.conf"
+CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-seed.conf"
 CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
 #CONSUL VARIABLES
@@ -174,7 +174,7 @@ chkstatus
 
 # Upstart config
 echo "Confiure Init/Upstart Scripts (server)"
-echo "Updating Master IP ($MASTER_IP)"
+echo "Updating Seed IP ($SEED_IP)"
 curl -s  $CONSUL_INITCONF -o ${CONSUL_INITFILE}
 chmod 755 ${CONSUL_INITFILE}
 curl -s  $CONSUL_UPSTART_CONF -o ${CONSUL_UPSTART_FILE}

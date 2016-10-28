@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,27,2016 ",
+    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,28,2016 ",
     "Parameters": {
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -204,7 +204,7 @@
         "ConsulSecGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enables SSH access to the Consul Master.",
+                "GroupDescription": "Enables SSH access to the Consul Seed.",
                 "VpcId": {
                     "Ref": "VPCID"
                     },
@@ -232,7 +232,7 @@
                 }]
             }
         },
-        "ConsulMaster": {
+        "ConsulSeed": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
                 "InstanceType": {
@@ -325,35 +325,35 @@
                             "-", [{
                                     "Ref": "AWS::StackName"
                                 },
-                                "ConsulMaster"
+                                "ConsulSeed"
                             ]
                         ]
                     }
                 }]
             }
         },
-        "ConsulMasterEIP" : {
+        "ConsulSeedEIP" : {
             "Type" : "AWS::EC2::EIP",
                 "Properties": {
                 "Domain": "vpc"
             }
         },
-        "ConsulMasterIPAssoc" : {
+        "ConsulSeedIPAssoc" : {
          "Type" : "AWS::EC2::EIPAssociation",
          "Properties" : {
-             "InstanceId" : { "Ref" : "ConsulMaster" },
+             "InstanceId" : { "Ref" : "ConsulSeed" },
              "AllocationId" : {
                     "Fn::GetAtt": [
-                        "ConsulMasterEIP",
+                        "ConsulSeedEIP",
                         "AllocationId"
                     ]
                 }
          }
      },
-        "ConsulMasterRecoveryAlarm": {
+        "ConsulSeedRecoveryAlarm": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmDescription": "EC2 Autorecovery for Consul Master. Autorecover if we fail EC2 status checks for 5 minutes.",
+                "AlarmDescription": "EC2 Autorecovery for Consul Seed. Autorecover if we fail EC2 status checks for 5 minutes.",
                 "Namespace": "AWS/EC2",
                 "MetricName": "StatusCheckFailed_System",
                 "Statistic": "Minimum",
@@ -374,7 +374,7 @@
                 "Dimensions": [{
                     "Name": "InstanceId",
                     "Value": {
-                        "Ref": "ConsulMaster"
+                        "Ref": "ConsulSeed"
                     }
                 }]
             }
@@ -452,9 +452,9 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                " --masterip ",
+                                " --seedip ",
                                 {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
                                 },
                                 "\n",
                                 "echo \"Start Services\"",
@@ -576,7 +576,7 @@
             }
         },
         "ConsulServerLC": {
-            "DependsOn": "ConsulMaster",
+            "DependsOn": "ConsulSeed",
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
                 "InstanceType": {
@@ -636,9 +636,9 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                " --masterip ",
+                                " --seedip ",
                                 {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
                                 },
                                 "\n",
                                 "echo \"Start Services\"",
@@ -711,9 +711,9 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                " --masterip ",
+                                " --seedip ",
                                 {
-                                    "Fn::GetAtt" : [ "ConsulMaster" , "PrivateIp" ]
+                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
                                 },
                                 "\n",
                                 "echo \"Start Services\"",
@@ -727,23 +727,23 @@
         }
     },
     "Outputs": {
-        "ConsulMasterPrivateIP": {
+        "ConsulSeedPrivateIP": {
             "Value": {
                 "Fn::GetAtt": [
-                    "ConsulMaster",
+                    "ConsulSeed",
                     "PrivateIp"
                 ]
             },
-            "Description": "Consul Master PrivateIp"
+            "Description": "Consul Seed PrivateIp"
         },
-        "ConsulMasterPublicIP": {
+        "ConsulSeedPublicIP": {
             "Value": {
                 "Fn::GetAtt": [
-                    "ConsulMaster",
+                    "ConsulSeed",
                     "PublicIp"
                 ]
             },
-            "Description": "Consul Master PublicIp"
+            "Description": "Consul Seed PublicIp"
         }
     }
 }

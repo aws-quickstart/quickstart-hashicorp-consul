@@ -28,7 +28,7 @@ echo "$0 <usage>"
 echo " "
 echo "options:"
 echo -e  "-h, --help \t show options for this script"
-echo -e "--masterip \t Consul master ip"
+echo -e "--seedip \t Consul seed ip"
 echo -e "--s3url \t specify the s3 URL  -S3url (https://s3.amazonaws.com/)"
 echo -e "--s3bucket \t specify -s3bucket (your-bucket)"
 echo -e "--s3prefix \t specify -s3prefix (prefix/to/key | folder/folder/file)"
@@ -54,7 +54,7 @@ S3URL='NONE'
 S3PREFIX='NONE'
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,masterip:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,seedip:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 
@@ -67,8 +67,8 @@ while true; do
   usage
   exit 1
   ;; 
-    -m | --masterip ) 
-  MASTERIP="$2"; 
+    -m | --seedip ) 
+  SEEDIP="$2"; 
   shift 
   ;;
     --s3url )
@@ -160,9 +160,9 @@ chkstatus
 
 # Upstart config
 echo "Confiure Init/Upstart Scripts (client)"
-echo "Updating Master IP ($MASTER_IP)"
-curl  $INITCONF  | sed -e s/__MASTER_IP__/${MASTERIP}/ >  ${INITFILE}
-curl  $CONSUL_UPSTART_CONF  | sed -e s/__MASTER_IP__/${MASTERIP}/ > ${CONSUL_UPSTART_FILE}
+echo "Updating Seed IP ($SEED_IP)"
+curl  $INITCONF  | sed -e s/__SEED_IP__/${SEEDIP}/ >  ${INITFILE}
+curl  $CONSUL_UPSTART_CONF  | sed -e s/__SEED_IP__/${SEEDIP}/ > ${CONSUL_UPSTART_FILE}
 chmod 755 ${INITFILE}
 chmod 755 ${CONSUL_UPSTART_FILE}
 chkstatus
