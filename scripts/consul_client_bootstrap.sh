@@ -64,27 +64,27 @@ if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage hel
 while true; do
   case "$1" in
     -h | --help)
-	usage
-	exit 1
-	;; 
+  usage
+  exit 1
+  ;; 
     -m | --masterip ) 
   MASTERIP="$2"; 
-	shift 
-	;;
+  shift 
+  ;;
     --s3url )
-	S3URL="${2%/}"; 
-	shift 2 
-	;;
+  S3URL="${2%/}"; 
+  shift 2 
+  ;;
     --s3bucket ) 
-	S3BUCKET="$2"; 
-	shift 2 
-	;;
+  S3BUCKET="$2"; 
+  shift 2 
+  ;;
     --s3prefix ) 
-	S3PREFIX="${2%/}";
-	shift 2 
-	;;
+  S3PREFIX="${2%/}";
+  shift 2 
+  ;;
     -- ) 
-	break;;
+  break;;
     *) break ;;
   esac
 done
@@ -121,8 +121,10 @@ CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart-client.conf"
-UPSTARTFILE="/etc/init.d/consul-client"
+INITCONF="${S3SCRIPT_PATH}/consul-init-client.conf"
+INITFILE="/etc/init.d/consul-client"
+CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-client.conf"
+CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
 #CONSUL VARIABLES
 echo  "Bootstrapping ${PROGRAM}"
@@ -157,17 +159,16 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 # Upstart config
-echo "Load upstart consul.conf (client)"
-echo "source file: ${UPSTARTCONF}"
-echo "target file: ${UPSTARTFILE}"
-curl  $UPSTARTCONF > ${UPSTARTFILE}
+echo "Confiure Init/Upstart Scripts (client)"
 echo "Updating Master IP ($MASTER_IP)"
-curl  $UPSTARTCONF  | sed -e s/__MASTER_IP__/${MASTERIP}/ >  ${UPSTARTFILE}
-chmod 755 ${UPSTARTFILE}
+curl  $INITCONF  | sed -e s/__MASTER_IP__/${MASTERIP}/ >  ${INITFILE}
+curl  $CONSUL_UPSTART_CONF  | sed -e s/__MASTER_IP__/${MASTERIP}/ > ${CONSUL_UPSTART_FILE}
+chmod 755 ${INITFILE}
+chmod 755 ${CONSUL_UPSTART_FILE}
 chkstatus
+
 update-rc.d consul-client defaults
 update-rc.d consul-client enable
-chkstatus
 chkstatus
 
 # Check Consul configuration

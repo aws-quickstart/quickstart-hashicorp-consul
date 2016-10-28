@@ -135,8 +135,10 @@ CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-CONSUL_UPSTARTCONF="${S3SCRIPT_PATH}/consul-upstart-server.conf"
-CONSUL_UPSTARTFILE="/etc/init.d/consul"
+CONSUL_INITCONF="${S3SCRIPT_PATH}/consul-init-server.conf"
+CONSUL_INITFILE="/etc/init.d/consul"
+CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-server.conf"
+CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
 #CONSUL VARIABLES
 echo  "Bootstrapping ${PROGRAM}"
@@ -171,12 +173,13 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 # Upstart config
-echo "Load upstart consul.conf (server)"
-echo "source file: ${CONSUL_UPSTARTCONF}"
-echo "target file: ${CONSUL_UPSTARTFILE}"
-curl -s  $CONSUL_UPSTARTCONF -o ${CONSUL_UPSTARTFILE}
-chmod 755 ${CONSUL_UPSTARTFILE}
+echo "Confiure Init/Upstart Scripts (server)"
+echo "Updating Master IP ($MASTER_IP)"
+curl -s  $CONSUL_INITCONF -o ${CONSUL_INITFILE}
+chmod 755 ${CONSUL_INITFILE}
+curl -s  $CONSUL_UPSTART_CONF -o ${CONSUL_UPSTART_FILE}
 chkstatus
+
 update-rc.d consul defaults
 update-rc.d consul enable
 chkstatus

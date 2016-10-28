@@ -332,6 +332,24 @@
                 }]
             }
         },
+        "ConsulMasterEIP" : {
+            "Type" : "AWS::EC2::EIP",
+                "Properties": {
+                "Domain": "vpc"
+            }
+        },
+        "ConsulMasterIPAssoc" : {
+         "Type" : "AWS::EC2::EIPAssociation",
+         "Properties" : {
+             "InstanceId" : { "Ref" : "ConsulMaster" },
+             "AllocationId" : {
+                    "Fn::GetAtt": [
+                        "ConsulMasterEIP",
+                        "AllocationId"
+                    ]
+                }
+         }
+     },
         "ConsulMasterRecoveryAlarm": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
@@ -564,7 +582,7 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
-                "AssociatePublicIpAddress": "true",
+                "AssociatePublicIpAddress": "false",
                 "SecurityGroups": [{
                     "Ref": "ConsulSecGroup"
                 }],
@@ -642,7 +660,7 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
-                "AssociatePublicIpAddress": "true",
+                "AssociatePublicIpAddress": "false",
                 "SecurityGroups": [{
                     "Ref": "ConsulSecGroup"
                 }],
