@@ -185,11 +185,6 @@ echo "Restarting dnsmasq..."
 sudo service dnsmasq restart
 chkstatus
 
-#Get consul server ips
-CONSULIPS="$(dig +short consul.service.consul | tr '\n' ' ')"
-nslookup  consul.service.consul
-chkstatus
-
 echo "Updating startup scripts"
 curl $CONSUL_UPSTART_CONF > ${CONSUL_UPSTART_FILE}
 chmod 755 ${CONSUL_UPSTART_FILE}

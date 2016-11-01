@@ -77,7 +77,6 @@ while true; do
 	if [ "$2" -eq "$2" ] 2>/dev/null
 	then
 		CONSUL_EXPECT="$2"; 
-		#CONSUL_EXPECT=$(($CONSUL_EXPECT-1))
 		shift 2 
 	else
     		echo "[ERROR]: vaule of consul_expect must be an [int] "
@@ -155,8 +154,6 @@ echo "Unpacking Consul to: ${BINDIR}"
 unzip  /tmp/consul.zip -d  /usr/local/bin 
 chmod 0755 /usr/local/bin/consul
 chown root:root /usr/local/bin/consul
-
-
 chkstatus
 
 echo "Creating Consul Directories"
@@ -175,14 +172,8 @@ echo "Confiure Init/Upstart Scripts (seed)"
 curl -s  $CONSUL_UPSTART_CONF -o ${CONSUL_UPSTART_FILE}
 chkstatus
 
-update-rc.d consul defaults
-update-rc.d consul enable
-chkstatus
-
 curl  ${S3SCRIPT_PATH}/base_json > ${CONSULCONFIGDIR}/base.json
-# Check Consul configuration
-#curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
-#chkstatus
+chkstatus
 
 echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
 
@@ -191,4 +182,11 @@ curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
 unzip  /tmp/consul_template.zip -d  /usr/local/bin 
 chmod 0755 /usr/local/bin/consul-template
 chown root:root /usr/local/bin/consul-template
+chkstatus
+
+wget https://s3.amazonaws.com/quickstart-reference/hashicorp/consul/latest/scripts/check_bootstrap.sh
+chkstatus
+chmod 755 check_bootstrap.sh
+export RUN="./check_bootstrap.sh ${CONSUL_EXPECT} &>/tmp/check_bootstrap.log"
+/bin/bash -c '${RUN}' &
 chkstatus

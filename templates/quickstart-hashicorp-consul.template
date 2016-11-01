@@ -316,6 +316,15 @@
                                 {
                                     "Ref": "ConsulServerNodes"
                                 },
+                                "\n",
+                                "/usr/local/bin/cfn-signal -e $? ",
+                                "  --stack ", {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource ConsulSeed ",
+                                " --region ", {
+                                    "Ref": "AWS::Region"
+                                },
                                 "\n"
                             ]
                         ]
@@ -461,6 +470,15 @@
                                     "Ref": "QSS3KeyPrefix"
                                 },
                                 " --seedip ${SEEDIP}",
+                                "\n",
+                                "/usr/local/bin/cfn-signal -e $? ",
+                                "  --stack ", {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource ConsulClients ",
+                                " --region ", {
+                                    "Ref": "AWS::Region"
+                                },
                                 "\n"
                             ]
                         ]

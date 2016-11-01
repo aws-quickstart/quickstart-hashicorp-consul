@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date: oct,24,2016
+# date: oct,31,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
@@ -181,11 +181,6 @@ sudo sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
 
 echo "Restarting dnsmasq..."
 sudo service dnsmasq restart
-chkstatus
-
-#Get consul server ips
-CONSULIPS="$(dig +short consul.service.consul | tr '\n' ' ')"
-nslookup  consul.service.consul
 chkstatus
 
 echo "Updating startup scripts"
