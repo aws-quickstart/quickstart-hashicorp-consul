@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Hashicorp Consul template seed, License: Apache 2.0 (Please do not remove) Oct,31,2016",
+  "Description": "Hashicorp Consul template seed, License: Apache 2.0 (Please do not remove) Nov,1,2016",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [{
@@ -27,6 +27,8 @@
           "AtlasToken",
           "ConsulNodes",
           "ConsulInstanceType",
+          "ConsulServerNodes",
+          "ConsulClientNodes",
           "KeyPairName"
         ]
       }, {
@@ -168,19 +170,19 @@
     },
     "ConsulServerNodes": {
       "Type": "String",
-      "Description": "Sets DesiredCapacity and MaxSize ",
+      "Description": "Number of Consul Servers",
       "AllowedValues": ["3","5","7"],
       "Default": "3"
     },
     "ConsulClientNodes": {
       "Type": "String",
-      "Description": "Sets DesiredCapacity and MaxSize ",
+      "Description": "Number of Consul Clients",
       "Default": "3"
     },
     "ConsulInstanceType": {
       "Type": "String",
       "Default": "t2.medium",
-      "Description": "Consul node instance type",
+      "Description": "Consul Instance type",
       "AllowedValues": [
         "t2.micro",
         "t2.small",

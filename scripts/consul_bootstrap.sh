@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date: oct,24,2016
+# date: Nov,1,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
@@ -172,7 +172,7 @@ echo "Confiure Init/Upstart Scripts (seed)"
 curl -s  $CONSUL_UPSTART_CONF -o ${CONSUL_UPSTART_FILE}
 chkstatus
 
-curl  ${S3SCRIPT_PATH}/base_json > ${CONSULCONFIGDIR}/base.json
+curl  -s ${S3SCRIPT_PATH}/base_json > ${CONSULCONFIGDIR}/base.json
 chkstatus
 
 echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
@@ -184,18 +184,21 @@ chmod 0755 /usr/local/bin/consul-template
 chown root:root /usr/local/bin/consul-template
 chkstatus
 
+# Start Consul in bootstrap mode
+bash -c "consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -bootstrap-expect ${CONSUL_EXPECT} &"
+
 echo "Starting Node Scanner in background! (see /tmp/check.log)"
 curl -s ${S3SCRIPT_PATH}/check_bootstrap.sh -o /tmp/check.sh
 sed -i "s/__CONSUL_EXPECT__/${CONSUL_EXPECT}/" /tmp/check.sh
 chmod 755 /tmp/check.sh
-/bin/bash -c '/tmp/check.sh' 
+bash -c '/tmp/check.sh' 
 chkstatus
 
-echo Installing Dnsmasq...
+echo "Installing Dnsmasq..."
 sudo apt-get -qq -y update
 sudo apt-get -qq -y install dnsmasq-base dnsmasq
 
-echo Configuring Dnsmasq...
+echo "Configuring Dnsmasq..."
 sudo sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
 sudo sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
 sudo sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
