@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
 # date: oct,24,2016
@@ -7,7 +7,7 @@
 
 
 # Configuration 
-PROGRAM='HashiCorp Consul'
+PROGRAM='HashiCorp Consul Seed Server'
 CONSULVERSION='0.7.0'
 CONSUL_TEMPLATE_VERSION='0.15.0'
 
@@ -129,14 +129,12 @@ echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 # SCRIPT VARIBLES
 BINDIR='/usr/local/bin'
 CONSULDIR='/opt/consul'
-CONFIGDIR='${CONSULDIR}/config'
-DATADIR='${CONSULDIR}/data'
+CONFIGDIR="${CONSULDIR}/config"
+DATADIR="${CONSULDIR}/data"
 CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-CONSUL_INITCONF="${S3SCRIPT_PATH}/consul-init-seed.conf"
-CONSUL_INITFILE="/etc/init.d/consul"
 CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-seed.conf"
 CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
@@ -173,10 +171,7 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 # Upstart config
-echo "Confiure Init/Upstart Scripts (server)"
-echo "Updating Seed IP ($SEED_IP)"
-curl -s  $CONSUL_INITCONF -o ${CONSUL_INITFILE}
-chmod 755 ${CONSUL_INITFILE}
+echo "Confiure Init/Upstart Scripts (seed)"
 curl -s  $CONSUL_UPSTART_CONF -o ${CONSUL_UPSTART_FILE}
 chkstatus
 
@@ -184,9 +179,10 @@ update-rc.d consul defaults
 update-rc.d consul enable
 chkstatus
 
+curl  ${S3SCRIPT_PATH}/base_json > ${CONSULCONFIGDIR}/base.json
 # Check Consul configuration
-curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
-chkstatus
+#curl  ${S3SCRIPT_PATH}/base_json | sed -e s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/ >  ${CONSULCONFIGDIR}/base.json
+#chkstatus
 
 echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
 

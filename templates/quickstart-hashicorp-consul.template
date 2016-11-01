@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,28,2016 ",
+    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Oct,31,2016 ",
     "Parameters": {
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -312,7 +312,10 @@
                                 "\n",
                                 "echo \"Start Services\"",
                                 "\n",
-                                "service  consul start",
+                                "consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul/data -bootstrap-expect ",
+                                {
+                                    "Ref": "ConsulServerNodes"
+                                },
                                 "\n"
                             ]
                         ]
@@ -438,6 +441,11 @@
                                 "\n",
                                 "wget ${CONSUL_BOOTSTRAP}",
                                 "\n",
+                                "SEEDIP=",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
+                                },
+                                "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
                                 " --s3url ",
@@ -452,14 +460,7 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                " --seedip ",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
-                                },
-                                "\n",
-                                "echo \"Start Services\"",
-                                "\n",
-                                "service consul start",
+                                " --seedip ${SEEDIP}",
                                 "\n"
                             ]
                         ]
@@ -622,6 +623,11 @@
                                 "\n",
                                 "wget ${CONSUL_BOOTSTRAP}",
                                 "\n",
+                                "SEEDIP=",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
+                                },
+                                "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
                                 " --s3url ",
@@ -636,14 +642,7 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                " --seedip ",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
-                                },
-                                "\n",
-                                "echo \"Start Services\"",
-                                "\n",
-                                "service consul start",
+                                " --seedip ${SEEDIP}",
                                 "\n"
                             ]
                         ]
@@ -697,6 +696,11 @@
                                 "\n",
                                 "wget ${CONSUL_BOOTSTRAP}",
                                 "\n",
+                                "SEEDIP=",
+                                {
+                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
+                                },
+                                "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
                                 " --s3url ",
@@ -711,14 +715,7 @@
                                 {
                                     "Ref": "QSS3KeyPrefix"
                                 },
-                                " --seedip ",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
-                                },
-                                "\n",
-                                "echo \"Start Services\"",
-                                "\n",
-                                "service consul start",
+                                " --seedip ${SEEDIP}",
                                 "\n"
                             ]
                         ]

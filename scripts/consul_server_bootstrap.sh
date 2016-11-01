@@ -115,14 +115,12 @@ echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 # SCRIPT VARIBLES
 BINDIR='/usr/local/bin'
 CONSULDIR='/opt/consul'
-CONFIGDIR='${CONSULDIR}/config'
-DATADIR='${CONSULDIR}/data'
+CONFIGDIR="${CONSULDIR}/config"
+DATADIR="${CONSULDIR}/data"
 CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-INITCONF="${S3SCRIPT_PATH}/consul-init-server.conf"
-INITFILE="/etc/init.d/consul-client"
 CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-server.conf"
 CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
@@ -158,21 +156,11 @@ chmod 755 $CONFIGDIR
 chmod 755 $CONSULCONFIGDIR
 chkstatus
 
-# Upstart config
-echo "Confiure Init/Upstart Scripts (client)"
-echo "Updating Seed IP ($SEED_IP)"
-curl  $INITCONF  | sed -e s/__SEED_IP__/${SEEDIP}/ >  ${INITFILE}
-curl  $CONSUL_UPSTART_CONF  | sed -e s/__SEED_IP__/${SEEDIP}/ > ${CONSUL_UPSTART_FILE}
-chmod 755 ${INITFILE}
-chmod 755 ${CONSUL_UPSTART_FILE}
-chkstatus
-
-update-rc.d consul-client defaults
-update-rc.d consul-client enable
-chkstatus
+echo "Starting Consul with temporary ip -> ($SEEDIP)"
+consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -join ${SEEDIP} &
 
 # Check Consul configuration
-curl  ${S3SCRIPT_PATH}/client_json  >  ${CONSULCONFIGDIR}/base.json
+curl  ${S3SCRIPT_PATH}/base_json  >  ${CONSULCONFIGDIR}/base.json
 chkstatus
 
 echo "Install Consul Template"
@@ -182,4 +170,33 @@ chmod 0755 /usr/local/bin/consul-template
 chown root:root /usr/local/bin/consul-template
 chkstatus
 
+echo Installing Dnsmasq...
 
+sudo apt-get -qq -y update
+sudo apt-get -qq -y install dnsmasq-base dnsmasq
+
+echo Configuring Dnsmasq...
+
+sudo sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
+sudo sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
+sudo sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
+
+echo "Restarting dnsmasq..."
+sudo service dnsmasq restart
+chkstatus
+
+#Get consul server ips
+CONSULIPS="$(dig +short consul.service.consul | tr '\n' ' ')"
+nslookup  consul.service.consul
+chkstatus
+
+echo "Updating startup scripts"
+curl $CONSUL_UPSTART_CONF > ${CONSUL_UPSTART_FILE}
+chmod 755 ${CONSUL_UPSTART_FILE}
+
+
+echo "Killing consul"
+/bin/bash -c '/usr/bin/killall -q consul; exit 0'
+sleep 5
+echo "Starting consul"
+start consul 
