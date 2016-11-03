@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date: Nov,1,2016
+# date: Nov,3,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
@@ -167,16 +167,12 @@ chmod 755 $CONFIGDIR
 chmod 755 $CONSULCONFIGDIR
 chkstatus
 
-# Upstart config
-echo "Confiure Init/Upstart Scripts (seed)"
-curl -s  $CONSUL_UPSTART_CONF -o ${CONSUL_UPSTART_FILE}
-chkstatus
 
+# Write Consul config file
 curl  -s ${S3SCRIPT_PATH}/base_json > ${CONSULCONFIGDIR}/base.json
 chkstatus
 
-echo "Fetching Consul Template ... from $CONSUL_TEMPLATE_DOWNLOAD"
-
+#Install Consul Template
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
 unzip  /tmp/consul_template.zip -d  /usr/local/bin 
@@ -185,13 +181,23 @@ chown root:root /usr/local/bin/consul-template
 chkstatus
 
 # Start Consul in bootstrap mode
-bash -c "consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -bootstrap-expect ${CONSUL_EXPECT} &"
+EXEC_STRING="exec consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -bootstrap-expect ${CONSUL_EXPECT}"
+curl -s ${S3SCRIPT_PATH}/consul-upstart_template.conf -o ${CONSUL_UPSTART_FILE} 
+sed -i -e "/__EXEC_STRING__/c${EXEC_STRING}" ${CONSUL_UPSTART_FILE}
+start consul
+
+mv ${CONSUL_UPSTART_FILE} ${CONSUL_UPSTART_FILE}.bootstrap
+
+# Update upstart config to restart in not bootstrap on restart 
+EXEC_STRING="exec consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul/data -client 0.0.0.0"
+curl -s ${S3SCRIPT_PATH}/consul-upstart_template.conf -o  ${CONSUL_UPSTART_FILE}
+sed -i -e "/__EXEC_STRING__/c${EXEC_STRING}"  ${CONSUL_UPSTART_FILE}
 
 echo "Starting Node Scanner in background! (see /tmp/check.log)"
 curl -s ${S3SCRIPT_PATH}/check_bootstrap.sh -o /tmp/check.sh
 sed -i "s/__CONSUL_EXPECT__/${CONSUL_EXPECT}/" /tmp/check.sh
 chmod 755 /tmp/check.sh
-bash -c '/tmp/check.sh' 
+bash -c '/tmp/check.sh' & 
 chkstatus
 
 echo "Installing Dnsmasq..."

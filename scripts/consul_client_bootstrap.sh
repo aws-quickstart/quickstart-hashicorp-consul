@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date:  Nov,1,2016
+# date:  Nov,3,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
@@ -184,11 +184,19 @@ sudo service dnsmasq restart
 chkstatus
 
 echo "Updating startup scripts"
-curl $CONSUL_UPSTART_CONF > ${CONSUL_UPSTART_FILE}
+CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
+curl -s $CONSUL_UPSTART_CONF | sed "s/__CONSUL_SERVER_IPS__/${CONSUL_SERVER_IPS}/" > ${CONSUL_UPSTART_FILE}
 chmod 755 ${CONSUL_UPSTART_FILE}
 
-echo "Killing consul"
-bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
 
-echo "Starting consul"
-start consul 
+if [[ -z $CONSUL_SERVER_IPS ]];then 
+  echo "Script [FAILED]" >&2
+  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
+  exit 1
+else
+  echo "Killing consul"
+  /bin/bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
+  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
+  echo "Starting consul"
+  start consul 
+fi

@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstraping 
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date:  Nov,1,2016
+# date:  Nov,3,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
@@ -128,8 +128,6 @@ CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 echo  "Bootstrapping ${PROGRAM}"
 EX_CODE=$?
 
-
-
 ## Install dependencies
 apt-get -y install curl unzip jq
 chkstatus
@@ -189,9 +187,17 @@ echo "Updating startup scripts"
 curl $CONSUL_UPSTART_CONF > ${CONSUL_UPSTART_FILE}
 chmod 755 ${CONSUL_UPSTART_FILE}
 
+CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
 
-echo "Killing consul"
-/bin/bash -c '/usr/bin/killall -q consul; exit 0'
-sleep 5
-echo "Starting consul"
-start consul 
+if [[ -z $CONSUL_SERVER_IPS ]];then 
+  echo "Script [FAILED]" >&2
+  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
+  exit 1
+else
+  echo "Killing consul"
+  /bin/bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
+  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
+  echo "Starting consul"
+  start consul 
+fi
+
