@@ -1,15 +1,15 @@
 #!/bin/bash -ex
-# Hashicorp Consul Bootstraping 
+# Hashicorp Consul Bootstrapping
 # authors: tonynv@amazon.com, bchav@amazon.com
 # date:  Nov,3,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
 
-# Configuration 
+# Configuration
 PROGRAM='HashiCorp Consul Server'
 CONSULVERSION='0.7.0'
-CONSUL_TEMPLATE_VERSION='0.15.0'
+CONSUL_TEMPLATE_VERSION='0.16.0'
 
 ##################################### Functions
 function checkos () {
@@ -66,24 +66,24 @@ while true; do
     -h | --help)
   usage
   exit 1
-  ;; 
-    -m | --seedip ) 
-  SEEDIP="$2"; 
-  shift 
+  ;;
+    -m | --seedip )
+  SEEDIP="$2";
+  shift
   ;;
     --s3url )
-  S3URL="${2%/}"; 
-  shift 2 
+  S3URL="${2%/}";
+  shift 2
   ;;
-    --s3bucket ) 
-  S3BUCKET="$2"; 
-  shift 2 
+    --s3bucket )
+  S3BUCKET="$2";
+  shift 2
   ;;
-    --s3prefix ) 
+    --s3prefix )
   S3PREFIX="${2%/}";
-  shift 2 
+  shift 2
   ;;
-    -- ) 
+    -- )
   break;;
     *) break ;;
   esac
@@ -95,7 +95,7 @@ echo "consul = $CONSUL"
 echo "s3bucket = $S3BUCKET"
 echo "S3url = $S3URL"
 echo "s3prefix = $S3PREFIX"
-fi 
+fi
 
 # Strip leading slash
 if [[ $S3PREFIX == /* ]];then
@@ -120,7 +120,6 @@ DATADIR="${CONSULDIR}/data"
 CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
-CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
 CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-server.conf"
 CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
@@ -138,7 +137,7 @@ curl -L $CONSULDOWNLOAD > /tmp/consul.zip
 chkstatus
 
 echo "Unpacking Consul to: ${BINDIR}"
-unzip  /tmp/consul.zip -d  /usr/local/bin 
+unzip  /tmp/consul.zip -d  /usr/local/bin
 chmod 0755 /usr/local/bin/consul
 chown root:root /usr/local/bin/consul
 chkstatus
@@ -157,13 +156,9 @@ chkstatus
 echo "Starting Consul with temporary ip -> ($SEEDIP)"
 consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -join ${SEEDIP} &
 
-# Check Consul configuration
-curl  ${S3SCRIPT_PATH}/base_json  >  ${CONSULCONFIGDIR}/base.json
-chkstatus
-
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
-unzip  /tmp/consul_template.zip -d  /usr/local/bin 
+unzip  /tmp/consul_template.zip -d  /usr/local/bin
 chmod 0755 /usr/local/bin/consul-template
 chown root:root /usr/local/bin/consul-template
 chkstatus
@@ -189,7 +184,7 @@ chmod 755 ${CONSUL_UPSTART_FILE}
 
 CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
 
-if [[ -z $CONSUL_SERVER_IPS ]];then 
+if [[ -z $CONSUL_SERVER_IPS ]];then
   echo "Script [FAILED]" >&2
   echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
   exit 1
@@ -198,6 +193,9 @@ else
   /bin/bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
   echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
   echo "Starting consul"
-  start consul 
+  start consul
 fi
 
+# Write Consul config file
+curl  -s ${S3SCRIPT_PATH}/base_json | sed "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" >  ${CONSULCONFIGDIR}/base.json
+chkstatus
