@@ -168,9 +168,7 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 
-# Write Consul config file
-curl  -s ${S3SCRIPT_PATH}/base_json > ${CONSULCONFIGDIR}/base.json
-chkstatus
+curl  -s ${S3SCRIPT_PATH}/base_json | sed "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" >  /tmp/base.json
 
 #Install Consul Template
 echo "Install Consul Template"

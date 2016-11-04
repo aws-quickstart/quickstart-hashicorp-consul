@@ -157,10 +157,6 @@ chkstatus
 echo "Starting Consul with temporary ip -> ($SEEDIP)"
 consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -join ${SEEDIP} &
 
-# Check Consul configuration
-curl  ${S3SCRIPT_PATH}/base_json  >  ${CONSULCONFIGDIR}/base.json
-chkstatus
-
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
 unzip  /tmp/consul_template.zip -d  /usr/local/bin 
@@ -201,3 +197,6 @@ else
   start consul 
 fi
 
+# Write Consul config file
+curl  -s ${S3SCRIPT_PATH}/base_json | sed "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" >  ${CONSULCONFIGDIR}/base.json
+chkstatus

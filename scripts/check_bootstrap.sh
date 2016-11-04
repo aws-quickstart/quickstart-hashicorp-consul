@@ -20,12 +20,10 @@ if [[ $SERVERS_READY  -eq $CONSUL_EXPECT  ]];
 	echo "SERVERS_READY = ${SERVERS_READY}"  >>/tmp/check.log
 	echo "CONSUL_EXPECT = ${CONSUL_EXPECT}"  >>/tmp/check.log
 
-	# Restart with out bootstrap_expect
 	sudo /bin/bash -c '/usr/bin/killall -q consul ;sleep 5; exit 0' 
 	sudo stop consul
 	sudo start consul
-
-	echo "Completed (consul started in  non-bootstrap mode)..." >>/tmp/check.log
+	mv /tmp/base.json /etc/consul.d/base.json
 
 else
 	echo "Check [FAILED]" >>/tmp/check.log
