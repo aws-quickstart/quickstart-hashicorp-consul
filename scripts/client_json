@@ -1,3 +1,4 @@
 {
-  "server": false
+  "server": false,
+  "ui": true
 }

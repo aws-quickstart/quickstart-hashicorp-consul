@@ -1,15 +1,15 @@
 #!/bin/bash -ex
-# Hashicorp Consul Bootstraping 
+# Hashicorp Consul Bootstrapping
 # authors: tonynv@amazon.com, bchav@amazon.com
 # date: Nov,3,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
 
-# Configuration 
+# Configuration
 PROGRAM='HashiCorp Consul Seed Server'
 CONSULVERSION='0.7.0'
-CONSUL_TEMPLATE_VERSION='0.15.0'
+CONSUL_TEMPLATE_VERSION='0.16.0'
 
 ##################################### Functions
 function checkos () {
@@ -65,38 +65,38 @@ if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage hel
 while true; do
   case "$1" in
     -h | --help)
-	usage
-	exit 1
-	;; 
-    -v | --verbose ) 
-	echo "[] DEBUG = ON"
-	VERBOSE=true; 
-	shift 
-	;;
+  usage
+  exit 1
+  ;;
+    -v | --verbose )
+  echo "[] DEBUG = ON"
+  VERBOSE=true;
+  shift
+  ;;
     --consul_expect )
-	if [ "$2" -eq "$2" ] 2>/dev/null
-	then
-		CONSUL_EXPECT="$2"; 
-		shift 2 
-	else
-    		echo "[ERROR]: vaule of consul_expect must be an [int] "
-    	exit 1
-	fi
-	;;
+  if [ "$2" -eq "$2" ] 2>/dev/null
+  then
+    CONSUL_EXPECT="$2";
+    shift 2
+  else
+        echo "[ERROR]: vaule of consul_expect must be an [int] "
+      exit 1
+  fi
+  ;;
     --s3url )
-	S3URL="${2%/}"; 
-	shift 2 
-	;;
-    --s3bucket ) 
-	S3BUCKET="$2"; 
-	shift 2 
-	;;
-    --s3prefix ) 
-	S3PREFIX="${2%/}";
-	shift 2 
-	;;
-    -- ) 
-	break;;
+  S3URL="${2%/}";
+  shift 2
+  ;;
+    --s3bucket )
+  S3BUCKET="$2";
+  shift 2
+  ;;
+    --s3prefix )
+  S3PREFIX="${2%/}";
+  shift 2
+  ;;
+    -- )
+  break;;
     *) break ;;
   esac
 done
@@ -107,7 +107,7 @@ echo "consul = $CONSUL"
 echo "s3bucket = $S3BUCKET"
 echo "S3url = $S3URL"
 echo "s3prefix = $S3PREFIX"
-fi 
+fi
 
 # Strip leading slash
 if [[ $S3PREFIX == /* ]];then
@@ -151,7 +151,7 @@ curl -L ${CONSULDOWNLOAD} > /tmp/consul.zip
 chkstatus
 
 echo "Unpacking Consul to: ${BINDIR}"
-unzip  /tmp/consul.zip -d  /usr/local/bin 
+unzip  /tmp/consul.zip -d  /usr/local/bin
 chmod 0755 /usr/local/bin/consul
 chown root:root /usr/local/bin/consul
 chkstatus
@@ -173,20 +173,20 @@ curl  -s ${S3SCRIPT_PATH}/base_json | sed "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPEC
 #Install Consul Template
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
-unzip  /tmp/consul_template.zip -d  /usr/local/bin 
+unzip  /tmp/consul_template.zip -d  /usr/local/bin
 chmod 0755 /usr/local/bin/consul-template
 chown root:root /usr/local/bin/consul-template
 chkstatus
 
 # Start Consul in bootstrap mode
 EXEC_STRING="exec consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -bootstrap-expect ${CONSUL_EXPECT}"
-curl -s ${S3SCRIPT_PATH}/consul-upstart_template.conf -o ${CONSUL_UPSTART_FILE} 
+curl -s ${S3SCRIPT_PATH}/consul-upstart_template.conf -o ${CONSUL_UPSTART_FILE}
 sed -i -e "/__EXEC_STRING__/c${EXEC_STRING}" ${CONSUL_UPSTART_FILE}
 start consul
 
 mv ${CONSUL_UPSTART_FILE} ${CONSUL_UPSTART_FILE}.bootstrap
 
-# Update upstart config to restart in not bootstrap on restart 
+# Update upstart config to restart in not bootstrap on restart
 EXEC_STRING="exec consul agent -server -config-dir /etc/consul.d -data-dir /opt/consul/data -client 0.0.0.0"
 curl -s ${S3SCRIPT_PATH}/consul-upstart_template.conf -o  ${CONSUL_UPSTART_FILE}
 sed -i -e "/__EXEC_STRING__/c${EXEC_STRING}"  ${CONSUL_UPSTART_FILE}
@@ -195,7 +195,7 @@ echo "Starting Node Scanner in background! (see /tmp/check.log)"
 curl -s ${S3SCRIPT_PATH}/check_bootstrap.sh -o /tmp/check.sh
 sed -i "s/__CONSUL_EXPECT__/${CONSUL_EXPECT}/" /tmp/check.sh
 chmod 755 /tmp/check.sh
-bash -c '/tmp/check.sh' & 
+bash -c '/tmp/check.sh' &
 chkstatus
 
 echo "Installing Dnsmasq..."
