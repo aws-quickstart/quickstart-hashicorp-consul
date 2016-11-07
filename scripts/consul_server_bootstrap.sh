@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstrapping
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date:  Nov,3,2016
+# date:  Nov,4,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
@@ -154,7 +154,7 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 echo "Starting Consul with temporary ip -> ($SEEDIP)"
-consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -join ${SEEDIP} &
+bash -c "consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -retry-join ${SEEDIP} &"
 
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip

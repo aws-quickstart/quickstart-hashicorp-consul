@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Nov,3,2016 ",
+    "Description": "QS(0036) HashiCorp Consul License: Apache 2.0 (Please do not remove) Nov,7,2016 ",
     "Parameters": {
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -384,113 +384,6 @@
                 }]
             }
         },
-        "ConsulClients": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-                "InstanceType": {
-                    "Ref": "ConsulInstanceType"
-                },
-                "KeyName": {
-                    "Ref": "KeyPair"
-                },
-                "NetworkInterfaces": [{
-                    "DeleteOnTermination": "true",
-                    "DeviceIndex": 0,
-                    "SubnetId": {
-                        "Ref": "PrivateSubnet1ID"
-                    },
-                    "GroupSet": [{
-                        "Ref": "ConsulSecGroup"
-                    }]
-                }],
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap", {
-                            "Ref": "AWS::Region"
-                        },
-                        "US1404HVM"
-                    ]
-                },
-                "BlockDeviceMappings": [{
-                    "DeviceName": "/dev/sda1",
-                    "Ebs": {
-                        "VolumeSize": "20",
-                        "VolumeType": "gp2"
-                    }
-                }],
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "", [
-                                "#!/bin/bash\n",
-                                "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh\n",
-                                "CONSUL_BOOTSTRAP=",
-                                {
-                                    "Ref": "QuickStartS3URL"
-                                },
-                                "/",
-                                {
-                                    "Ref": "QSS3BucketName"
-                                },
-                                "/",
-                                {
-                                    "Ref": "QSS3KeyPrefix"
-                                },
-                                "/scripts/",
-                                "${CONSUL_BOOTSTRAP_FILE}",
-                                "\n",
-                                "echo ${CONSUL_BOOTSTRAP}",
-                                "\n",
-                                "wget ${CONSUL_BOOTSTRAP}",
-                                "\n",
-                                "SEEDIP=",
-                                {
-                                    "Fn::GetAtt" : [ "ConsulSeed" , "PrivateIp" ]
-                                },
-                                "\n",
-                                "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
-                                "./${CONSUL_BOOTSTRAP_FILE} ",
-                                " --s3url ",
-                                {
-                                    "Ref": "QuickStartS3URL"
-                                },
-                                " --s3bucket ",
-                                {
-                                    "Ref": "QSS3BucketName"
-                                },
-                                " --s3prefix ",
-                                {
-                                    "Ref": "QSS3KeyPrefix"
-                                },
-                                " --seedip ${SEEDIP}",
-                                "\n",
-                                "/usr/local/bin/cfn-signal -e $? ",
-                                "  --stack ", {
-                                    "Ref": "AWS::StackName"
-                                },
-                                " --resource ConsulClients ",
-                                " --region ", {
-                                    "Ref": "AWS::Region"
-                                },
-                                "\n"
-                            ]
-                        ]
-                    }
-                },
-                "Tags": [{
-                    "Key": "Name",
-                    "Value": {
-                        "Fn::Join": [
-                            "-", [{
-                                    "Ref": "AWS::StackName"
-                                },
-                                "ConsulClients"
-                            ]
-                        ]
-                    }
-                }]
-            }
-        },
         "ConsulAsg": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
@@ -547,21 +440,11 @@
                 },
                 "MinSize": "2",
                 "MaxSize": {
-                    "Fn::FindInMap": [
-                        "NumOfServer", {
-                            "Ref": "ConsulServerNodes"
+                            "Ref": "ConsulClientNodes"
                         },
-                        "servers"
-                    ]
-                },
                 "DesiredCapacity": {
-                    "Fn::FindInMap": [
-                        "NumOfServer", {
-                            "Ref": "ConsulServerNodes"
+                            "Ref": "ConsulClientNodes"
                         },
-                        "servers"
-                    ]
-                },
                 "VPCZoneIdentifier": [{
                     "Ref": "PrivateSubnet1ID"
                 }, {
@@ -661,7 +544,7 @@
             }    }
         },
          "ConsulClientLC": {
-            "DependsOn": "ConsulClients",
+            "DependsOn": "ConsulSeed",
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
                 "InstanceType": {

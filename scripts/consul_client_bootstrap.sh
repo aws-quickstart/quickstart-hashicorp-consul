@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstrapping
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date:  Nov,3,2016
+# date:  Nov,4,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
@@ -160,7 +160,7 @@ curl  ${S3SCRIPT_PATH}/client_json  >  ${CONSULCONFIGDIR}/base.json
 chkstatus
 
 echo "Starting Consul with temporary ip -> ($SEEDIP)"
-bash -c "consul agent -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -join ${SEEDIP} &"
+bash -c "consul agent -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -retry-join ${SEEDIP} &"
 
 echo "Install Consul Template"
 curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
@@ -183,19 +183,23 @@ sudo service dnsmasq restart
 chkstatus
 
 echo "Updating startup scripts"
-CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
-curl -s $CONSUL_UPSTART_CONF | sed "s/__CONSUL_SERVER_IPS__/${CONSUL_SERVER_IPS}/" > ${CONSUL_UPSTART_FILE}
+# Load  with seed ip
+curl -s ${CONSUL_UPSTART_CONF} | sed "s/__CONSUL_SERVER_IPS__/${CONSUL_SERVER_IPS}/" > ${CONSUL_UPSTART_FILE}
 chmod 755 ${CONSUL_UPSTART_FILE}
 
+CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
 
-if [[ -z $CONSUL_SERVER_IPS ]];then
-  echo "Script [FAILED]" >&2
-  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
+# Attempt Re-load with IP from DNS 
+if [[ -z $CONSUL_SERVER_IPS ]];then 
+  echo "[WARINING] Could not acquire consul nodes via DNS" >&2
+  echo "[WARINING] Not modifing configuration" >&2
   exit 1
 else
-  echo "Killing consul"
+  echo "[INFO] Restarting with all consul nodes gatherd via DNS" >&2
+  curl -s ${CONSUL_UPSTART_CONF} | sed "s/__CONSUL_SERVER_IPS__/${CONSUL_SERVER_IPS}/" > ${CONSUL_UPSTART_FILE}
   /bin/bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
   echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
   echo "Starting consul"
-  start consul
+  start consul 
 fi
+:set number !

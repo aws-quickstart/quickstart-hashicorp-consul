@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstrapping
 # authors: tonynv@amazon.com, bchav@amazon.com
-# date: Nov,3,2016
+# date: Nov,4,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
@@ -134,7 +134,7 @@ CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSULWEBUI="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_web_ui.zip"
-CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-seed.conf"
+CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-server.conf"
 CONSUL_UPSTART_FILE="/etc/init/consul.conf"
 
 #CONSUL VARIABLES

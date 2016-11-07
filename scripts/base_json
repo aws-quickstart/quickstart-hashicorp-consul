@@ -1,5 +1,7 @@
 {
   "server": true,
   "ui": true,
+  "data_dir": "/opt/consul/data",
+  "client_addr": "0.0.0.0",
   "bootstrap_expect": __BOOTSTRAP_EXPECT__
 }
