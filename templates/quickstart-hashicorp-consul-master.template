@@ -291,8 +291,10 @@
                   ]
                 }, {
                   "Ref": "QSS3BucketName"
+                }, {
+                  "Ref": "QSS3KeyPrefix"
                 },
-                "aws/vpc/latest/templates/aws-vpc.template"
+                "submodules/quickstart-aws-vpc/templates/aws-vpc.template"
               ]
             ]
           },
@@ -443,19 +445,9 @@
             "AccessCIDR": {
               "Ref": "AccessCIDR"
             },
-            "QuickStartS3URL": {
-            "Fn::Join": [
-                "/", [{
-                    "Fn::FindInMap": [
-                      "AWSInfoRegionMap", {
-                          "Ref": "AWS::Region"
-                          },
-                        "QuickStartS3URL"
-                      ]
-                    }
-                  ]
-                ]
-              },
+            "QSS3BucketName": {
+              "Ref": "QSS3BucketName"
+            },
             "QSS3KeyPrefix": {
               "Ref": "QSS3KeyPrefix"
             }
