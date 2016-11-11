@@ -19,7 +19,6 @@ tests:
     parameter_input: quickstart-hashicorp-consul-master.json
     template_file: quickstart-hashicorp-consul-master.template
     regions:
-    - ap-southeast-1
     - ap-southeast-2
     - eu-west-1
     - us-west-2
