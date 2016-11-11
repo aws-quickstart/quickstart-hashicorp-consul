@@ -1,4 +1,4 @@
-## Change Log: (tagged dev-rc1)
+## Change Log: (tagged v1.0)
 
 ### Template Changes
 * Added Master template (links sub templates)
@@ -22,8 +22,4 @@
 * Consul now looks at generated config to get hints on how many nodes to expect during build
 * New bootstrapping script takes parameterized values via Userdata and executes build according to specified values in: `ConsulNodes, S3URL, S3BucketName, S3KeyPrefix`
 
-## Todo
-- Enable Atlas Token
-- Add wait handles for better failure detection
-- Create Deployment Docs
 
