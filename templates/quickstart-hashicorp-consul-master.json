@@ -21,7 +21,7 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "tonynv"
+        "ParameterValue": "clstokes-mbpro"
     },
     {
         "ParameterKey": "NATInstanceType",
