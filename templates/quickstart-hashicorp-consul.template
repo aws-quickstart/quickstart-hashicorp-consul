@@ -293,7 +293,9 @@
                 "LaunchConfigurationName": {
                     "Ref": "ConsulServerLC"
                 },
-                "MinSize": "2",
+                "MinSize": {
+                    "Ref": "ConsulServerNodes"
+                },
                 "MaxSize": {
                     "Ref": "ConsulServerNodes"
                 },
@@ -336,7 +338,9 @@
                 "LaunchConfigurationName": {
                     "Ref": "ConsulClientLC"
                 },
-                "MinSize": "2",
+                "MinSize": {
+                    "Ref": "ConsulServerNodes"
+                },
                 "MaxSize": {
                     "Ref": "ConsulClientNodes"
                 },
@@ -397,6 +401,9 @@
                         "US1404HVM"
                     ]
                 },
+                "IamInstanceProfile": {
+                  "Ref": "DescribeInstancesProfile"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -437,7 +444,9 @@
                                 "'",
                                 {
                                   "Fn::Join": [
-                                      "-", [{
+                                      "-",
+                                      [
+                                          {
                                               "Ref": "AWS::StackName"
                                           },
                                           "Consul Server"
@@ -488,6 +497,9 @@
                         "US1404HVM"
                     ]
                 },
+                "IamInstanceProfile": {
+                  "Ref": "DescribeInstancesProfile"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -524,7 +536,9 @@
                                 "'",
                                 {
                                   "Fn::Join": [
-                                      "-", [{
+                                      "-",
+                                      [
+                                          {
                                               "Ref": "AWS::StackName"
                                           },
                                           "Consul Server"
@@ -549,6 +563,56 @@
                     }
                 }
             }
+        },
+
+        "DescribeInstancesRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "sts:AssumeRole",
+                  "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                  },
+                  "Effect": "Allow",
+                  "Sid": ""
+                }
+              ]
+            }
+          }
+        },
+        "DescribeInstancesPolicy": {
+          "Type": "AWS::IAM::Policy",
+          "Properties": {
+            "PolicyName": "ec2-describe-instances",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "ec2:DescribeInstances",
+                  "Resource": "*"
+                }
+              ]
+            },
+            "Roles": [
+              {
+                "Ref": "DescribeInstancesRole"
+              }
+            ]
+          }
+        },
+        "DescribeInstancesProfile": {
+          "Type": "AWS::IAM::InstanceProfile",
+          "Properties": {
+            "Path": "/",
+            "Roles": [
+              {
+                "Ref": "DescribeInstancesRole"
+              }
+            ]
+          }
         }
+
     }
 }
