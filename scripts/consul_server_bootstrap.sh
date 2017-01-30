@@ -8,8 +8,8 @@
 
 # Configuration
 PROGRAM='HashiCorp Consul Server'
-CONSULVERSION='0.7.2'
-CONSUL_TEMPLATE_VERSION='0.16.0'
+CONSULVERSION='0.7.3'
+CONSUL_TEMPLATE_VERSION='0.18.0'
 
 ##################################### Functions
 function checkos () {
