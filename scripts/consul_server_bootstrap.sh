@@ -137,8 +137,8 @@ DATADIR="${CONSULDIR}/data"
 CONSULCONFIGDIR='/etc/consul.d'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
-CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul.conf"
-CONSUL_UPSTART_FILE="/etc/init/consul.conf"
+CONSUL_SERVICE_CONF="${S3SCRIPT_PATH}/consul.service"
+CONSUL_SERVICE_FILE="/etc/systemd/system/consul.service"
 
 #CONSUL VARIABLES
 echo  "Bootstrapping ${PROGRAM}"
@@ -194,8 +194,8 @@ chkstatus
 
 # Write Consul service and config files
 echo "Updating Consul startup scripts..."
-curl $CONSUL_UPSTART_CONF > ${CONSUL_UPSTART_FILE}
-chmod 755 ${CONSUL_UPSTART_FILE}
+curl $CONSUL_SERVICE_CONF > ${CONSUL_SERVICE_FILE}
+chmod 755 ${CONSUL_SERVICE_FILE}
 
 curl  -s ${S3SCRIPT_PATH}/consul_server_config.json > ${CONSULCONFIGDIR}/server.json.tmp
 sed -i "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" ${CONSULCONFIGDIR}/server.json.tmp
@@ -203,5 +203,5 @@ sed -i "s/__CONSUL_TAG_VALUE__/${CONSUL_TAG_VALUE}/" ${CONSULCONFIGDIR}/server.j
 mv ${CONSULCONFIGDIR}/server.json.tmp ${CONSULCONFIGDIR}/server.json
 
 echo "Starting Consul..."
-start consul
+service consul start
 chkstatus

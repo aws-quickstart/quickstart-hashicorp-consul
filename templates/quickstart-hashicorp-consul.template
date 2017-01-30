@@ -159,43 +159,46 @@
     "Mappings": {
       "AWSAMIRegionMap": {
           "AMI": {
-              "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20161020"
+              "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20161221"
           },
           "ap-northeast-1": {
-              "US1404HVM": "ami-c88325a9"
+              "US1604HVM": "ami-18afc47f"
           },
           "ap-northeast-2": {
-              "US1404HVM": "ami-8ce236e2"
+              "US1604HVM": "ami-93d600fd"
           },
           "ap-south-1": {
-              "US1404HVM": "ami-0155216e"
+              "US1604HVM": "ami-dd3442b2"
           },
           "ap-southeast-1": {
-              "US1404HVM": "ami-1c2e887f"
+              "US1604HVM": "ami-87b917e4"
           },
           "ap-southeast-2": {
-              "US1404HVM": "ami-bf3d00dc"
+              "US1604HVM": "ami-e6b58e85"
           },
           "eu-central-1": {
-              "US1404HVM": "ami-9c09f0f3"
+              "US1604HVM": "ami-fe408091"
           },
           "eu-west-1": {
-              "US1404HVM": "ami-1c4a046f"
+              "US1604HVM": "ami-ca80a0b9"
+          },
+          "eu-west-2": {
+              "US1604HVM": "ami-ede2e889"
           },
           "sa-east-1": {
-              "US1404HVM": "ami-900b96fc"
+              "US1604HVM": "ami-e075ed8c"
           },
           "us-east-1": {
-              "US1404HVM": "ami-c8580bdf"
+              "US1604HVM": "ami-9dcfdb8a"
           },
           "us-east-2": {
-              "US1404HVM": "ami-b7075dd2"
+              "US1604HVM": "ami-fcc19b99"
           },
           "us-west-1": {
-              "US1404HVM": "ami-61074c01"
+              "US1604HVM": "ami-b05203d0"
           },
           "us-west-2": {
-              "US1404HVM": "ami-01f05461"
+              "US1604HVM": "ami-b2d463d2"
           }
       },
       "AWSInfoRegionMap": {
@@ -398,7 +401,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "US1404HVM"
+                        "US1604HVM"
                     ]
                 },
                 "IamInstanceProfile": {
@@ -494,7 +497,7 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "US1404HVM"
+                        "US1604HVM"
                     ]
                 },
                 "IamInstanceProfile": {
