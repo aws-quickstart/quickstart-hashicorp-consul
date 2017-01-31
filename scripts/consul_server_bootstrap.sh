@@ -29,7 +29,8 @@ echo " "
 echo "options:"
 echo -e  "-h, --help \t show options for this script"
 echo -e "--consul_expect \t Number of Consul nodes to expect"
-echo -e "--consul_tag_value \t 'Name' tag value to use for joining"
+echo -e "--consul_tag_key \t tag key to use for joining"
+echo -e "--consul_tag_value \t tag value to use for joining"
 echo -e "--s3url \t specify the s3 URL  -S3url (https://s3.amazonaws.com/)"
 echo -e "--s3bucket \t specify -s3bucket (your-bucket)"
 echo -e "--s3prefix \t specify -s3prefix (prefix/to/key | folder/folder/file)"
@@ -51,13 +52,14 @@ checkos
 
 ## set an initial value
 CONSUL_EXPECT=3
+CONSUL_TAG_KEY='NONE'
 CONSUL_TAG_VALUE='NONE'
 S3BUCKET='NONE'
 S3URL='NONE'
 S3PREFIX='NONE'
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,verbose,consul_expect:,consul_tag_value:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,verbose,consul_expect:,consul_tag_key:,consul_tag_value:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
@@ -84,7 +86,11 @@ while true; do
     exit 1
   fi
   ;;
-    --consul_tag_value )
+    --consul_tag_key )
+  CONSUL_TAG_KEY="$2";
+  shift 2
+  ;;
+  --consul_tag_value )
   CONSUL_TAG_VALUE="$2";
   shift 2
   ;;
@@ -109,7 +115,8 @@ done
 
 if [[ ${VERBOSE} == 'true' ]]; then
 echo "consul_expect = $CONSUL_EXPECT"
-echo "consul_tage_value = $CONSUL_TAG_VALUE"
+echo "consul_tag_key = $CONSUL_TAG_KEY"
+echo "consul_tag_value = $CONSUL_TAG_VALUE"
 echo "s3bucket = $S3BUCKET"
 echo "S3url = $S3URL"
 echo "s3prefix = $S3PREFIX"
@@ -199,6 +206,7 @@ chmod 755 ${CONSUL_SERVICE_FILE}
 
 curl  -s ${S3SCRIPT_PATH}/consul_server_config.json > ${CONSULCONFIGDIR}/server.json.tmp
 sed -i "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" ${CONSULCONFIGDIR}/server.json.tmp
+sed -i "s/__CONSUL_TAG_KEY__/${CONSUL_TAG_KEY}/" ${CONSULCONFIGDIR}/server.json.tmp
 sed -i "s/__CONSUL_TAG_VALUE__/${CONSUL_TAG_VALUE}/" ${CONSULCONFIGDIR}/server.json.tmp
 mv ${CONSULCONFIGDIR}/server.json.tmp ${CONSULCONFIGDIR}/server.json
 

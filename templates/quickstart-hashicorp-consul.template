@@ -319,17 +319,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                "-",
-                                [
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    },
-                                    "Consul Server"
-                                ]
-                            ]
-                        },
+                        "Value": "Consul-Server",
                         "PropagateAtLaunch": "true"
                     }
                 ]
@@ -364,17 +354,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                "-",
-                                [
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    },
-                                    "Consul Client"
-                                ]
-                            ]
-                        },
+                        "Value": "Consul-Client",
                         "PropagateAtLaunch": "true"
                     }
                 ]
@@ -443,20 +423,11 @@
                                 {
                                     "Ref": "ConsulServerNodes"
                                 },
+                                " --consul_tag_key aws:cloudformation:stack-name ",
                                 " --consul_tag_value ",
-                                "'",
                                 {
-                                  "Fn::Join": [
-                                      "-",
-                                      [
-                                          {
-                                              "Ref": "AWS::StackName"
-                                          },
-                                          "Consul Server"
-                                      ]
-                                  ]
+                                    "Ref": "AWS::StackName"
                                 },
-                                "'",
                                 " --s3url ",
                                 {
                                     "Ref": "QuickStartS3URL"
@@ -535,20 +506,11 @@
                                 "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
+                                " --consul_tag_key aws:cloudformation:stack-name ",
                                 " --consul_tag_value ",
-                                "'",
                                 {
-                                  "Fn::Join": [
-                                      "-",
-                                      [
-                                          {
-                                              "Ref": "AWS::StackName"
-                                          },
-                                          "Consul Server"
-                                      ]
-                                  ]
+                                    "Ref": "AWS::StackName"
                                 },
-                                "'",
                                 " --s3url ",
                                 {
                                     "Ref": "QuickStartS3URL"
