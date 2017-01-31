@@ -124,33 +124,25 @@ echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 #apt-get -y update
 
 # SCRIPT VARIBLES
-BINDIR='/usr/local/bin'
+BINDIR='/usr/bin'
 CONSULDIR='/opt/consul'
 CONFIGDIR="${CONSULDIR}/config"
 DATADIR="${CONSULDIR}/data"
-CONSULCONFIGDIR='/etc/consul.d'
+CONSULCONFIGDIR='/etc/consul'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSUL_SERVICE_CONF="${S3SCRIPT_PATH}/consul.service"
 CONSUL_SERVICE_FILE="/etc/systemd/system/consul.service"
 
-#CONSUL VARIABLES
-echo  "Bootstrapping ${PROGRAM}"
-EX_CODE=$?
-
-## Install dependencies
+echo "Installing dependencies..."
 apt-get -y install curl unzip jq
 chkstatus
 
-echo "Fetching Consul... from $CONSULDOWNLOAD"
-
+echo "Installing Consul..."
 curl -L $CONSULDOWNLOAD > /tmp/consul.zip
-chkstatus
-
-echo "Unpacking Consul to: ${BINDIR}"
-unzip  /tmp/consul.zip -d  /usr/local/bin
-chmod 0755 /usr/local/bin/consul
-chown root:root /usr/local/bin/consul
+unzip  /tmp/consul.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul
+chown root:root ${BINDIR}/consul
 chkstatus
 
 echo "Creating Consul Directories"
@@ -165,10 +157,10 @@ chmod 755 $CONSULCONFIGDIR
 chkstatus
 
 echo "Installing Consul Template..."
-curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
-unzip  /tmp/consul_template.zip -d  /usr/local/bin
-chmod 0755 /usr/local/bin/consul-template
-chown root:root /usr/local/bin/consul-template
+curl -L $CONSUL_TEMPLATE_DOWNLOAD > /tmp/consul_template.zip
+unzip  /tmp/consul_template.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul-template
+chown root:root ${BINDIR}/consul-template
 chkstatus
 
 echo "Installing Dnsmasq..."
