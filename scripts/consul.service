@@ -1,5 +1,7 @@
 [Unit]
 Description=Consul
+Requires=network-online.target
+After=network-online.target
 
 [Service]
 Restart=on-failure

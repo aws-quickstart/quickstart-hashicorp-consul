@@ -100,13 +100,12 @@ while true; do
   esac
 done
 
-
 if [[ ${VERBOSE} == 'true' ]]; then
-echo "consul_tag_key = $CONSUL_TAG_KEY"
-echo "consul_tag_value = $CONSUL_TAG_VALUE"
-echo "s3bucket = $S3BUCKET"
-echo "S3url = $S3URL"
-echo "s3prefix = $S3PREFIX"
+  echo "consul_tag_key = $CONSUL_TAG_KEY"
+  echo "consul_tag_value = $CONSUL_TAG_VALUE"
+  echo "s3bucket = $S3BUCKET"
+  echo "S3url = $S3URL"
+  echo "s3prefix = $S3PREFIX"
 fi
 
 # Strip leading slash
@@ -120,9 +119,6 @@ fi
 S3SCRIPT_PATH="${S3URL}/${S3BUCKET}/${S3PREFIX}/scripts"
 echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 
-# Uncomment to update on boot
-#apt-get -y update
-
 # SCRIPT VARIBLES
 BINDIR='/usr/bin'
 CONSULDIR='/opt/consul'
@@ -134,8 +130,29 @@ CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSU
 CONSUL_SERVICE_CONF="${S3SCRIPT_PATH}/consul.service"
 CONSUL_SERVICE_FILE="/etc/systemd/system/consul.service"
 
+echo "Updating package list..."
+apt-get -y update
+chkstatus
+
 echo "Installing dependencies..."
-apt-get -y install curl unzip jq
+apt-get -y install curl unzip
+chkstatus
+
+echo "Creating Consul Directories"
+mkdir -p $CONSULCONFIGDIR
+mkdir -p $CONSULDIR
+mkdir -p $CONFIGDIR
+mkdir -p $DATADIR
+chmod 755 $CONSULCONFIGDIR
+chmod 755 $CONSULDIR
+chmod 755 $CONFIGDIR
+chmod 755 $DATADIR
+
+echo "Installing Consul Template..."
+curl -L $CONSUL_TEMPLATE_DOWNLOAD > /tmp/consul_template.zip
+unzip  /tmp/consul_template.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul-template
+chown root:root ${BINDIR}/consul-template
 chkstatus
 
 echo "Installing Consul..."
@@ -145,41 +162,7 @@ chmod 0755 ${BINDIR}/consul
 chown root:root ${BINDIR}/consul
 chkstatus
 
-echo "Creating Consul Directories"
-mkdir -p $CONSULCONFIGDIR
-mkdir -p $CONSULDIR
-mkdir -p $CONFIGDIR
-mkdir -p $DATADIR
-chmod 755 $CONSULDIR
-chmod 755 $DATADIR
-chmod 755 $CONFIGDIR
-chmod 755 $CONSULCONFIGDIR
-chkstatus
-
-echo "Installing Consul Template..."
-curl -L $CONSUL_TEMPLATE_DOWNLOAD > /tmp/consul_template.zip
-unzip  /tmp/consul_template.zip -d ${BINDIR}/
-chmod 0755 ${BINDIR}/consul-template
-chown root:root ${BINDIR}/consul-template
-chkstatus
-
-echo "Installing Dnsmasq..."
-
-sudo apt-get -qq -y update
-sudo apt-get -qq -y install dnsmasq-base dnsmasq
-
-echo "Configuring Dnsmasq..."
-
-sudo sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
-sudo sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
-sudo sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
-
-echo "Restarting dnsmasq..."
-sudo service dnsmasq restart
-chkstatus
-
-# Write Consul service and config files
-echo "Updating Consul startup scripts..."
+echo "Installing Consul startup scripts..."
 curl $CONSUL_SERVICE_CONF > ${CONSUL_SERVICE_FILE}
 chmod 755 ${CONSUL_SERVICE_FILE}
 
@@ -190,4 +173,16 @@ mv ${CONSULCONFIGDIR}/client.json.tmp ${CONSULCONFIGDIR}/client.json
 
 echo "Starting Consul..."
 service consul start
+chkstatus
+
+echo "Installing Dnsmasq..."
+apt-get -qq -y install dnsmasq-base dnsmasq
+
+echo "Configuring Dnsmasq..."
+sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
+sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
+sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
+
+echo "Restarting dnsmasq..."
+service dnsmasq restart
 chkstatus
