@@ -12,6 +12,10 @@
             "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 2 AZs are used for this deployment.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
+        "BastionSecurityGroupID": {
+          "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)",
+          "Type": "AWS::EC2::SecurityGroup::Id"
+        },
         "ConsulInstanceType": {
             "Type": "String",
             "Description": "Consul node instance type",
@@ -269,8 +273,8 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "AccessCIDR"
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroupID"
                         }
                     },
                     {
@@ -307,13 +311,13 @@
                 },
                 "VPCZoneIdentifier": [
                     {
-                        "Ref": "PublicSubnet1ID"
+                        "Ref": "PrivateSubnet1ID"
                     },
                     {
-                        "Ref": "PublicSubnet2ID"
+                        "Ref": "PrivateSubnet2ID"
                     },
                     {
-                        "Ref": "PublicSubnet3ID"
+                        "Ref": "PrivateSubnet3ID"
                     }
                 ],
                 "Tags": [
@@ -342,13 +346,13 @@
                 },
                 "VPCZoneIdentifier": [
                     {
-                        "Ref": "PublicSubnet1ID"
+                        "Ref": "PrivateSubnet1ID"
                     },
                     {
-                        "Ref": "PublicSubnet2ID"
+                        "Ref": "PrivateSubnet2ID"
                     },
                     {
-                        "Ref": "PublicSubnet3ID"
+                        "Ref": "PrivateSubnet3ID"
                     }
                 ],
                 "Tags": [
@@ -366,7 +370,7 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
-                "AssociatePublicIpAddress": "true",
+                "AssociatePublicIpAddress": "false",
                 "SecurityGroups": [
                     {
                         "Ref": "ConsulSecGroup"
@@ -453,7 +457,7 @@
                 "InstanceType": {
                     "Ref": "ConsulInstanceType"
                 },
-                "AssociatePublicIpAddress": "true",
+                "AssociatePublicIpAddress": "false",
                 "SecurityGroups": [
                     {
                         "Ref": "ConsulSecGroup"
