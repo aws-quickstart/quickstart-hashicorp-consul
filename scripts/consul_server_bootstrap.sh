@@ -8,7 +8,7 @@
 
 # Configuration
 PROGRAM='HashiCorp Consul Server'
-CONSULVERSION='0.7.4'
+CONSULVERSION='0.7.5'
 CONSUL_TEMPLATE_VERSION='0.18.1'
 
 ##################################### Functions
