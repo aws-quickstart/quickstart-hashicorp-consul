@@ -56,6 +56,12 @@
             "ConstraintDescription": "Choose an instance type.",
             "Default": "t2.medium"
         },
+        "ConsulEc2RetryTagKey": {
+            "Description": "The Amazon EC2 instance tag key to filter on when joining to other Consul nodes.",
+            "Type": "String",
+            "Default": "aws:cloudformation:stack-name",
+            "ConstraintDescription": "Must match EC2 Tag Name requirements."
+        },
         "PrivateSubnet1ID": {
             "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)",
             "Type": "AWS::EC2::Subnet::Id"
@@ -289,7 +295,17 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "ConsulSecGroup"
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "ConsulSecGroup"
+                                ]
+                            ]
+                        }
                     }
                 ]
             }
@@ -323,7 +339,17 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Consul-Server",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "Consul-Server"
+                                ]
+                            ]
+                        },
                         "PropagateAtLaunch": "true"
                     }
                 ]
@@ -356,9 +382,19 @@
                     }
                 ],
                 "Tags": [
-                    {
+                      {
                         "Key": "Name",
-                        "Value": "Consul-Client",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "Consul-Client"
+                                ]
+                            ]
+                        },
                         "PropagateAtLaunch": "true"
                     }
                 ]
@@ -427,7 +463,10 @@
                                 {
                                     "Ref": "ConsulServerNodes"
                                 },
-                                " --consul_tag_key aws:cloudformation:stack-name ",
+                                " --consul_tag_key ",
+                                {
+                                    "Ref": "ConsulEc2RetryTagKey"
+                                },
                                 " --consul_tag_value ",
                                 {
                                     "Ref": "AWS::StackName"
@@ -604,26 +643,16 @@
             "PolicyName": "consul-server",
             "PolicyDocument": {
               "Statement": [
-                {
-                  "Action": "ec2:DescribeInstances",
-                  "Resource": "*",
-                  "Effect": "Allow"
-                },
-                {
-                  "Action": "ec2:DescribeTags",
-                  "Resource": "*",
-                  "Effect": "Allow"
-                },
-                {
-                  "Action": "autoscaling:DescribeAutoScalingGroups",
-                  "Resource": "*",
-                  "Effect": "Allow"
-                },
-                {
-                  "Action": "ec2:DescribeInstanceStatus",
-                  "Resource": "*",
-                  "Effect": "Allow"
-                }
+                  {
+                      "Effect": "Allow",
+                      "Action": [
+                          "ec2:DescribeInstances",
+                          "ec2:DescribeTags",
+                          "autoscaling:DescribeAutoScalingGroups",
+                          "ec2:DescribeInstanceStatus"
+                      ],
+                      "Resource": "*"
+                  }
               ]
             },
             "Roles": [
@@ -643,6 +672,20 @@
               }
             ]
           }
+        }
+    },
+    "Outputs": {
+        "ConsulEc2RetryTagKey": {
+            "Value": {
+                "Ref": "ConsulEc2RetryTagKey"
+            },
+            "Description": "The Amazon EC2 instance tag key to filter on when joining to other Consul nodes."
+        },
+        "ConsulEc2RetryTagValue": {
+            "Value": {
+                "Ref": "AWS::StackName"
+            },
+            "Description": "The Amazon EC2 instance tag value to filter on when joining to other Consul nodes."
         }
     }
 }
