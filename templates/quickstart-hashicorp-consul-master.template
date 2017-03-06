@@ -361,7 +361,8 @@
                 }, {
                   "Ref": "QSS3KeyPrefix"
                 },
-                "submodules/quickstart-aws-vpc/templates/aws-vpc.template"
+                "submodules/quickstart-aws-vpc",
+                "templates/aws-vpc.template"
               ]
             ]
           },
