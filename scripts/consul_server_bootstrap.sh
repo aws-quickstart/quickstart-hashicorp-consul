@@ -8,8 +8,8 @@
 
 # Configuration
 PROGRAM='HashiCorp Consul Server'
-CONSULVERSION='0.7.0'
-CONSUL_TEMPLATE_VERSION='0.16.0'
+CONSULVERSION='0.7.5'
+CONSUL_TEMPLATE_VERSION='0.18.1'
 
 ##################################### Functions
 function checkos () {
@@ -28,7 +28,9 @@ echo "$0 <usage>"
 echo " "
 echo "options:"
 echo -e  "-h, --help \t show options for this script"
-echo -e "--seedip \t Consul seed ip"
+echo -e "--consul_expect \t Number of Consul nodes to expect"
+echo -e "--consul_tag_key \t tag key to use for joining"
+echo -e "--consul_tag_value \t tag value to use for joining"
 echo -e "--s3url \t specify the s3 URL  -S3url (https://s3.amazonaws.com/)"
 echo -e "--s3bucket \t specify -s3bucket (your-bucket)"
 echo -e "--s3prefix \t specify -s3prefix (prefix/to/key | folder/folder/file)"
@@ -49,14 +51,16 @@ fi
 checkos
 
 ## set an initial value
+CONSUL_EXPECT=3
+CONSUL_TAG_KEY='NONE'
+CONSUL_TAG_VALUE='NONE'
 S3BUCKET='NONE'
 S3URL='NONE'
 S3PREFIX='NONE'
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,seedip:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,verbose,consul_expect:,consul_tag_key:,consul_tag_value:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
-
 
 if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
 
@@ -67,9 +71,28 @@ while true; do
   usage
   exit 1
   ;;
-    -m | --seedip )
-  SEEDIP="$2";
+    -v | --verbose )
+  echo "[] DEBUG = ON"
+  VERBOSE=true;
   shift
+  ;;
+    --consul_expect )
+  if [ "$2" -eq "$2" ] 2>/dev/null
+  then
+    CONSUL_EXPECT="$2";
+    shift 2
+  else
+    echo "[ERROR]: vaule of consul_expect must be an [int] "
+    exit 1
+  fi
+  ;;
+    --consul_tag_key )
+  CONSUL_TAG_KEY="$2";
+  shift 2
+  ;;
+  --consul_tag_value )
+  CONSUL_TAG_VALUE="$2";
+  shift 2
   ;;
     --s3url )
   S3URL="${2%/}";
@@ -89,12 +112,13 @@ while true; do
   esac
 done
 
-
 if [[ ${VERBOSE} == 'true' ]]; then
-echo "consul = $CONSUL"
-echo "s3bucket = $S3BUCKET"
-echo "S3url = $S3URL"
-echo "s3prefix = $S3PREFIX"
+  echo "consul_expect = $CONSUL_EXPECT"
+  echo "consul_tag_key = $CONSUL_TAG_KEY"
+  echo "consul_tag_value = $CONSUL_TAG_VALUE"
+  echo "s3bucket = $S3BUCKET"
+  echo "S3url = $S3URL"
+  echo "s3prefix = $S3PREFIX"
 fi
 
 # Strip leading slash
@@ -108,94 +132,87 @@ fi
 S3SCRIPT_PATH="${S3URL}/${S3BUCKET}/${S3PREFIX}/scripts"
 echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 
-
-# Uncomment to update on boot
-#apt-get -y update
-
 # SCRIPT VARIBLES
-BINDIR='/usr/local/bin'
+BINDIR='/usr/bin'
 CONSULDIR='/opt/consul'
 CONFIGDIR="${CONSULDIR}/config"
 DATADIR="${CONSULDIR}/data"
-CONSULCONFIGDIR='/etc/consul.d'
+CONSULCONFIGDIR='/etc/consul'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
-CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-server.conf"
-CONSUL_UPSTART_FILE="/etc/init/consul.conf"
+CONSUL_SERVICE_CONF="${S3SCRIPT_PATH}/consul.service"
+CONSUL_SERVICE_FILE="/etc/systemd/system/consul.service"
+CONSUL_LEAVE_DOWNLOAD="${S3SCRIPT_PATH}/consul-force-leave-missing-peers.sh"
+CONSUL_LEAVE_CONF="${S3SCRIPT_PATH}/consul-force-leave-missing-peers.service"
+CONSUL_LEAVE_FILE="/etc/systemd/system/consul-force-leave-missing-peers.service"
 
-#CONSUL VARIABLES
-echo  "Bootstrapping ${PROGRAM}"
-EX_CODE=$?
-
-## Install dependencies
-apt-get -y install curl unzip jq
+echo "Updating package list..."
+apt-get -y update
 chkstatus
 
-echo "Fetching Consul... from $CONSULDOWNLOAD"
-
-curl -L $CONSULDOWNLOAD > /tmp/consul.zip
+echo "Installing dependencies..."
+apt-get -y install curl unzip
 chkstatus
 
-echo "Unpacking Consul to: ${BINDIR}"
-unzip  /tmp/consul.zip -d  /usr/local/bin
-chmod 0755 /usr/local/bin/consul
-chown root:root /usr/local/bin/consul
-chkstatus
-
-echo "Creating Consul Directories"
+echo "Creating Consul Directories..."
 mkdir -p $CONSULCONFIGDIR
 mkdir -p $CONSULDIR
 mkdir -p $CONFIGDIR
 mkdir -p $DATADIR
-chmod 755 $CONSULDIR
-chmod 755 $DATADIR
-chmod 755 $CONFIGDIR
 chmod 755 $CONSULCONFIGDIR
+chmod 755 $CONSULDIR
+chmod 755 $CONFIGDIR
+chmod 755 $DATADIR
+
+echo "Installing Consul Template..."
+curl -L $CONSUL_TEMPLATE_DOWNLOAD > /tmp/consul_template.zip
+unzip  /tmp/consul_template.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul-template
+chown root:root ${BINDIR}/consul-template
 chkstatus
 
-echo "Starting Consul with temporary ip -> ($SEEDIP)"
-bash -c "consul agent -server -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -retry-join ${SEEDIP} &"
-
-echo "Install Consul Template"
-curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
-unzip  /tmp/consul_template.zip -d  /usr/local/bin
-chmod 0755 /usr/local/bin/consul-template
-chown root:root /usr/local/bin/consul-template
+echo "Installing Consul..."
+curl -L $CONSULDOWNLOAD > /tmp/consul.zip
+unzip  /tmp/consul.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul
+chown root:root ${BINDIR}/consul
 chkstatus
 
-echo Installing Dnsmasq...
+echo "Installing Consul startup scripts..."
+curl $CONSUL_SERVICE_CONF > ${CONSUL_SERVICE_FILE}
+chmod 755 ${CONSUL_SERVICE_FILE}
 
-sudo apt-get -qq -y update
-sudo apt-get -qq -y install dnsmasq-base dnsmasq
+curl  -s ${S3SCRIPT_PATH}/consul_server_config.json > ${CONSULCONFIGDIR}/server.json.tmp
+sed -i "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" ${CONSULCONFIGDIR}/server.json.tmp
+sed -i "s/__CONSUL_TAG_KEY__/${CONSUL_TAG_KEY}/" ${CONSULCONFIGDIR}/server.json.tmp
+sed -i "s/__CONSUL_TAG_VALUE__/${CONSUL_TAG_VALUE}/" ${CONSULCONFIGDIR}/server.json.tmp
+mv ${CONSULCONFIGDIR}/server.json.tmp ${CONSULCONFIGDIR}/server.json
 
-echo Configuring Dnsmasq...
+echo "Starting Consul..."
+service consul start
+chkstatus
 
-sudo sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
-sudo sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
-sudo sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
+echo "Installing Consul Leave script..."
+apt-get -qq -y install awscli jq
+curl -L $CONSUL_LEAVE_DOWNLOAD > /tmp/consul-force-leave-missing-peers.sh
+mv /tmp/consul-force-leave-missing-peers.sh ${BINDIR}/
+chmod 0755 ${BINDIR}/consul-force-leave-missing-peers.sh
+chown root:root ${BINDIR}/consul-force-leave-missing-peers.sh
+chkstatus
+
+curl $CONSUL_LEAVE_CONF > ${CONSUL_LEAVE_FILE}
+chmod 755 ${CONSUL_LEAVE_FILE}
+service consul-force-leave-missing-peers start
+chkstatus
+
+echo "Installing Dnsmasq..."
+apt-get -qq -y install dnsmasq-base dnsmasq
+
+echo "Configuring Dnsmasq..."
+sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
+sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
+sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
 
 echo "Restarting dnsmasq..."
-sudo service dnsmasq restart
-chkstatus
-
-echo "Updating startup scripts"
-curl $CONSUL_UPSTART_CONF > ${CONSUL_UPSTART_FILE}
-chmod 755 ${CONSUL_UPSTART_FILE}
-
-CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
-
-if [[ -z $CONSUL_SERVER_IPS ]];then
-  echo "Script [FAILED]" >&2
-  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
-  exit 1
-else
-  echo "Killing consul"
-  /bin/bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
-  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
-  echo "Starting consul"
-  start consul
-fi
-
-# Write Consul config file
-curl  -s ${S3SCRIPT_PATH}/base_json | sed "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" >  ${CONSULCONFIGDIR}/base.json
+service dnsmasq restart
 chkstatus

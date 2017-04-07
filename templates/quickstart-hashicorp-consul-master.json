@@ -8,6 +8,22 @@
         "ParameterValue": "$[alfred_genaz_3]"
     },
     {
+        "ParameterKey": "Bastion1InstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "Bastion1PrivateIP",
+        "ParameterValue": "172.31.48.10"
+    },
+    {
+        "ParameterKey": "Bastion2InstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "Bastion2PrivateIP",
+        "ParameterValue": "172.31.64.10"
+    },
+    {
         "ParameterKey": "ConsulInstanceType",
         "ParameterValue": "m3.medium"
     },
@@ -21,7 +37,7 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "tonynv"
+        "ParameterValue": "clstokes-mbpro"
     },
     {
         "ParameterKey": "NATInstanceType",

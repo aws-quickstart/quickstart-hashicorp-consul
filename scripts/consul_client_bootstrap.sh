@@ -8,8 +8,8 @@
 
 # Configuration
 PROGRAM='HashiCorp Consul Client'
-CONSULVERSION='0.7.0'
-CONSUL_TEMPLATE_VERSION='0.16.0'
+CONSULVERSION='0.7.5'
+CONSUL_TEMPLATE_VERSION='0.18.1'
 
 ##################################### Functions
 function checkos () {
@@ -28,7 +28,8 @@ echo "$0 <usage>"
 echo " "
 echo "options:"
 echo -e  "-h, --help \t show options for this script"
-echo -e "--seedip \t Consul seed ip"
+echo -e "--consul_tag_key \t tag key to use for joining"
+echo -e "--consul_tag_value \t tag value to use for joining"
 echo -e "--s3url \t specify the s3 URL  -S3url (https://s3.amazonaws.com/)"
 echo -e "--s3bucket \t specify -s3bucket (your-bucket)"
 echo -e "--s3prefix \t specify -s3prefix (prefix/to/key | folder/folder/file)"
@@ -49,14 +50,15 @@ fi
 checkos
 
 ## set an initial value
+CONSUL_TAG_KEY='NONE'
+CONSUL_TAG_VALUE='NONE'
 S3BUCKET='NONE'
 S3URL='NONE'
 S3PREFIX='NONE'
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,seedip:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,verbose,consul_tag_key:,consul_tag_value:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
-
 
 if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
 
@@ -67,9 +69,18 @@ while true; do
   usage
   exit 1
   ;;
-    -m | --seedip )
-  SEEDIP="$2";
+    -v | --verbose )
+  echo "[] DEBUG = ON"
+  VERBOSE=true;
   shift
+  ;;
+    --consul_tag_key )
+  CONSUL_TAG_KEY="$2";
+  shift 2
+  ;;
+  --consul_tag_value )
+  CONSUL_TAG_VALUE="$2";
+  shift 2
   ;;
     --s3url )
   S3URL="${2%/}";
@@ -89,12 +100,12 @@ while true; do
   esac
 done
 
-
 if [[ ${VERBOSE} == 'true' ]]; then
-echo "consul = $CONSUL"
-echo "s3bucket = $S3BUCKET"
-echo "S3url = $S3URL"
-echo "s3prefix = $S3PREFIX"
+  echo "consul_tag_key = $CONSUL_TAG_KEY"
+  echo "consul_tag_value = $CONSUL_TAG_VALUE"
+  echo "s3bucket = $S3BUCKET"
+  echo "S3url = $S3URL"
+  echo "s3prefix = $S3PREFIX"
 fi
 
 # Strip leading slash
@@ -108,40 +119,23 @@ fi
 S3SCRIPT_PATH="${S3URL}/${S3BUCKET}/${S3PREFIX}/scripts"
 echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 
-
-# Uncomment to update on boot
-#apt-get -y update
-
 # SCRIPT VARIBLES
-BINDIR='/usr/local/bin'
+BINDIR='/usr/bin'
 CONSULDIR='/opt/consul'
 CONFIGDIR="${CONSULDIR}/config"
 DATADIR="${CONSULDIR}/data"
-CONSULCONFIGDIR='/etc/consul.d'
+CONSULCONFIGDIR='/etc/consul'
 CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${CONSULVERSION}_linux_amd64.zip"
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
-CONSUL_UPSTART_CONF="${S3SCRIPT_PATH}/consul-client.conf"
-CONSUL_UPSTART_FILE="/etc/init/consul.conf"
+CONSUL_SERVICE_CONF="${S3SCRIPT_PATH}/consul.service"
+CONSUL_SERVICE_FILE="/etc/systemd/system/consul.service"
 
-#CONSUL VARIABLES
-echo  "Bootstrapping ${PROGRAM}"
-EX_CODE=$?
-
-
-
-## Install dependencies
-apt-get -y install curl unzip jq
+echo "Updating package list..."
+apt-get -y update
 chkstatus
 
-echo "Fetching Consul... from $CONSULDOWNLOAD"
-
-curl -L $CONSULDOWNLOAD > /tmp/consul.zip
-chkstatus
-
-echo "Unpacking Consul to: ${BINDIR}"
-unzip  /tmp/consul.zip -d  /usr/local/bin
-chmod 0755 /usr/local/bin/consul
-chown root:root /usr/local/bin/consul
+echo "Installing dependencies..."
+apt-get -y install curl unzip
 chkstatus
 
 echo "Creating Consul Directories"
@@ -149,57 +143,46 @@ mkdir -p $CONSULCONFIGDIR
 mkdir -p $CONSULDIR
 mkdir -p $CONFIGDIR
 mkdir -p $DATADIR
-chmod 755 $CONSULDIR
-chmod 755 $DATADIR
-chmod 755 $CONFIGDIR
 chmod 755 $CONSULCONFIGDIR
+chmod 755 $CONSULDIR
+chmod 755 $CONFIGDIR
+chmod 755 $DATADIR
+
+echo "Installing Consul Template..."
+curl -L $CONSUL_TEMPLATE_DOWNLOAD > /tmp/consul_template.zip
+unzip  /tmp/consul_template.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul-template
+chown root:root ${BINDIR}/consul-template
 chkstatus
 
-# Check Consul configuration
-curl  ${S3SCRIPT_PATH}/client_json  >  ${CONSULCONFIGDIR}/base.json
+echo "Installing Consul..."
+curl -L $CONSULDOWNLOAD > /tmp/consul.zip
+unzip  /tmp/consul.zip -d ${BINDIR}/
+chmod 0755 ${BINDIR}/consul
+chown root:root ${BINDIR}/consul
 chkstatus
 
-echo "Starting Consul with temporary ip -> ($SEEDIP)"
-bash -c "consul agent -config-dir ${CONSULCONFIGDIR} -data-dir ${DATADIR} -retry-join ${SEEDIP} &"
+echo "Installing Consul startup scripts..."
+curl $CONSUL_SERVICE_CONF > ${CONSUL_SERVICE_FILE}
+chmod 755 ${CONSUL_SERVICE_FILE}
 
-echo "Install Consul Template"
-curl -L $CONSUL_TEMPLATE_DOWNLOAD >  /tmp/consul_template.zip
-unzip  /tmp/consul_template.zip -d  /usr/local/bin
-chmod 0755 /usr/local/bin/consul-template
-chown root:root /usr/local/bin/consul-template
+curl  -s ${S3SCRIPT_PATH}/consul_client_config.json > ${CONSULCONFIGDIR}/client.json.tmp
+sed -i "s/__CONSUL_TAG_KEY__/${CONSUL_TAG_KEY}/" ${CONSULCONFIGDIR}/client.json.tmp
+sed -i "s/__CONSUL_TAG_VALUE__/${CONSUL_TAG_VALUE}/" ${CONSULCONFIGDIR}/client.json.tmp
+mv ${CONSULCONFIGDIR}/client.json.tmp ${CONSULCONFIGDIR}/client.json
+
+echo "Starting Consul..."
+service consul start
 chkstatus
 
-echo Installing Dnsmasq...
-sudo apt-get -qq -y update
-sudo apt-get -qq -y install dnsmasq-base dnsmasq
+echo "Installing Dnsmasq..."
+apt-get -qq -y install dnsmasq-base dnsmasq
 
-echo Configuring Dnsmasq...
-sudo sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
-sudo sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
-sudo sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
+echo "Configuring Dnsmasq..."
+sh -c 'echo "server=/consul/127.0.0.1#8600" >> /etc/dnsmasq.d/consul'
+sh -c 'echo "listen-address=127.0.0.1" >> /etc/dnsmasq.d/consul'
+sh -c 'echo "bind-interfaces" >> /etc/dnsmasq.d/consul'
 
 echo "Restarting dnsmasq..."
-sudo service dnsmasq restart
+service dnsmasq restart
 chkstatus
-
-echo "Updating startup scripts"
-# Load  with seed ip
-curl -s ${CONSUL_UPSTART_CONF} | sed "s/__CONSUL_SERVER_IPS__/${CONSUL_SERVER_IPS}/" > ${CONSUL_UPSTART_FILE}
-chmod 755 ${CONSUL_UPSTART_FILE}
-
-CONSUL_SERVER_IPS=$(dig +short  consul.service.consul | tr  '\n', ' ' | sed 's/[ \t]*$//')
-
-# Attempt Re-load with IP from DNS 
-if [[ -z $CONSUL_SERVER_IPS ]];then 
-  echo "[WARINING] Could not acquire consul nodes via DNS" >&2
-  echo "[WARINING] Not modifing configuration" >&2
-  exit 1
-else
-  echo "[INFO] Restarting with all consul nodes gatherd via DNS" >&2
-  curl -s ${CONSUL_UPSTART_CONF} | sed "s/__CONSUL_SERVER_IPS__/${CONSUL_SERVER_IPS}/" > ${CONSUL_UPSTART_FILE}
-  /bin/bash -c '/usr/bin/killall -q consul; sleep 5; exit 0'
-  echo "CONSUL_SERVER_IPS = $CONSUL_SERVER_IPS"
-  echo "Starting consul"
-  start consul 
-fi
-:set number !
