@@ -424,6 +424,9 @@
                         "US1604HVM"
                     ]
                 },
+                "IamInstanceProfile": {
+                  "Ref": "ConsulServerProfile"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -511,6 +514,9 @@
                         "US1604HVM"
                     ]
                 },
+                "IamInstanceProfile": {
+                  "Ref": "ConsulClientProfile"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -565,6 +571,107 @@
                     }
                 }
             }
+        },
+        "ConsulClientRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "sts:AssumeRole",
+                  "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                  },
+                  "Effect": "Allow",
+                  "Sid": ""
+                }
+              ]
+            }
+          }
+        },
+        "ConsulClientPolicy": {
+          "Type": "AWS::IAM::Policy",
+          "Properties": {
+            "PolicyName": "consul-client",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "ec2:DescribeInstances",
+                  "Resource": "*"
+                }
+              ]
+            },
+            "Roles": [
+              {
+                "Ref": "ConsulClientRole"
+              }
+            ]
+          }
+        },
+        "ConsulClientProfile": {
+          "Type": "AWS::IAM::InstanceProfile",
+          "Properties": {
+            "Path": "/",
+            "Roles": [
+              {
+                "Ref": "ConsulClientRole"
+              }
+            ]
+          }
+        },
+        "ConsulServerRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "sts:AssumeRole",
+                  "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                  },
+                  "Effect": "Allow",
+                  "Sid": ""
+                }
+              ]
+            }
+          }
+        },
+        "ConsulServerPolicy": {
+          "Type": "AWS::IAM::Policy",
+          "Properties": {
+            "PolicyName": "consul-server",
+            "PolicyDocument": {
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Action": [
+                          "ec2:DescribeInstances",
+                          "ec2:DescribeTags",
+                          "autoscaling:DescribeAutoScalingGroups",
+                          "ec2:DescribeInstanceStatus"
+                      ],
+                      "Resource": "*"
+                  }
+              ]
+            },
+            "Roles": [
+              {
+                "Ref": "ConsulServerRole"
+              }
+            ]
+          }
+        },
+        "ConsulServerProfile": {
+          "Type": "AWS::IAM::InstanceProfile",
+          "Properties": {
+            "Path": "/",
+            "Roles": [
+              {
+                "Ref": "ConsulServerRole"
+              }
+            ]
+          }
         }
     },
     "Outputs": {
