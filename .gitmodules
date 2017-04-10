@@ -3,6 +3,6 @@
   url = git@github.com:aws-quickstart/quickstart-aws-vpc.git
   branch = master
 [submodule "submodules/quickstart-linux-bastion"]
-  path = submodules/quickstart-linux-bastion
-  url = git@github.com:aws-quickstart/quickstart-linux-bastion.git
-  branch = master
+	path = submodules/quickstart-linux-bastion
+	url = git@github.com:aws-quickstart/quickstart-linux-bastion.git
+	branch = master
