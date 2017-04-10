@@ -8,8 +8,8 @@
 
 # Configuration
 PROGRAM='HashiCorp Consul Server'
-CONSULVERSION='0.7.5'
-CONSUL_TEMPLATE_VERSION='0.18.1'
+CONSULVERSION='0.8.0'
+CONSUL_TEMPLATE_VERSION='0.18.2'
 
 ##################################### Functions
 function checkos () {
@@ -142,9 +142,6 @@ CONSULDOWNLOAD="https://releases.hashicorp.com/consul/${CONSULVERSION}/consul_${
 CONSUL_TEMPLATE_DOWNLOAD="https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip"
 CONSUL_SERVICE_CONF="${S3SCRIPT_PATH}/consul.service"
 CONSUL_SERVICE_FILE="/etc/systemd/system/consul.service"
-CONSUL_LEAVE_DOWNLOAD="${S3SCRIPT_PATH}/consul-force-leave-missing-peers.sh"
-CONSUL_LEAVE_CONF="${S3SCRIPT_PATH}/consul-force-leave-missing-peers.service"
-CONSUL_LEAVE_FILE="/etc/systemd/system/consul-force-leave-missing-peers.service"
 
 echo "Updating package list..."
 apt-get -y update
@@ -190,19 +187,6 @@ mv ${CONSULCONFIGDIR}/server.json.tmp ${CONSULCONFIGDIR}/server.json
 
 echo "Starting Consul..."
 service consul start
-chkstatus
-
-echo "Installing Consul Leave script..."
-apt-get -qq -y install awscli jq
-curl -L $CONSUL_LEAVE_DOWNLOAD > /tmp/consul-force-leave-missing-peers.sh
-mv /tmp/consul-force-leave-missing-peers.sh ${BINDIR}/
-chmod 0755 ${BINDIR}/consul-force-leave-missing-peers.sh
-chown root:root ${BINDIR}/consul-force-leave-missing-peers.sh
-chkstatus
-
-curl $CONSUL_LEAVE_CONF > ${CONSUL_LEAVE_FILE}
-chmod 755 ${CONSUL_LEAVE_FILE}
-service consul-force-leave-missing-peers start
 chkstatus
 
 echo "Installing Dnsmasq..."
