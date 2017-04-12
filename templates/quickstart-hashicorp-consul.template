@@ -435,7 +435,7 @@
                                 "#!/bin/bash\n",
                                 "apt-get -y update\n",
                                 "#install the cfn-init tools\n",
-                                "apt-get install python-setuptools\n",
+                                "apt-get install python-setuptools -y \n",
                                 "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh\n",
                                 "CONSUL_BOOTSTRAP=",
