@@ -9,7 +9,6 @@
         },
         "Parameters": [
           "AvailabilityZones",
-          "BastionAMIOS",
           "VPCCIDR",
           "PrivateSubnet1CIDR",
           "PrivateSubnet2CIDR",
@@ -19,13 +18,6 @@
           "PublicSubnet3CIDR",
           "AccessCIDR",
           "NATInstanceType"
-        ]
-      }, {
-        "Label": {
-          "default": "Bastion Setup"
-        },
-        "Parameters": [
-          "BastionAMIOS"
         ]
       }, {
         "Label": {
@@ -382,9 +374,7 @@
             ]
           },
           "Parameters": {
-            "BastionAMIOS": {
-              "Ref": "BastionAMIOS"
-            },
+            "BastionAMIOS": "Ubuntu-Server-16.04-LTS-HVM",
             "KeyPairName": {
               "Ref": "KeyPairName"
             },
