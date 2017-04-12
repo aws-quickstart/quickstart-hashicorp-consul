@@ -179,7 +179,7 @@ echo "Installing Consul startup scripts..."
 curl $CONSUL_SERVICE_CONF > ${CONSUL_SERVICE_FILE}
 chmod 755 ${CONSUL_SERVICE_FILE}
 
-curl  -s ${S3SCRIPT_PATH}/consul_server_config.json > ${CONSULCONFIGDIR}/server.json.tmp
+curl  -s ${S3SCRIPT_PATH}/consul_server_config.stub > ${CONSULCONFIGDIR}/server.json.tmp
 sed -i "s/__BOOTSTRAP_EXPECT__/${CONSUL_EXPECT}/" ${CONSULCONFIGDIR}/server.json.tmp
 sed -i "s/__CONSUL_TAG_KEY__/${CONSUL_TAG_KEY}/" ${CONSULCONFIGDIR}/server.json.tmp
 sed -i "s/__CONSUL_TAG_VALUE__/${CONSUL_TAG_VALUE}/" ${CONSULCONFIGDIR}/server.json.tmp
