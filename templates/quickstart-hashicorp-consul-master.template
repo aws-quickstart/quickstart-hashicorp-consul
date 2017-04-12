@@ -46,9 +46,6 @@
         "AvailabilityZones": {
           "default": "Availability Zones"
         },
-        "BastionAMIOS": {
-          "default": "The Linux distribution for the AMI to be used for the bastion instances"
-        },
         "ConsulNodes": {
           "default": "Consul nodes"
         },
