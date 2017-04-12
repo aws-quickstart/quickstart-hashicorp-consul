@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AccessCIDR",
-        "ParameterValue": "1.2.3.4/32"
+        "ParameterValue": "54.240.198.33/32"
     },
     {
         "ParameterKey": "AvailabilityZones",
@@ -21,10 +21,18 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "cikey"
+        "ParameterValue": "tonynv"
     },
     {
         "ParameterKey": "NATInstanceType",
         "ParameterValue": "t2.small"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "tonynv-cf"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "quickstart-hashicorp-consul"
     }
 ]
