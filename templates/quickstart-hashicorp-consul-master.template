@@ -92,11 +92,6 @@
       "Description": "The CIDR IP range that is permitted to access Consul Note: a value of 0.0.0.0/0 will allow access from ANY ip address",
       "Type": "String"
     },
-    "BastionAMIOS": {
-      "Description": "The Linux distribution for the AMI to be used for the bastion instances. See https://github.com/aws-quickstart/quickstart-linux-bastion for available options.",
-      "Type": "String",
-      "Default": "Ubuntu-Server-16.04-LTS-HVM"
-    },
     "ConsulServerNodes": {
       "Type": "String",
       "Description": "Number of Consul Servers",
