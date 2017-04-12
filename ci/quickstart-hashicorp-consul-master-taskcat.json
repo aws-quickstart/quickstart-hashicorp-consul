@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AccessCIDR",
-        "ParameterValue": "54.240.198.33/32"
+        "ParameterValue": "0.0.0.0/0"
     },
     {
         "ParameterKey": "AvailabilityZones",
@@ -29,7 +29,7 @@
     },
     {
         "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "tonynv-cf"
+        "ParameterValue": "cfn-tonynv"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
