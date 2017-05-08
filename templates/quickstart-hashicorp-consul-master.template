@@ -101,7 +101,7 @@
     "ConsulClientNodes": {
       "Type": "String",
       "Description": "Number of Consul Clients",
-      "Default": "3"
+      "Default": "0"
     },
     "ConsulInstanceType": {
       "Type": "String",

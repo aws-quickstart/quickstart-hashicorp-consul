@@ -362,7 +362,7 @@
                     "Ref": "ConsulClientLC"
                 },
                 "MinSize": {
-                    "Ref": "ConsulServerNodes"
+                    "Ref": "ConsulClientNodes"
                 },
                 "MaxSize": {
                     "Ref": "ConsulClientNodes"
