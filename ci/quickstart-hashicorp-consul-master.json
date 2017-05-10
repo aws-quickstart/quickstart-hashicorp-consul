@@ -1,11 +1,11 @@
 [
     {
         "ParameterKey": "AccessCIDR",
-        "ParameterValue": "1.2.3.4/32"
+        "ParameterValue": "10.0.0.0/16"
     },
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_genaz_3]"
+        "ParameterValue": "$[alfred_getaz_3]"
     },
     {
         "ParameterKey": "ConsulInstanceType",
@@ -21,10 +21,6 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "cikey"
-    },
-    {
-        "ParameterKey": "NATInstanceType",
-        "ParameterValue": "t2.small"
+        "ParameterValue": "$[alfred_getkeypair]"
     }
 ]

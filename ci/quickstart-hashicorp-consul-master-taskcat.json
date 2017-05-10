@@ -24,15 +24,11 @@
         "ParameterValue": "tonynv"
     },
     {
-        "ParameterKey": "NATInstanceType",
-        "ParameterValue": "t2.small"
-    },
-    {
         "ParameterKey": "QSS3BucketName",
         "ParameterValue": "cfn-tonynv"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
-        "ParameterValue": "quickstart-hashicorp-consul"
+        "ParameterValue": "quickstart-hashicorp-consul/"
     }
 ]

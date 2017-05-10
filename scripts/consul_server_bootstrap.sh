@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # Hashicorp Consul Bootstrapping
-# authors: tonynv@amazon.com, bchav@amazon.com
-# date:  Nov,4,2016
+# authors: tonynv@amazon.com, bchav@amazon.com, sancard@amazon.com
+# date:  May,10,2017
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you much install GNU getopt
 
 
@@ -31,9 +31,8 @@ echo -e  "-h, --help \t show options for this script"
 echo -e "--consul_expect \t Number of Consul nodes to expect"
 echo -e "--consul_tag_key \t tag key to use for joining"
 echo -e "--consul_tag_value \t tag value to use for joining"
-echo -e "--s3url \t specify the s3 URL  -S3url (https://s3.amazonaws.com/)"
 echo -e "--s3bucket \t specify -s3bucket (your-bucket)"
-echo -e "--s3prefix \t specify -s3prefix (prefix/to/key | folder/folder/file)"
+echo -e "--s3prefix \t specify -s3prefix (prefix/to/key/ | folder/folder/file/)"
 }
 
 function chkstatus () {
@@ -59,7 +58,7 @@ S3URL='NONE'
 S3PREFIX='NONE'
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,verbose,consul_expect:,consul_tag_key:,consul_tag_value:,s3bucket:,s3url:,s3prefix: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,verbose,consul_expect:,consul_tag_key:,consul_tag_value:,s3bucket:,s3prefix: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
@@ -94,10 +93,6 @@ while true; do
   CONSUL_TAG_VALUE="$2";
   shift 2
   ;;
-    --s3url )
-  S3URL="${2%/}";
-  shift 2
-  ;;
     --s3bucket )
   S3BUCKET="$2";
   shift 2
@@ -117,7 +112,6 @@ if [[ ${VERBOSE} == 'true' ]]; then
   echo "consul_tag_key = $CONSUL_TAG_KEY"
   echo "consul_tag_value = $CONSUL_TAG_VALUE"
   echo "s3bucket = $S3BUCKET"
-  echo "S3url = $S3URL"
   echo "s3prefix = $S3PREFIX"
 fi
 
@@ -129,7 +123,7 @@ if [[ $S3PREFIX == /* ]];then
 fi
 
 # Format S3 script path
-S3SCRIPT_PATH="${S3URL}/${S3BUCKET}/${S3PREFIX}/scripts"
+S3SCRIPT_PATH="https://${S3BUCKET}.s3.amazonaws.com/${S3PREFIX}/scripts"
 echo "S3SCRIPT_PATH = ${S3SCRIPT_PATH}"
 
 # SCRIPT VARIBLES
