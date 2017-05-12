@@ -1,47 +1,43 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Hashicorp Consul template, License: Apache 2.0 (Please do not remove) April,12,2016",
+    "Description": "Hashicorp Consul template, License: Apache 2.0 (Please do not remove) May,11,2017",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
-                    "Label": {
-                        "default": " VPC Network Configuration"
-                    },
-                    "Parameters": [
-                        "AvailabilityZones",
-                        "VPCCIDR",
-                        "PrivateSubnet1CIDR",
-                        "PrivateSubnet2CIDR",
-                        "PrivateSubnet3CIDR",
-                        "PublicSubnet1CIDR",
-                        "PublicSubnet2CIDR",
-                        "PublicSubnet3CIDR",
-                        "AccessCIDR"
-                    ]
+            "ParameterGroups": [{
+                "Label": {
+                    "default": " VPC Network Configuration"
                 },
-                {
-                    "Label": {
-                        "default": "Consul Setup"
-                    },
-                    "Parameters": [
-                        "ConsulNodes",
-                        "ConsulInstanceType",
-                        "ConsulServerNodes",
-                        "ConsulClientNodes",
-                        "KeyPairName"
-                    ]
+                "Parameters": [
+                    "AvailabilityZones",
+                    "VPCCIDR",
+                    "PrivateSubnet1CIDR",
+                    "PrivateSubnet2CIDR",
+                    "PrivateSubnet3CIDR",
+                    "PublicSubnet1CIDR",
+                    "PublicSubnet2CIDR",
+                    "PublicSubnet3CIDR",
+                    "AccessCIDR"
+                ]
+            }, {
+                "Label": {
+                    "default": "Consul Setup"
                 },
-                {
-                    "Label": {
-                        "default": "AWS Quick Start Configuration"
-                    },
-                    "Parameters": [
-                        "QSS3BucketName",
-                        "QSS3KeyPrefix"
-                    ]
-                }
-            ],
+                "Parameters": [
+                    "ConsulNodes",
+                    "ConsulInstanceType",
+                    "ConsulServerNodes",
+                    "ConsulClientNodes",
+                    "KeyPairName"
+                ]
+            }, {
+                "Label": {
+                    "default": "AWS Quick Start Configuration"
+                },
+                "Parameters": [
+                    "QSS3BucketName",
+                    "QSS3KeyPrefix"
+                ]
+            }],
             "ParameterLabels": {
                 "AccessCIDR": {
                     "default": "Permitted IP range"
@@ -64,11 +60,17 @@
                 "PrivateSubnet2CIDR": {
                     "default": "Private Subnet 2 CIDR"
                 },
+                "PrivateSubnet3CIDR": {
+                    "default": "Private Subnet 3 CIDR"
+                },
                 "PublicSubnet1CIDR": {
                     "default": "Public Subnet 1 CIDR"
                 },
                 "PublicSubnet2CIDR": {
                     "default": "Public Subnet 2 CIDR"
+                },
+                "PublicSubnet3CIDR": {
+                    "default": "Public Subnet 3 CIDR"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -218,8 +220,7 @@
                 "Parameters": {
                     "AvailabilityZones": {
                         "Fn::Join": [
-                            ",",
-                            {
+                            ",", {
                                 "Ref": "AvailabilityZones"
                             }
                         ]

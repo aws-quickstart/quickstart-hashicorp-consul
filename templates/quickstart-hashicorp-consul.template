@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "HashiCorp Consul License: Apache 2.0 (Please do not remove) May,10,2017 QS(0036)",
+    "Description": "HashiCorp Consul License: Apache 2.0 (Please do not remove) May,11,2017 QS(0036)",
     "Parameters": {
         "BastionSecurityGroupID": {
             "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)",
@@ -163,6 +163,9 @@
             },
             "us-east-1": {
                 "US1604HVM": "ami-80861296"
+            },
+            "us-east-2": {
+                "US1604HVM": "ami-618fab04"
             },
             "ap-southeast-2": {
                 "US1604HVM": "ami-96666ff5"
