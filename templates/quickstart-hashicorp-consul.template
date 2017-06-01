@@ -159,22 +159,22 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170414"
-            },
-            "us-east-1": {
-                "US1604HVM": "ami-80861296"
-            },
-            "us-east-2": {
-                "US1604HVM": "ami-618fab04"
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170516"
             },
             "ap-southeast-2": {
-                "US1604HVM": "ami-96666ff5"
+                "US1604HVM": "ami-1e01147d"
             },
             "eu-west-1": {
-                "US1604HVM": "ami-a8d2d7ce"
+                "US1604HVM": "ami-6c101b0a"
+            },
+            "us-east-1": {
+                "US1604HVM": "ami-20631a36"
+            },
+            "us-east-2": {
+                "US1604HVM": "ami-a5b196c0"
             },
             "us-west-2": {
-                "US1604HVM": "ami-efd0428f"
+                "US1604HVM": "ami-45224425"
             }
         }
     },
@@ -186,33 +186,40 @@
                 "VpcId": {
                     "Ref": "VPCID"
                 },
-                "SecurityGroupIngress": [{
-                    "IpProtocol": "tcp",
-                    "FromPort": "22",
-                    "ToPort": "22",
-                    "SourceSecurityGroupId": {
-                        "Ref": "BastionSecurityGroupID"
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroupID"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "0",
+                        "ToPort": "65535",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
                     }
-                }, {
-                    "IpProtocol": "tcp",
-                    "FromPort": "0",
-                    "ToPort": "65535",
-                    "CidrIp": {
-                        "Ref": "VPCCIDR"
-                    }
-                }],
-                "Tags": [{
-                    "Key": "Name",
-                    "Value": {
-                        "Fn::Join": [
-                            "-", [{
-                                    "Ref": "AWS::StackName"
-                                },
-                                "ConsulSecGroup"
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "ConsulSecGroup"
+                                ]
                             ]
-                        ]
+                        }
                     }
-                }]
+                ]
             }
         },
         "ConsulServerAsg": {
@@ -230,26 +237,34 @@
                 "DesiredCapacity": {
                     "Ref": "ConsulServerNodes"
                 },
-                "VPCZoneIdentifier": [{
-                    "Ref": "PrivateSubnet1ID"
-                }, {
-                    "Ref": "PrivateSubnet2ID"
-                }, {
-                    "Ref": "PrivateSubnet3ID"
-                }],
-                "Tags": [{
-                    "Key": "Name",
-                    "Value": {
-                        "Fn::Join": [
-                            "-", [{
-                                    "Ref": "AWS::StackName"
-                                },
-                                "Consul-Server"
-                            ]
-                        ]
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "PrivateSubnet1ID"
                     },
-                    "PropagateAtLaunch": "true"
-                }]
+                    {
+                        "Ref": "PrivateSubnet2ID"
+                    },
+                    {
+                        "Ref": "PrivateSubnet3ID"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "Consul-Server"
+                                ]
+                            ]
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
             }
         },
         "ConsulClientAsg": {
@@ -267,26 +282,34 @@
                 "DesiredCapacity": {
                     "Ref": "ConsulClientNodes"
                 },
-                "VPCZoneIdentifier": [{
-                    "Ref": "PrivateSubnet1ID"
-                }, {
-                    "Ref": "PrivateSubnet2ID"
-                }, {
-                    "Ref": "PrivateSubnet3ID"
-                }],
-                "Tags": [{
-                    "Key": "Name",
-                    "Value": {
-                        "Fn::Join": [
-                            "-", [{
-                                    "Ref": "AWS::StackName"
-                                },
-                                "Consul-Client"
-                            ]
-                        ]
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "PrivateSubnet1ID"
                     },
-                    "PropagateAtLaunch": "true"
-                }]
+                    {
+                        "Ref": "PrivateSubnet2ID"
+                    },
+                    {
+                        "Ref": "PrivateSubnet3ID"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    },
+                                    "Consul-Client"
+                                ]
+                            ]
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
             }
         },
         "ConsulServerLC": {
@@ -296,15 +319,18 @@
                     "Ref": "ConsulInstanceType"
                 },
                 "AssociatePublicIpAddress": "false",
-                "SecurityGroups": [{
-                    "Ref": "ConsulSecGroup"
-                }],
+                "SecurityGroups": [
+                    {
+                        "Ref": "ConsulSecGroup"
+                    }
+                ],
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "AWSAMIRegionMap", {
+                        "AWSAMIRegionMap",
+                        {
                             "Ref": "AWS::Region"
                         },
                         "US1604HVM"
@@ -316,14 +342,16 @@
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
-                            "", [
+                            "",
+                            [
                                 "#!/bin/bash\n",
                                 "apt-get -y update\n",
                                 "#install the cfn-init tools\n",
                                 "apt-get install python-setuptools -y \n",
                                 "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh\n",
-                                "CONSUL_BOOTSTRAP=", {
+                                "CONSUL_BOOTSTRAP=",
+                                {
                                     "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/"
                                 },
                                 "${CONSUL_BOOTSTRAP_FILE}",
@@ -334,19 +362,24 @@
                                 "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
-                                " --consul_expect ", {
+                                " --consul_expect ",
+                                {
                                     "Ref": "ConsulServerNodes"
                                 },
-                                " --consul_tag_key ", {
+                                " --consul_tag_key ",
+                                {
                                     "Ref": "ConsulEc2RetryTagKey"
                                 },
-                                " --consul_tag_value ", {
+                                " --consul_tag_value ",
+                                {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --s3bucket ", {
+                                " --s3bucket ",
+                                {
                                     "Ref": "QSS3BucketName"
                                 },
-                                " --s3prefix ", {
+                                " --s3prefix ",
+                                {
                                     "Ref": "QSS3KeyPrefix"
                                 },
                                 "\n"
@@ -363,15 +396,18 @@
                     "Ref": "ConsulInstanceType"
                 },
                 "AssociatePublicIpAddress": "false",
-                "SecurityGroups": [{
-                    "Ref": "ConsulSecGroup"
-                }],
+                "SecurityGroups": [
+                    {
+                        "Ref": "ConsulSecGroup"
+                    }
+                ],
                 "KeyName": {
                     "Ref": "KeyPair"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "AWSAMIRegionMap", {
+                        "AWSAMIRegionMap",
+                        {
                             "Ref": "AWS::Region"
                         },
                         "US1604HVM"
@@ -383,14 +419,16 @@
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
-                            "", [
+                            "",
+                            [
                                 "#!/bin/bash\n",
                                 "apt-get -y update\n",
                                 "#install the cfn-init tools\n",
                                 "apt-get install python-setuptools\n",
                                 "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh\n",
-                                "CONSUL_BOOTSTRAP=", {
+                                "CONSUL_BOOTSTRAP=",
+                                {
                                     "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/"
                                 },
                                 "${CONSUL_BOOTSTRAP_FILE}",
@@ -402,13 +440,16 @@
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
                                 " --consul_tag_key aws:cloudformation:stack-name ",
-                                " --consul_tag_value ", {
+                                " --consul_tag_value ",
+                                {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --s3bucket ", {
+                                " --s3bucket ",
+                                {
                                     "Ref": "QSS3BucketName"
                                 },
-                                " --s3prefix ", {
+                                " --s3prefix ",
+                                {
                                     "Ref": "QSS3KeyPrefix"
                                 }
                             ]
@@ -421,30 +462,36 @@
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
-                    "Statement": [{
-                        "Action": "sts:AssumeRole",
-                        "Principal": {
-                            "Service": "ec2.amazonaws.com"
-                        },
-                        "Effect": "Allow",
-                        "Sid": ""
-                    }]
-                },
-                "Policies": [{
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [{
-                            "Action": [
-                                "s3:GetObject"
-                            ],
-                            "Resource": {
-                                "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Principal": {
+                                "Service": "ec2.amazonaws.com"
                             },
-                            "Effect": "Allow"
-                        }]
-                    },
-                    "PolicyName": "aws-quick-start-s3-policy"
-                }]
+                            "Effect": "Allow",
+                            "Sid": ""
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:GetObject"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                                    },
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        },
+                        "PolicyName": "aws-quick-start-s3-policy"
+                    }
+                ]
             }
         },
         "ConsulClientPolicy": {
@@ -452,54 +499,66 @@
             "Properties": {
                 "PolicyName": "consul-client",
                 "PolicyDocument": {
-                    "Statement": [{
-                        "Effect": "Allow",
-                        "Action": "ec2:DescribeInstances",
-                        "Resource": "*"
-                    }]
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "ec2:DescribeInstances",
+                            "Resource": "*"
+                        }
+                    ]
                 },
-                "Roles": [{
-                    "Ref": "ConsulClientRole"
-                }]
+                "Roles": [
+                    {
+                        "Ref": "ConsulClientRole"
+                    }
+                ]
             }
         },
         "ConsulClientProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
-                "Roles": [{
-                    "Ref": "ConsulClientRole"
-                }]
+                "Roles": [
+                    {
+                        "Ref": "ConsulClientRole"
+                    }
+                ]
             }
         },
         "ConsulServerRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
-                    "Statement": [{
-                        "Action": "sts:AssumeRole",
-                        "Principal": {
-                            "Service": "ec2.amazonaws.com"
-                        },
-                        "Effect": "Allow",
-                        "Sid": ""
-                    }]
-                },
-                "Policies": [{
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [{
-                            "Action": [
-                                "s3:GetObject"
-                            ],
-                            "Resource": {
-                                "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Principal": {
+                                "Service": "ec2.amazonaws.com"
                             },
-                            "Effect": "Allow"
-                        }]
-                    },
-                    "PolicyName": "aws-quick-start-s3-policy"
-                }]
+                            "Effect": "Allow",
+                            "Sid": ""
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:GetObject"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                                    },
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        },
+                        "PolicyName": "aws-quick-start-s3-policy"
+                    }
+                ]
             }
         },
         "ConsulServerPolicy": {
@@ -507,26 +566,32 @@
             "Properties": {
                 "PolicyName": "consul-server",
                 "PolicyDocument": {
-                    "Statement": [{
-                        "Effect": "Allow",
-                        "Action": [
-                            "ec2:DescribeInstances"
-                        ],
-                        "Resource": "*"
-                    }]
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:DescribeInstances"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
                 },
-                "Roles": [{
-                    "Ref": "ConsulServerRole"
-                }]
+                "Roles": [
+                    {
+                        "Ref": "ConsulServerRole"
+                    }
+                ]
             }
         },
         "ConsulServerProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
-                "Roles": [{
-                    "Ref": "ConsulServerRole"
-                }]
+                "Roles": [
+                    {
+                        "Ref": "ConsulServerRole"
+                    }
+                ]
             }
         }
     },
