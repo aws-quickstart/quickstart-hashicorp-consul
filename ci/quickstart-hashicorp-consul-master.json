@@ -5,7 +5,7 @@
     },
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_getaz_3]"
+        "ParameterValue": "$[taskcat_genaz_3]"
     },
     {
         "ParameterKey": "ConsulInstanceType",
@@ -21,6 +21,11 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "$[alfred_getkeypair]"
+        "ParameterValue": "cikey"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+         "ParameterValue": "$[taskcat_autobucket]"
     }
+
 ]
