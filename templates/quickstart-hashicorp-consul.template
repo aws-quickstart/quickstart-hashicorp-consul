@@ -439,7 +439,10 @@
                                 "\n",
                                 "chmod +x ${CONSUL_BOOTSTRAP_FILE}\n",
                                 "./${CONSUL_BOOTSTRAP_FILE} ",
-                                " --consul_tag_key aws:cloudformation:stack-name ",
+                                " --consul_tag_key ",
+                                {
+                                    "Ref": "ConsulEc2RetryTagKey"
+                                },
                                 " --consul_tag_value ",
                                 {
                                     "Ref": "AWS::StackName"
