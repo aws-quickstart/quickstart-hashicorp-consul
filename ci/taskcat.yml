@@ -22,8 +22,4 @@ tests:
     parameter_input: quickstart-hashicorp-consul-master-taskcat.json
     template_file: quickstart-hashicorp-consul-master.template
     regions:
-     - us-east-1
-     - ap-southeast-2
-     - eu-west-1
      - us-west-2
-     - us-east-1
