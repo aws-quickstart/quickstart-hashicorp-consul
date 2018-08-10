@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "HashiCorp Consul License: Apache 2.0 (Please do not remove) May,11,2017 QS(0036)",
+    "Description": "HashiCorp Consul License: Apache 2.0 (Please do not remove) Aug,18,2018 QS(0036)",
     "Parameters": {
         "BastionSecurityGroupID": {
             "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)",

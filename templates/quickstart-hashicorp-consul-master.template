@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Hashicorp Consul template, License: Apache 2.0 (Please do not remove) May,11,2017",
+    "Description": "Hashicorp Consul template, License: Apache 2.0 (Please do not remove) Aug,18,2018",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [{
