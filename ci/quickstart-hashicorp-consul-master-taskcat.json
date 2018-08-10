@@ -5,7 +5,7 @@
     },
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_genaz_3]"
+        "ParameterValue": "$[taskcat_genaz_3]"
     },
     {
         "ParameterKey": "ConsulInstanceType",
@@ -25,7 +25,7 @@
     },
     {
         "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "cfn-tonynv"
+        "ParameterValue": "$[taskcat_autobucket]"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",

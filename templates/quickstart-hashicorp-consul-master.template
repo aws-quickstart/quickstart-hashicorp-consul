@@ -327,47 +327,11 @@
                             "Outputs.PrivateSubnet3AID"
                         ]
                     },
-                    "PublicSubnet1ID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet1ID"
-                        ]
-                    },
-                    "PublicSubnet2ID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet2ID"
-                        ]
-                    },
-                    "PublicSubnet3ID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet3ID"
-                        ]
-                    },
                     "VPCID": {
                         "Fn::GetAtt": [
                             "VPCStack",
                             "Outputs.VPCID"
                         ]
-                    },
-                    "PrivateSubnet1CIDR": {
-                        "Ref": "PublicSubnet1CIDR"
-                    },
-                    "PrivateSubnet2CIDR": {
-                        "Ref": "PublicSubnet2CIDR"
-                    },
-                    "PrivateSubnet3CIDR": {
-                        "Ref": "PublicSubnet3CIDR"
-                    },
-                    "PublicSubnet1CIDR": {
-                        "Ref": "PublicSubnet1CIDR"
-                    },
-                    "PublicSubnet2CIDR": {
-                        "Ref": "PublicSubnet2CIDR"
-                    },
-                    "PublicSubnet3CIDR": {
-                        "Ref": "PublicSubnet3CIDR"
                     },
                     "VPCCIDR": {
                         "Ref": "VPCCIDR"
@@ -383,9 +347,6 @@
                     },
                     "KeyPair": {
                         "Ref": "KeyPairName"
-                    },
-                    "AccessCIDR": {
-                        "Ref": "AccessCIDR"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
