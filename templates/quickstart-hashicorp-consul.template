@@ -128,6 +128,9 @@
             },
             "us-west-2": {
                 "US1604HVM": "ami-0dbd6cabe4749f197"
+            },
+            "eu-west-2": {
+                "US1604HVM": "ami-03c015fc0026bf4fc"
             }
         }
     },
