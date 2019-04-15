@@ -112,25 +112,25 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190320"
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190406"
             },
             "ap-southeast-2": {
-                "US1604HVM": "ami-09e6fd1e6e5bec813"
+                "US1604HVM": "ami-074a2888bf09cab0a"
             },
             "eu-west-1": {
-                "US1604HVM": "ami-01bc69b830b49f729"
+                "US1604HVM": "ami-0e219142c0bee4a6e"
             },
             "eu-west-2": {
-                "US1604HVM": "ami-04773891d2d406800"
+                "US1604HVM": "ami-021202ee82d116ad0"
             },
             "us-east-1": {
-                "US1604HVM": "ami-06d990a360d7a793c"
+                "US1604HVM": "ami-028d6461780695a43"
             },
             "us-east-2": {
-                "US1604HVM": "ami-0c8b8e32659017cc5"
+                "US1604HVM": "ami-0dae3d101cd772fae"
             },
             "us-west-2": {
-                "US1604HVM": "ami-0b4a4b368aa8bd6f0"
+                "US1604HVM": "ami-09b42c38b449cfa59"
             }
         }
     },
