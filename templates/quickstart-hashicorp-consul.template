@@ -115,22 +115,22 @@
                 "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190628"
             },
             "ap-southeast-2": {
-                "US1604HVM": "ami-06f3d4ce695640dab"
+                "US1604HVM": "ami-09332079312dc6085"
             },
             "eu-west-1": {
-                "US1604HVM": "ami-0b0a4b944b489441c"
+                "US1604HVM": "ami-067b6923c66564bf6"
             },
             "eu-west-2": {
-                "US1604HVM": "ami-074e75dd98b03f55f"
+                "US1604HVM": "ami-031e556ebe95c007e"
             },
             "us-east-1": {
-                "US1604HVM": "ami-0a57edc25c5a0837f"
+                "US1604HVM": "ami-0378588b4ae11ec24"
             },
             "us-east-2": {
-                "US1604HVM": "ami-05a3575939a51d28c"
+                "US1604HVM": "ami-07e26819c90e50327"
             },
             "us-west-2": {
-                "US1604HVM": "ami-0d1a13e419ec9285d"
+                "US1604HVM": "ami-0135f076a31aebe66"
             }
         }
     },
