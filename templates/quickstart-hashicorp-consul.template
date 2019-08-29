@@ -197,9 +197,16 @@ Resources:
           !Sub |
                #!/bin/bash -x
                apt-get -y update
-               #install the cfn-init tools
-               apt-get install python-setuptools -y 
-               easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+               # Install git
+               apt-get install -y git 
+               #Load Linux utils
+               until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+               cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
+               # Prep operating systems
+               qs_update-os || qs_err
+               qs_bootstrap_pip || qs_err
+               qs_aws-cfn-bootstrap || qs_err
+               #Bootstrap Consul
                CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh
                CONSUL_BOOTSTRAP=https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/${!CONSUL_BOOTSTRAP_FILE}
                echo ${!CONSUL_BOOTSTRAP}
@@ -230,9 +237,16 @@ Resources:
           !Sub |
                #!/bin/bash -x
                apt-get -y update
-               #install the cfn-init tools
-               apt-get install python-setuptools -y
-               easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+               # Install git
+               apt-get install -y git 
+               #Load Linux utils
+               until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+               cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
+               # Prep operating systems
+               qs_update-os || qs_err
+               qs_bootstrap_pip || qs_err
+               qs_aws-cfn-bootstrap || qs_err
+               #Bootstrap Consul
                CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh
                CONSUL_BOOTSTRAP= https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/${!CONSUL_BOOTSTRAP_FILE}
                echo ${!CONSUL_BOOTSTRAP}
