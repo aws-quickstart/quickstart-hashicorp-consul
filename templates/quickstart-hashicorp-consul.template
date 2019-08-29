@@ -192,48 +192,25 @@ Resources:
         - !Ref 'AWS::Region'
         - US1604HVM
       IamInstanceProfile: !Ref ConsulServerProfile
-      UserData: !Base64 
-        'Fn::Join':
-          - ''
-          - - |
-              #!/bin/bash
-            - |
-              apt-get -y update
-            - |
-              #install the cfn-init tools
-            - |
-              apt-get install python-setuptools -y 
-            - >
-              easy_install
-              https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            - |
-              CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh
-            - CONSUL_BOOTSTRAP=
-            - !Sub >-
-              https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/
-            - '${CONSUL_BOOTSTRAP_FILE}'
-            - |+
-
-            - 'echo ${CONSUL_BOOTSTRAP}'
-            - |+
-
-            - 'wget ${CONSUL_BOOTSTRAP}'
-            - |+
-
-            - |
-              chmod +x ${CONSUL_BOOTSTRAP_FILE}
-            - './${CONSUL_BOOTSTRAP_FILE} '
-            - ' --consul_expect '
-            - !Ref ConsulServerNodes
-            - ' --consul_tag_key '
-            - !Ref ConsulEc2RetryTagKey
-            - ' --consul_tag_value '
-            - !Ref 'AWS::StackName'
-            - ' --s3bucket '
-            - !Ref QSS3BucketName
-            - ' --s3prefix '
-            - !Ref QSS3KeyPrefix
-            - |+
+      UserData:
+        Fn::Base64: 
+          !Sub |
+               #!/bin/bash -x
+               apt-get -y update
+               #install the cfn-init tools
+               apt-get install python-setuptools -y 
+               easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+               CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh
+               CONSUL_BOOTSTRAP=https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/${!CONSUL_BOOTSTRAP_FILE}
+               echo ${!CONSUL_BOOTSTRAP}
+               wget ${!CONSUL_BOOTSTRAP}
+               chmod +x ${!CONSUL_BOOTSTRAP_FILE}
+               ./${!CONSUL_BOOTSTRAP_FILE} \
+                 --consul_expect ${ConsulServerNodes} \
+                 --consul_tag_key ${ConsulEc2RetryTagKey}
+                 --consul_tag_value ${AWS::StackName} \
+                 --s3bucket ${QSS3BucketName} \
+                 --s3prefix ${QSS3KeyPrefix}
 
   ConsulClientLC:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
@@ -248,45 +225,25 @@ Resources:
         - !Ref 'AWS::Region'
         - US1604HVM
       IamInstanceProfile: !Ref ConsulClientProfile
-      UserData: !Base64 
-        'Fn::Join':
-          - ''
-          - - |
-              #!/bin/bash
-            - |
-              apt-get -y update
-            - |
-              #install the cfn-init tools
-            - |
-              apt-get install python-setuptools
-            - >
-              easy_install
-              https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            - |
-              CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh
-            - CONSUL_BOOTSTRAP=
-            - !Sub >-
-              https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/
-            - '${CONSUL_BOOTSTRAP_FILE}'
-            - |+
+      UserData:
+        Fn::Base64:
+          !Sub |
+               #!/bin/bash -x
+               apt-get -y update
+               #install the cfn-init tools
+               apt-get install python-setuptools -y
+               easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+               CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh
+               CONSUL_BOOTSTRAP= https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/${!CONSUL_BOOTSTRAP_FILE}
+               echo ${!CONSUL_BOOTSTRAP}
+               wget ${!CONSUL_BOOTSTRAP}
+               chmod +x ${!CONSUL_BOOTSTRAP_FILE}
+               ./${!CONSUL_BOOTSTRAP_FILE} \
+                 --consul_tag_key ${ConsulEc2RetryTagKey} \
+                 --consul_tag_value ${AWS::StackName} \
+                 --s3bucket ${QSS3BucketName} \
+                 --s3prefix ${QSS3KeyPrefix}
 
-            - 'echo ${CONSUL_BOOTSTRAP}'
-            - |+
-
-            - 'wget ${CONSUL_BOOTSTRAP}'
-            - |+
-
-            - |
-              chmod +x ${CONSUL_BOOTSTRAP_FILE}
-            - './${CONSUL_BOOTSTRAP_FILE} '
-            - ' --consul_tag_key '
-            - !Ref ConsulEc2RetryTagKey
-            - ' --consul_tag_value '
-            - !Ref 'AWS::StackName'
-            - ' --s3bucket '
-            - !Ref QSS3BucketName
-            - ' --s3prefix '
-            - !Ref QSS3KeyPrefix
   ConsulClientRole:
     Type: 'AWS::IAM::Role'
     Properties:
