@@ -69,7 +69,7 @@ Parameters:
     ConstraintDescription: >-
       Quick Start bucket name can include numbers, lowercase letters, uppercase
       letters, and hyphens (-). It cannot start or end with a hyphen (-).
-    Default: aws-quickstart
+    Default: 'aws-quickstart'
     Description: >-
       S3 bucket name for the Quick Start assets. Quick Start bucket name can
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
@@ -80,7 +80,7 @@ Parameters:
     ConstraintDescription: >-
       Quick Start key prefix can include numbers, lowercase letters, uppercase
       letters, hyphens (-), and forward slash (/).
-    Default: quickstart-hashicorp-consul/
+    Default: 'quickstart-hashicorp-consul/'
     Description: >-
       S3 key prefix for the Quick Start assets. Quick Start key prefix can
       include numbers, lowercase letters, uppercase letters, hyphens (-), and
@@ -200,7 +200,143 @@ Resources:
               - Consul-Client
           PropagateAtLaunch: true
   ConsulServerLC:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          cs_install:
+            - install_and_enable_cfn_hup
+            - install_consul
+            - install_consul_template
+            - consul_bootstrap
+            - setup_dnsmasq
+        install_and_enable_cfn_hup:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Join 
+                - ''
+                - - |
+                    [main]
+                  - stack=
+                  - !Ref 'AWS::StackId'
+                  - |+
+
+                  - region=
+                  - !Ref 'AWS::Region'
+                  - |+
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Join 
+                - ''
+                - - |
+                    [cfn-auto-reloader-hook]
+                  - |
+                    triggers=post.update
+                  - >
+                    path=Resources.ConsulClientLC.Metadata.AWS::CloudFormation::Init
+                  - 'action=/usr/local/bin/cfn-init -v '
+                  - '         --stack '
+                  - !Ref 'AWS::StackName'
+                  - '         --resource ConsulClientLC '
+                  - '         --configsets cs_install '
+                  - '         --region '
+                  - !Ref 'AWS::Region'
+                  - |+
+
+                  - |
+                    runas=root
+            /lib/systemd/system/cfn-hup.service:
+              content: !Join 
+                - ''
+                - - |
+                    [Unit]
+                  - |+
+                    Description=cfn-hup daemon
+
+                  - |
+                    [Service]
+                  - |
+                    Type=simple
+                  - |
+                    ExecStart=/usr/local/bin/cfn-hup
+                  - |+
+                    Restart=always
+                  - |
+                    [Install]
+                  - WantedBy=multi-user.target
+          commands:
+            01enable_cfn_hup:
+              command: systemctl enable cfn-hup.service
+            02start_cfn_hup:
+              command: systemctl start cfn-hup.service
+        install_consul:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul/1.6.0/consul_1.6.0_linux_amd64.zip
+        install_consul_template:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul-template/0.21.0/consul-template_0.21.0_linux_amd64.zip
+        consul_bootstrap:
+          files:
+            /etc/systemd/system/consul.service: 
+              content: !Join 
+                - ''
+                - - |
+                    [Unit]
+                  - |
+                    Description=Consul
+                  - |
+                    Requires=network-online.target
+                  - |
+                    After=network-online.target
+                  - |+
+                    [Service]
+                  - |
+                    Restart=on-failure
+                  - |
+                    ExecStart=/usr/bin/consul agent -config-dir /etc/consul
+                  - |
+                    ExecReload=/bin/kill -HUP $MAINPID
+                  - |
+                    KillSignal=SIGTERM
+                  - |+
+                    [Install]
+                  - WantedBy=multi-user.target
+          /etc/consul/server.json:
+            context : { "tagkey" : "${ConsulEc2RetryTagKey}", "tagvalue": "${ConsulEc2RetryTagValue}" }
+            content: !Join 
+                - ''
+                -
+                  - '{'
+                  - '"server": true,'
+                  - '"ui": true,'
+                  - '"data_dir": "/opt/consul/data",'
+                  - '"client_addr": "0.0.0.0",'
+                  - '"retry_join": ["provider=aws tag_key={{tagkey}} tag_value={{tagvalue}}"]'
+                  - '}'
+          commands:
+            01_start_consul:
+                command:  service consul start
+        setup_dnsmasq:
+          files:
+            /etc/dnsmasq.d/consul:
+              content: !Join 
+                - ''
+                - - |
+                    server=/consul/127.0.0.1#8600
+                  - |
+                    listen-address=127.0.0.1
+                  - |
+                    bind-interfaces
+                  - |
+          packages:
+            apt:
+              dnsmasq-base: []  
+              dnsmasq: []
+          commands:
+            01_start_dnsmasq:
+              command: service dnsmasq restart
     Properties:
       InstanceType: !Ref ConsulInstanceType
       AssociatePublicIpAddress: false
@@ -220,27 +356,151 @@ Resources:
                # Install git
                apt-get install -y git 
                #Load Linux utils
-               until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+               until git clone https://github.com//quickstart-linux-utilities.git ; do echo "Retrying"; done
                cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
                # Prep operating systems
                qs_update-os || qs_err
                qs_bootstrap_pip || qs_err
                qs_aws-cfn-bootstrap || qs_err
-               #Bootstrap Consul
-               CONSUL_BOOTSTRAP_FILE=consul_server_bootstrap.sh
-               CONSUL_BOOTSTRAP=https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/${!CONSUL_BOOTSTRAP_FILE}
-               echo ${!CONSUL_BOOTSTRAP}
-               wget ${!CONSUL_BOOTSTRAP}
-               chmod +x ${!CONSUL_BOOTSTRAP_FILE}
-               ./${!CONSUL_BOOTSTRAP_FILE} \
-                 --consul_expect ${ConsulServerNodes} \
-                 --consul_tag_key ${ConsulEc2RetryTagKey}
-                 --consul_tag_value ${AWS::StackName} \
-                 --s3bucket ${QSS3BucketName} \
-                 --s3prefix ${QSS3KeyPrefix}
-
+               #cfn-init
   ConsulClientLC:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          cs_install:
+            - install_and_enable_cfn_hup
+            - install_consul
+            - install_consul_template
+            - consul_bootstrap
+            - setup_dnsmasq
+        install_and_enable_cfn_hup:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Join 
+                - ''
+                - - |
+                    [main]
+                  - stack=
+                  - !Ref 'AWS::StackId'
+                  - |+
+
+                  - region=
+                  - !Ref 'AWS::Region'
+                  - |+
+              mode: '000400'
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Join 
+                - ''
+                - - |
+                    [cfn-auto-reloader-hook]
+                  - |
+                    triggers=post.update
+                  - >
+                    path=Resources.ConsulClientLC.Metadata.AWS::CloudFormation::Init
+                  - 'action=/usr/local/bin/cfn-init -v '
+                  - '         --stack '
+                  - !Ref 'AWS::StackName'
+                  - '         --resource ConsulClientLC '
+                  - '         --configsets cs_install '
+                  - '         --region '
+                  - !Ref 'AWS::Region'
+                  - |+
+
+                  - |
+                    runas=root
+            /lib/systemd/system/cfn-hup.service:
+              content: !Join 
+                - ''
+                - - |
+                    [Unit]
+                  - |+
+                    Description=cfn-hup daemon
+
+                  - |
+                    [Service]
+                  - |
+                    Type=simple
+                  - |
+                    ExecStart=/usr/local/bin/cfn-hup
+                  - |+
+                    Restart=always
+                  - |
+                    [Install]
+                  - WantedBy=multi-user.target
+          commands:
+            01enable_cfn_hup:
+              command: systemctl enable cfn-hup.service
+            02start_cfn_hup:
+              command: systemctl start cfn-hup.service
+        install_consul:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul/1.6.0/consul_1.6.0_linux_amd64.zip
+        install_consul_template:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul-template/0.21.0/consul-template_0.21.0_linux_amd64.zip
+        consul_bootstrap:
+          files:
+            /etc/systemd/system/consul.service: 
+              content: !Join 
+                - ''
+                - - |
+                    [Unit]
+                  - |
+                    Description=Consul
+                  - |
+                    Requires=network-online.target
+                  - |
+                    After=network-online.target
+                  - |+
+                    [Service]
+                  - |
+                    Restart=on-failure
+                  - |
+                    ExecStart=/usr/bin/consul agent -config-dir /etc/consul
+                  - |
+                    ExecReload=/bin/kill -HUP $MAINPID
+                  - |
+                    KillSignal=SIGTERM
+                  - |+
+                    [Install]
+                  - WantedBy=multi-user.target
+          /etc/consul/client.json:
+            context : { "tagkey" : "${ConsulEc2RetryTagKey}", "tagvalue": "${ConsulEc2RetryTagValue}" }
+            content: !Join 
+                - ''
+                -
+                  - '{'
+                  - '"server": false,'
+                  - '"ui": true,'
+                  - '"data_dir": "/opt/consul/data",'
+                  - '"client_addr": "0.0.0.0",'
+                  - '"retry_join": ["provider=aws tag_key={{tagkey}} tag_value={{tagvalue}}"]'
+                  - '}'
+          commands:
+            01_start_consul:
+                command:  service consul start
+        setup_dnsmasq:
+          files:
+            /etc/dnsmasq.d/consul:
+              content: !Join 
+                - ''
+                - - |
+                    server=/consul/127.0.0.1#8600
+                  - |
+                    listen-address=127.0.0.1
+                  - |
+                    bind-interfaces
+                  - |
+          packages:
+            apt:
+              dnsmasq-base: []  
+              dnsmasq: []
+          commands:
+            01_start_dnsmasq:
+              command: service dnsmasq restart
     Properties:
       InstanceType: !Ref ConsulInstanceType
       AssociatePublicIpAddress: false
@@ -260,26 +520,15 @@ Resources:
                # Install git
                apt-get install -y git 
                #Load Linux utils
-               until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+               until git clone https://github.com//quickstart-linux-utilities.git ; do echo "Retrying"; done
                cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
                # Prep operating systems
                qs_update-os || qs_err
                qs_bootstrap_pip || qs_err
                qs_aws-cfn-bootstrap || qs_err
-               #Bootstrap Consul
-               CONSUL_BOOTSTRAP_FILE=consul_client_bootstrap.sh
-               CONSUL_BOOTSTRAP= https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/${!CONSUL_BOOTSTRAP_FILE}
-               echo ${!CONSUL_BOOTSTRAP}
-               wget ${!CONSUL_BOOTSTRAP}
-               chmod +x ${!CONSUL_BOOTSTRAP_FILE}
-               ./${!CONSUL_BOOTSTRAP_FILE} \
-                 --consul_tag_key ${ConsulEc2RetryTagKey} \
-                 --consul_tag_value ${AWS::StackName} \
-                 --s3bucket ${QSS3BucketName} \
-                 --s3prefix ${QSS3KeyPrefix}
-
+               #cfn-init
   ConsulClientRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -296,9 +545,9 @@ Resources:
                   - 's3:GetObject'
                 Resource: !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
                 Effect: Allow
-          PolicyName: aws-quick-start-s3-policy
+          PolicyName: AuthenticatedS3GetObjects
   ConsulClientPolicy:
-    Type: 'AWS::IAM::Policy'
+    Type: AWS::IAM::Policy
     Properties:
       PolicyName: consul-client
       PolicyDocument:
@@ -309,13 +558,13 @@ Resources:
       Roles:
         - !Ref ConsulClientRole
   ConsulClientProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       Roles:
         - !Ref ConsulClientRole
   ConsulServerRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -332,9 +581,9 @@ Resources:
                   - 's3:GetObject'
                 Resource: !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
                 Effect: Allow
-          PolicyName: aws-quick-start-s3-policy
+          PolicyName: AuthenticatedS3GetObjects
   ConsulServerPolicy:
-    Type: 'AWS::IAM::Policy'
+    Type: AWS::IAM::Policy
     Properties:
       PolicyName: consul-server
       PolicyDocument:
@@ -346,7 +595,7 @@ Resources:
       Roles:
         - !Ref ConsulServerRole
   ConsulServerProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       Roles:
