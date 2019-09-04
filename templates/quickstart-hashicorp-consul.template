@@ -561,7 +561,7 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err
             #cfn-init
             echo "Executing config-sets"
-            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientL --configsets cs_install --region ${AWS::Region} || cfn_fail
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientLC --configsets cs_install --region ${AWS::Region} || cfn_fail
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [ GovCloudCondition, s3-us-gov-west-1, s3 ]
