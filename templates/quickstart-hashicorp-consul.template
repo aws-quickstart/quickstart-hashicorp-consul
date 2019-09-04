@@ -142,6 +142,10 @@ Mappings:
       US1604HVM: ami-052ae783527d1a0c9
     us-west-2:
       US1604HVM: ami-0135f076a31aebe66
+Conditions:
+  GovCloudCondition: !Equals
+    - !Ref AWS::Region
+    - us-gov-west-1
 Resources:
   ConsulSecGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -304,17 +308,18 @@ Resources:
                     [Install]
                   - WantedBy=multi-user.target
           /etc/consul/server.json:
-            context : { "tagkey" : "${ConsulEc2RetryTagKey}", "tagvalue": "${ConsulEc2RetryTagValue}" }
-            content: !Join 
-                - ''
-                -
-                  - '{'
-                  - '"server": true,'
-                  - '"ui": true,'
-                  - '"data_dir": "/opt/consul/data",'
-                  - '"client_addr": "0.0.0.0",'
-                  - '"retry_join": ["provider=aws tag_key={{tagkey}} tag_value={{tagvalue}}"]'
-                  - '}'
+             content: !Sub | 
+               {
+                     "server": true,
+                     "ui": true,
+                     "data_dir": "/opt/consul/data",
+                     "client_addr": "0.0.0.0",
+                     "bootstrap_expect": ${ConsulServerNodes},
+                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${AWS::StackName}"]
+                }
+             mode: 000644
+             owner: root
+             group: root
           commands:
             01_start_consul:
                 command:  service consul start
@@ -350,19 +355,37 @@ Resources:
       IamInstanceProfile: !Ref ConsulServerProfile
       UserData:
         Fn::Base64: 
-          !Sub |
-               #!/bin/bash -x
-               apt-get -y update
-               # Install git
-               apt-get install -y git 
-               #Load Linux utils
-               until git clone https://github.com//quickstart-linux-utilities.git ; do echo "Retrying"; done
-               cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
-               # Prep operating systems
-               qs_update-os || qs_err
-               qs_bootstrap_pip || qs_err
-               qs_aws-cfn-bootstrap || qs_err
-               #cfn-init
+          !Sub
+          - |
+            #!/bin/bash -x
+            #CFN Functions
+            function cfn_fail
+            {
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              exit 1
+            }
+            function cfn_success
+            {
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              exit 0
+            }
+            S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
+            apt-get -y update
+            # Install git
+            apt-get install -y git 
+            #Load Linux utils
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+            cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
+            # Prep operating systems
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            #cfn-init
+            echo "Executing config-sets"
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulServerLC --configsets cs_install --region ${AWS::Region} || cfn_fail
+            # Signal cfn-init (final check)
+            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
+          - S3Region: !If [ GovCloudCondition, s3-us-gov-west-1, s3 ]
   ConsulClientLC:
     Type: AWS::AutoScaling::LaunchConfiguration
     Metadata:
@@ -468,17 +491,14 @@ Resources:
                     [Install]
                   - WantedBy=multi-user.target
           /etc/consul/client.json:
-            context : { "tagkey" : "${ConsulEc2RetryTagKey}", "tagvalue": "${ConsulEc2RetryTagValue}" }
-            content: !Join 
-                - ''
-                -
-                  - '{'
-                  - '"server": false,'
-                  - '"ui": true,'
-                  - '"data_dir": "/opt/consul/data",'
-                  - '"client_addr": "0.0.0.0",'
-                  - '"retry_join": ["provider=aws tag_key={{tagkey}} tag_value={{tagvalue}}"]'
-                  - '}'
+            content: !Sub | 
+               }
+                     "server": false,
+                     "ui": true,
+                     "data_dir": "/opt/consul/data",
+                     "client_addr": "0.0.0.0",
+                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${AWS::StackName}"]
+               {
           commands:
             01_start_consul:
                 command:  service consul start
@@ -514,19 +534,37 @@ Resources:
       IamInstanceProfile: !Ref ConsulClientProfile
       UserData:
         Fn::Base64:
-          !Sub |
-               #!/bin/bash -x
-               apt-get -y update
-               # Install git
-               apt-get install -y git 
-               #Load Linux utils
-               until git clone https://github.com//quickstart-linux-utilities.git ; do echo "Retrying"; done
-               cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
-               # Prep operating systems
-               qs_update-os || qs_err
-               qs_bootstrap_pip || qs_err
-               qs_aws-cfn-bootstrap || qs_err
-               #cfn-init
+          !Sub
+          - |
+            #!/bin/bash -x
+            #CFN Functions
+            function cfn_fail
+            {
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              exit 1
+            }
+            function cfn_success
+            {
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              exit 0
+            }
+            S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
+            apt-get -y update
+            # Install git
+            apt-get install -y git 
+            #Load Linux utils
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+            cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
+            # Prep operating systems
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            #cfn-init
+            echo "Executing config-sets"
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientL --configsets cs_install --region ${AWS::Region} || cfn_fail
+            # Signal cfn-init (final check)
+            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
+          - S3Region: !If [ GovCloudCondition, s3-us-gov-west-1, s3 ]
   ConsulClientRole:
     Type: AWS::IAM::Role
     Properties:
