@@ -14,11 +14,11 @@ Parameters:
       - t2.small
       - t2.medium
       - t2.large
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
       - m4.large
       - m4.xlarge
-      - m4.2xlarge
-      - m4.4xlarge
-      - m4.10xlarge
       - m3.medium
       - m3.large
       - m3.xlarge
@@ -43,7 +43,7 @@ Parameters:
       - i2.4xlarge
       - i2.8xlarge
     ConstraintDescription: Choose an instance type.
-    Default: t2.medium
+    Default: m5.large
   ConsulEc2RetryTagKey:
     Description: The Amazon EC2 instance tag key to filter on when joining to other Consul
       nodes.
