@@ -1,9 +1,9 @@
 ## HashiCorp Consul on the AWS Cloud
 
 ### Versions:
-* `CONSUL CLIENT VERSION`='1.2.2'
-* `CONSUL SERVER VERSION`='1.2.2'
-* `CONSUL_TEMPLATE_VERSION`='0.19.5'
+* `CONSUL CLIENT VERSION`='1.6.0'
+* `CONSUL SERVER VERSION`='1.6.0'
+* `CONSUL_TEMPLATE_VERSION`='0.20.1'
 
 ### Deployment options:
 
@@ -16,8 +16,9 @@
 
 ### Change Log: 
 
-* Updated Consul versions to '1.2.2'
-* Update Auto-join method to `retry_join`
+* Updated Consul versions to '1.6.0'
+* Converted to yaml
+* Adds S3 Authenticated calls for ConfigSets (Remove the need public bucket)
 
 
 
