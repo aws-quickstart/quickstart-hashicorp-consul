@@ -1,8 +1,0 @@
-{
-  "server": true,
-  "ui": true,
-  "data_dir": "/opt/consul/data",
-  "client_addr": "0.0.0.0",
-  "bootstrap_expect": __BOOTSTRAP_EXPECT__,
-  "retry_join": ["provider=aws tag_key=__CONSUL_TAG_KEY__ tag_value=__CONSUL_TAG_VALUE__"]
-}
