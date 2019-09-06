@@ -213,6 +213,7 @@ Resources:
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template
       Parameters:
         BastionAMIOS: Ubuntu-Server-16.04-LTS-HVM
+        BastionInstanceType: 't3.medium'
         KeyPairName: !Ref KeyPairName
         PublicSubnet1ID: !GetAtt 
           - VPCStack
