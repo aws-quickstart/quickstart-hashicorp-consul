@@ -307,9 +307,9 @@ Resources:
                   - |+
                     [Install]
                   - WantedBy=multi-user.target
-          /etc/consul/server.json:
-             content: !Sub | 
-               {
+            /etc/consul/server.json:
+              content: !Sub | 
+                {
                      "server": true,
                      "ui": true,
                      "data_dir": "/opt/consul/data",
@@ -317,9 +317,9 @@ Resources:
                      "bootstrap_expect": ${ConsulServerNodes},
                      "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${AWS::StackName}"]
                 }
-             mode: 000644
-             owner: root
-             group: root
+              mode: 000644
+              owner: root
+              group: root
           commands:
             01_start_consul:
                 command:  service consul start
@@ -490,15 +490,15 @@ Resources:
                   - |+
                     [Install]
                   - WantedBy=multi-user.target
-          /etc/consul/client.json:
-            content: !Sub | 
-               }
+            /etc/consul/client.json:
+              content: !Sub | 
+                {
                      "server": false,
                      "ui": true,
                      "data_dir": "/opt/consul/data",
                      "client_addr": "0.0.0.0",
                      "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${AWS::StackName}"]
-               {
+                }
           commands:
             01_start_consul:
                 command:  service consul start
