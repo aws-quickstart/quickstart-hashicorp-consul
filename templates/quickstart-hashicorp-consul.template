@@ -361,12 +361,12 @@ Resources:
             #CFN Functions
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
               exit 1
             }
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
               exit 0
             }
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
@@ -540,12 +540,12 @@ Resources:
             #CFN Functions
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
               exit 1
             }
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource CordaInstance
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
               exit 0
             }
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
