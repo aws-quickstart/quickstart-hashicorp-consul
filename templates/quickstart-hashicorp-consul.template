@@ -259,15 +259,15 @@ Resources:
         - !Ref ConsulServerELBSecGroup
       CrossZone: true
       Listeners:
-        - LoadBalancerPort: 80
-          InstancePort: 8500
+        - LoadBalancerPort: "80"
+          InstancePort: "8500"
           Protocol: HTTP
       HealthCheck:
         Target: HTTP:8500/v1/status/leader
-        HealthyThreshold: 3
-        UnhealthyThreshold: 2
-        Interval: 30
-        Timeout: 5
+        HealthyThreshold: "3"
+        UnhealthyThreshold: "2"
+        Interval: "30"
+        Timeout: "5"
       ConnectionDrainingPolicy:
         Enabled: true
         Timeout: 300
@@ -332,7 +332,7 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
-        - IpProtocol: -1
+        - IpProtocol: "-1"
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
