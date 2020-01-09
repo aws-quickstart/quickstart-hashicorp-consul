@@ -49,7 +49,14 @@ Parameters:
       The Amazon EC2 instance tag key to filter on when joining to other Consul
       nodes.
     Type: String
-    Default: "aws:cloudformation:stack-name"
+    Default: "quickstart-consul-cluster"
+    ConstraintDescription: Must match EC2 Tag Name requirements.
+  ConsulEc2RetryTagValue:
+    Description:
+      The Amazon EC2 instance tag value to filter on when joining to other Consul
+      nodes.
+    Type: String
+    Default: "consul-member-node"
     ConstraintDescription: Must match EC2 Tag Name requirements.
   KeyPair:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
@@ -230,6 +237,9 @@ Resources:
             - - !Ref "AWS::StackName"
               - Consul-Server
           PropagateAtLaunch: true
+        - Key: !Ref ConsulEc2RetryTagKey
+          Value: !Ref ConsulEc2RetryTagValue
+          PropagateAtLaunch: true
   ConsulClientAsg:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
@@ -251,6 +261,7 @@ Resources:
   ConsulServerELB:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
+      Scheme: "internal"
       Subnets:
         - !Ref PrivateSubnet1ID
         - !Ref PrivateSubnet2ID
@@ -286,6 +297,7 @@ Resources:
   ConsulServerLogsBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
   ConsulServerLogsBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -452,7 +464,7 @@ Resources:
                      "data_dir": "/opt/consul/data",
                      "client_addr": "0.0.0.0",
                      "bootstrap_expect": ${ConsulServerNodes},
-                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${AWS::StackName}"]
+                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"]
                 }
               mode: 000644
               owner: root
@@ -633,7 +645,7 @@ Resources:
                      "ui": true,
                      "data_dir": "/opt/consul/data",
                      "client_addr": "0.0.0.0",
-                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${AWS::StackName}"]
+                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"]
                 }
           commands:
             01_start_consul:
@@ -778,7 +790,7 @@ Outputs:
     Value: !Ref ConsulEc2RetryTagKey
     Description: The Amazon EC2 instance tag key to filter on when joining to other Consul nodes.
   ConsulEc2RetryTagValue:
-    Value: !Ref "AWS::StackName"
+    Value: !Ref ConsulEc2RetryTagValue
     Description: The Amazon EC2 instance tag value to filter on when joining to other Consul nodes.
   ConsulServerELB:
     Description: The public URL of your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
