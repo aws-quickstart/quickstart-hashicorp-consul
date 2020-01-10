@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: 2010-09-09
+ AWSTemplateFormatVersion: 2010-09-09
 Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 QS(0036)"
 Metadata:
   LICENSE: "Apache License, Version 2.0"
@@ -366,7 +366,7 @@ Resources:
   ConsulServerELB:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
-      Scheme: "internal"
+      Scheme: "internet-facing"
       Subnets:
         - !Ref PrivateSubnet1ID
         - !Ref PrivateSubnet2ID
@@ -654,6 +654,7 @@ Resources:
             apt:
               dnsmasq-base: []
               dnsmasq: []
+              jq: []
           commands:
             01_start_dnsmasq:
               command: service dnsmasq restart
@@ -686,7 +687,7 @@ Resources:
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
             apt-get -y update
             # Install git
-            apt-get install -y git 
+            apt-get install -y git jq
             #Load Linux utils
             until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
             cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
@@ -908,7 +909,7 @@ Resources:
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
             apt-get -y update
             # Install git
-            apt-get install -y git 
+            apt-get install -y git jq
             #Load Linux utils
             until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
             cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
