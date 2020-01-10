@@ -359,6 +359,7 @@ Resources:
         configSets:
           cs_install:
             - install_and_enable_cfn_hup
+            - create_consul_group_user_dir
             - install_consul
             - install_consul_template
             - consul_bootstrap
@@ -424,53 +425,101 @@ Resources:
               command: systemctl enable cfn-hup.service
             02start_cfn_hup:
               command: systemctl start cfn-hup.service
+        create_consul_group_user_dir:
+          users:
+            consul:
+              homeDir: /srv/consul
+          commands:
+            01_create_data_dir:
+              command: mkdir -p /opt/consul/data
         install_consul:
           sources:
-            /usr/bin/: https://releases.hashicorp.com/consul/1.6.0/consul_1.6.0_linux_amd64.zip
+            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0-beta2/consul_1.7.0-beta2_linux_amd64.zip
         install_consul_template:
           sources:
-            /usr/bin/: https://releases.hashicorp.com/consul-template/0.21.0/consul-template_0.21.0_linux_amd64.zip
+            /usr/bin/: https://releases.hashicorp.com/consul-template/0.24.0/consul-template_0.24.0_linux_amd64.zip
         consul_bootstrap:
           files:
+            /opt/consul/config/server.json:
+              content: !Sub |
+                {
+                  "advertise_addr": "PrivateIpAddress",
+                  "bind_addr": "PrivateIpAddress",
+                  "node_name": "InstanceId",
+                  "datacenter": "${AWS::Region}",
+                  "server": true,
+                  "ui": true,
+                  "leave_on_terminate" : true,
+                  "skip_leave_on_interrupt" : true,
+                  "disable_update_check": true,
+                  "log_level": "warn",
+                  "data_dir": "/opt/consul/data",
+                  "client_addr": "0.0.0.0",
+                  "bootstrap_expect": ${ConsulServerNodes},
+                  "retry_join": ["provider=aws region=${AWS::Region} tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"],
+                  "addresses": {
+                    "http": "0.0.0.0"
+                  },
+                  "connect": {
+                    "enabled": true
+                  },
+                  "autopilot": {
+                    "cleanup_dead_servers": true,
+                    "last_contact_threshold": "200ms",
+                    "max_trailing_logs": 250,
+                    "server_stabilization_time": "10s",
+                    "redundancy_zone_tag": "az",
+                    "disable_upgrade_migration": false,
+                    "upgrade_version_tag": ""
+                  }
+                }
+              mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
                 - ""
                 - - |
                     [Unit]
                   - |
-                    Description=Consul
+                    Description="HashiCorp Consul - A service mesh solution"
+                  - |
+                    Documentation=https://www.consul.io/
                   - |
                     Requires=network-online.target
                   - |
                     After=network-online.target
+                  - |
+                    ConditionFileNotEmpty=/opt/consul/config/server.json
                   - |+
                     [Service]
                   - |
+                    Type=notify
+                  - |
+                    User=consul
+                  - |
+                    Group=consul
+                  - |
+                    ExecStart=/usr/bin/consul agent -config-dir /opt/consul/config -data-dir /opt/consul/data
+                  - |
+                    ExecReload=/usr/bin/consul reload
+                  - |
+                    KillMode=process
+                  - |
                     Restart=on-failure
                   - |
-                    ExecStart=/usr/bin/consul agent -config-dir /etc/consul
+                    TimeoutSec=300s
                   - |
-                    ExecReload=/bin/kill -HUP $MAINPID
-                  - |
-                    KillSignal=SIGTERM
+                    LimitNOFILE=65536
                   - |+
                     [Install]
                   - WantedBy=multi-user.target
-            /etc/consul/server.json:
-              content: !Sub |
-                {
-                     "server": true,
-                     "ui": true,
-                     "data_dir": "/opt/consul/data",
-                     "client_addr": "0.0.0.0",
-                     "bootstrap_expect": ${ConsulServerNodes},
-                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"]
-                }
-              mode: 000644
-              owner: root
-              group: root
           commands:
-            01_start_consul:
+            00_fill_consul_config_ip:
+              command: myip=`echo $(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)` && sed -i "s/PrivateIpAddress/${myip}/g" /opt/consul/config/server.json
+            01_fill_consul_config_instance_id:
+              command: myid=`echo $(curl -s http://169.254.169.254/latest/meta-data/instance-id)` && sed -i "s/InstanceId/${myid}/g" /opt/consul/config/server.json
+            02_change_ownership:
+              command: chown -R consul:consul /opt/consul
+            03_start_consul:
               command: service consul start
         setup_dnsmasq:
           files:
@@ -541,6 +590,7 @@ Resources:
         configSets:
           cs_install:
             - install_and_enable_cfn_hup
+            - create_consul_group_user_dir
             - install_consul
             - install_consul_template
             - consul_bootstrap
@@ -606,49 +656,92 @@ Resources:
               command: systemctl enable cfn-hup.service
             02start_cfn_hup:
               command: systemctl start cfn-hup.service
+        create_consul_group_user_dir:
+          users:
+            consul:
+              homeDir: /srv/consul
+          commands:
+            01_create_data_dir:
+              command: mkdir -p /opt/consul/data
         install_consul:
           sources:
-            /usr/bin/: https://releases.hashicorp.com/consul/1.6.0/consul_1.6.0_linux_amd64.zip
+            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0-beta2/consul_1.7.0-beta2_linux_amd64.zip
         install_consul_template:
           sources:
-            /usr/bin/: https://releases.hashicorp.com/consul-template/0.21.0/consul-template_0.21.0_linux_amd64.zip
+            /usr/bin/: https://releases.hashicorp.com/consul-template/0.24.0/consul-template_0.24.0_linux_amd64.zip
         consul_bootstrap:
           files:
+            /opt/consul/config/client.json:
+              content: !Sub |
+                {
+                  "advertise_addr": "PrivateIpAddress",
+                  "bind_addr": "PrivateIpAddress",
+                  "node_name": "InstanceId",
+                  "datacenter": "${AWS::Region}",
+                  "server": false,
+                  "ui" : false,
+                  "leave_on_terminate" : true,
+                  "skip_leave_on_interrupt" : false,
+                  "disable_update_check": true,
+                  "log_level": "warn",
+                  "enable_local_script_checks": true,
+                  "data_dir": "/opt/consul/data",
+                  "client_addr": "0.0.0.0",
+                  "retry_join": ["provider=aws region=${AWS::Region} tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"],
+                  "addresses": {
+                    "http": "0.0.0.0"
+                  },
+                  "connect": {
+                    "enabled": true
+                  }
+                }
+              mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
                 - ""
                 - - |
                     [Unit]
                   - |
-                    Description=Consul
+                    Description="HashiCorp Consul - A service mesh solution"
+                  - |
+                    Documentation=https://www.consul.io/
                   - |
                     Requires=network-online.target
                   - |
                     After=network-online.target
+                  - |
+                    ConditionFileNotEmpty=/opt/consul/config/client.json
                   - |+
                     [Service]
                   - |
+                    Type=notify
+                  - |
+                    User=consul
+                  - |
+                    Group=consul
+                  - |
+                    ExecStart=/usr/bin/consul agent -config-dir /opt/consul/config -data-dir /opt/consul/data
+                  - |
+                    ExecReload=/usr/bin/consul reload
+                  - |
+                    KillMode=process
+                  - |
                     Restart=on-failure
                   - |
-                    ExecStart=/usr/bin/consul agent -config-dir /etc/consul
+                    TimeoutSec=300s
                   - |
-                    ExecReload=/bin/kill -HUP $MAINPID
-                  - |
-                    KillSignal=SIGTERM
+                    LimitNOFILE=65536
                   - |+
                     [Install]
                   - WantedBy=multi-user.target
-            /etc/consul/client.json:
-              content: !Sub |
-                {
-                     "server": false,
-                     "ui": true,
-                     "data_dir": "/opt/consul/data",
-                     "client_addr": "0.0.0.0",
-                     "retry_join": ["provider=aws tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"]
-                }
           commands:
-            01_start_consul:
+            00_fill_consul_config_ip:
+              command: myip=`echo $(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)` && sed -i "s/PrivateIpAddress/${myip}/g" /opt/consul/config/client.json
+            01_fill_consul_config_instance_id:
+              command: myid=`echo $(curl -s http://169.254.169.254/latest/meta-data/instance-id)` && sed -i "s/InstanceId/${myid}/g" /opt/consul/config/client.json
+            02_change_ownership:
+              command: chown -R consul:consul /opt/consul
+            03_start_consul:
               command: service consul start
         setup_dnsmasq:
           files:
