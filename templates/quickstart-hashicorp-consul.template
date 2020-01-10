@@ -1036,4 +1036,4 @@ Outputs:
   ConsulServerFQDN:
     Condition: SetupRoute53
     Description: The public CNAME pointing to your Consul Load Balancer.
-    Value: !Join ["", ["https://", !Ref ConsulServerELB.DNSName]]
+    Value: !Join ["", ["https://", !Ref LoadBalancerFQDN]]

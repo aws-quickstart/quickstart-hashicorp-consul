@@ -317,5 +317,5 @@ Outputs:
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulServerELB"
   ConsulServerFQDN:
     Condition: SetupRoute53
-    Description: The public CNAME pointing to your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
+    Description: The public CNAME pointing to your Consul Load Balancer.
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulServerFQDN"
