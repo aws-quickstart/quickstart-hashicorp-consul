@@ -376,9 +376,9 @@ Resources:
     Properties:
       Scheme: "internet-facing"
       Subnets:
-        - !Ref PrivateSubnet1ID
-        - !Ref PrivateSubnet2ID
-        - !Ref PrivateSubnet3ID
+        - !Ref PublicSubnet1ID
+        - !Ref PublicSubnet2ID
+        - !Ref PublicSubnet3ID
       SecurityGroups:
         - !Ref ConsulServerELBSecGroup
       CrossZone: true
