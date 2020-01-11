@@ -345,6 +345,10 @@ Resources:
         - Key: !Ref ConsulEc2RetryTagKey
           Value: !Ref ConsulEc2RetryTagValue
           PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref ConsulServerNodes
+        Timeout: PT20M
   ConsulClientAsg:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
@@ -363,6 +367,10 @@ Resources:
             - - !Ref "AWS::StackName"
               - Consul-Client
           PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref ConsulClientNodes
+        Timeout: PT20M
   ConsulServerELB:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
@@ -676,12 +684,12 @@ Resources:
             #CFN Functions
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulServerAsg
               exit 1
             }
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulServerAsg
               exit 0
             }
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
@@ -898,12 +906,12 @@ Resources:
             #CFN Functions
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
               exit 1
             }
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
               exit 0
             }
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
