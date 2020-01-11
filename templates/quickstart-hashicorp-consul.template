@@ -2,6 +2,71 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 QS(0036)"
 Metadata:
   LICENSE: "Apache License, Version 2.0"
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: 'VPC Network Configuration'
+        Parameters:
+          - AvailabilityZones
+          - VPCCIDR
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
+          - PrivateSubnet3CIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - PublicSubnet3CIDR
+          - AccessCIDR
+      - Label:
+          default: Consul Setup
+        Parameters:
+          - ConsulInstanceType
+          - ConsulServerNodes
+          - ConsulClientNodes
+          - KeyPairName
+      - Label:
+          default: AWS Quick Start Configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+      - Label:
+          default: "DNS or SSL configuration"
+        Parameters:
+          - LoadBalancerFQDN
+          - HostedZoneID
+          - SSLCertificateArn
+    ParameterLabels:
+      AccessCIDR:
+        default: Permitted IP range
+      AvailabilityZones:
+        default: Availability Zones
+      ConsulInstanceType:
+        default: Consul cluster node instance type
+      KeyPairName:
+        default: Key Name
+      PrivateSubnet1CIDR:
+        default: Private Subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private Subnet 2 CIDR
+      PrivateSubnet3CIDR:
+        default: Private Subnet 3 CIDR
+      PublicSubnet1CIDR:
+        default: Public Subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public Subnet 2 CIDR
+      PublicSubnet3CIDR:
+        default: Public Subnet 3 CIDR
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
+      VPCCIDR:
+        default: VPC CIDR
+      SSLCertificateArn:
+        default: SSL certificate ARN
+      HostedZoneID:
+        default: Route 53 hosted zone ID
+      LoadBalancerFQDN:
+        default: Load Balancer FQDN
 Parameters:
   BastionSecurityGroupID:
     Description: ID of the bastion host security group to enable SSH connections (e.g. sg-7f16e910)
@@ -114,6 +179,19 @@ Parameters:
     Type: String
     Description: "Sets DesiredCapacity and MaxSize "
     Default: "3"
+  SSLCertificateArn:
+    Description: The ARN of the SSL certificate to use for the load balancer. Use 'SSLCertificateArn' if you are not using 'LoadBalancerFQDN' and 'HostedZoneID'.
+    Type: String
+    Default: ''
+  HostedZoneID:
+    Description: Route 53 Hosted Zone ID of the domain name. Used in conjunction with a 'LoadBalancerFQDN'.
+    Type: String
+    MaxLength: 32
+    Default: ''
+  LoadBalancerFQDN:
+    Description: The fully qualified domain name for the consul load balancer. Use with 'HostedZoneID' if you are not using SSL.
+    Type: String
+    Default: ''
 Mappings:
   RegionELBAccountId:
     ap-east-1:
@@ -197,6 +275,33 @@ Conditions:
   GovCloudCondition: !Equals
     - !Ref AWS::Region
     - us-gov-west-1
+  GenerateSSL: !And
+    - !Equals [!Ref SSLCertificateArn, '']
+    - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+  SetupRoute53: !And
+    - !Not
+      - !Equals
+        - !Ref 'HostedZoneID'
+        - ''
+    - !Not
+      - !Equals
+        - !Ref 'LoadBalancerFQDN'
+        - ''
+Rules:
+  DomainNamePresentWithHostedID:
+    Assertions:
+      - Assert: !Or
+          - !Equals [!Ref HostedZoneID, '']
+          - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+        AssertDescription: "Please specify a 'Domain Name' if you specify 'Route 53 Hosted Zone ID'"
+  GenerateOrProvideSSL:
+    Assertions:
+      - Assert: !Or
+        - !Not [!Equals [!Ref SSLCertificateArn, '']]
+        - !And
+            - !Not [!Equals [!Ref HostedZoneID, '']]
+            - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+        AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
 Resources:
   ConsulSecGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -240,6 +345,10 @@ Resources:
         - Key: !Ref ConsulEc2RetryTagKey
           Value: !Ref ConsulEc2RetryTagValue
           PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref ConsulServerNodes
+        Timeout: PT20M
   ConsulClientAsg:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
@@ -258,10 +367,14 @@ Resources:
             - - !Ref "AWS::StackName"
               - Consul-Client
           PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref ConsulClientNodes
+        Timeout: PT20M
   ConsulServerELB:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
-      Scheme: "internal"
+      Scheme: "internet-facing"
       Subnets:
         - !Ref PrivateSubnet1ID
         - !Ref PrivateSubnet2ID
@@ -273,6 +386,14 @@ Resources:
         - LoadBalancerPort: "80"
           InstancePort: "8500"
           Protocol: HTTP
+        - LoadBalancerPort: "443"
+          InstancePort: "8500"
+          Protocol: HTTPS
+          SSLCertificateId:
+            !If
+              - GenerateSSL
+              - !GetAtt ConfigureSSLStack.Outputs.ACMCertificate
+              - !Ref SSLCertificateArn
       HealthCheck:
         Target: HTTP:8500/v1/status/leader
         HealthyThreshold: "3"
@@ -342,6 +463,10 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
           CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: "-1"
@@ -537,6 +662,7 @@ Resources:
             apt:
               dnsmasq-base: []
               dnsmasq: []
+              jq: []
           commands:
             01_start_dnsmasq:
               command: service dnsmasq restart
@@ -558,18 +684,18 @@ Resources:
             #CFN Functions
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulServerAsg
               exit 1
             }
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulServerAsg
               exit 0
             }
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
             apt-get -y update
             # Install git
-            apt-get install -y git 
+            apt-get install -y git jq
             #Load Linux utils
             until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
             cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
@@ -780,18 +906,18 @@ Resources:
             #CFN Functions
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
               exit 1
             }
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulInstanceType
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
               exit 0
             }
             S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
             apt-get -y update
             # Install git
-            apt-get install -y git 
+            apt-get install -y git jq
             #Load Linux utils
             until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
             cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
@@ -878,6 +1004,34 @@ Resources:
       Path: /
       Roles:
         - !Ref ConsulServerRole
+  LoadBalancerFQDNRecord:
+    Condition: SetupRoute53
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Type: A
+      Name: !Ref 'LoadBalancerFQDN'
+      AliasTarget:
+        HostedZoneId: !GetAtt 'ConsulServerELB.CanonicalHostedZoneNameID'
+        DNSName: !GetAtt 'ConsulServerELB.DNSName'
+      HostedZoneId: !Ref 'HostedZoneID'
+  CopyLambdaStack:
+    Condition: GenerateSSL
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/copy-lambdas.template"
+      Parameters:
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+  ConfigureSSLStack:
+    Condition: GenerateSSL
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/acm-cert-r53-record.template.yaml"
+      Parameters:
+        LambdaZipsBucketName: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        DomainName: !Ref LoadBalancerFQDN
+        HostedZoneID: !Ref HostedZoneID
 Outputs:
   ConsulEc2RetryTagKey:
     Value: !Ref ConsulEc2RetryTagKey
@@ -887,4 +1041,8 @@ Outputs:
     Description: The Amazon EC2 instance tag value to filter on when joining to other Consul nodes.
   ConsulServerELB:
     Description: The public URL of your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
-    Value: !Join ["", ["http://", !GetAtt ConsulServerELB.DNSName]]
+    Value: !Join ["", ["https://", !GetAtt ConsulServerELB.DNSName]]
+  ConsulServerFQDN:
+    Condition: SetupRoute53
+    Description: The public CNAME pointing to your Consul Load Balancer.
+    Value: !Join ["", ["https://", !Ref LoadBalancerFQDN]]

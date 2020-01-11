@@ -55,6 +55,12 @@ Metadata:
         default: Quick Start S3 Key Prefix
       VPCCIDR:
         default: VPC CIDR
+      SSLCertificateArn:
+        default: SSL certificate ARN
+      HostedZoneID:
+        default: Route 53 hosted zone ID
+      LoadBalancerFQDN:
+        default: Load Balancer FQDN
 Parameters:
   AvailabilityZones:
     Description: >-
@@ -187,6 +193,47 @@ Parameters:
     Default: 10.0.0.0/16
     Description: CIDR Block for the VPC
     Type: String
+  SSLCertificateArn:
+    Description: The ARN of the SSL certificate to use for the load balancer. Use 'SSLCertificateArn' if you are not using 'LoadBalancerFQDN' and 'HostedZoneID'.
+    Type: String
+    Default: ''
+  HostedZoneID:
+    Description: Route 53 Hosted Zone ID of the domain name. Used in conjunction with a 'LoadBalancerFQDN'.
+    Type: String
+    MaxLength: 32
+    Default: ''
+  LoadBalancerFQDN:
+    Description: The fully qualified domain name for the load balancer. Use with 'HostedZoneID' if you are not using SSL.
+    Type: String
+    Default: ''
+Conditions:
+  GovCloudCondition: !Equals
+    - !Ref AWS::Region
+    - us-gov-west-1
+  SetupRoute53: !And
+    - !Not
+      - !Equals
+        - !Ref 'HostedZoneID'
+        - ''
+    - !Not
+      - !Equals
+        - !Ref 'LoadBalancerFQDN'
+        - ''
+Rules:
+  DomainNamePresentWithHostedID:
+    Assertions:
+      - Assert: !Or
+          - !Equals [!Ref HostedZoneID, '']
+          - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+        AssertDescription: "Please specify a 'Domain Name' if you specify 'Route 53 Hosted Zone ID'"
+  GenerateOrProvideSSL:
+    Assertions:
+      - Assert: !Or
+        - !Not [!Equals [!Ref SSLCertificateArn, '']]
+        - !And
+            - !Not [!Equals [!Ref HostedZoneID, '']]
+            - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+        AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -255,4 +302,20 @@ Resources:
         KeyPair: !Ref KeyPairName
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-
+        SSLCertificateArn: !Ref SSLCertificateArn
+        HostedZoneID: !Ref HostedZoneID
+        LoadBalancerFQDN: !Ref LoadBalancerFQDN 
+Outputs:
+  ConsulEc2RetryTagKey:
+    Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagKey"
+    Description: The Amazon EC2 instance tag key to filter on when joining to other Consul nodes.
+  ConsulEc2RetryTagValue:
+    Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagValue"
+    Description: The Amazon EC2 instance tag value to filter on when joining to other Consul nodes.
+  ConsulServerELB:
+    Description: The public URL of your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
+    Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulServerELB"
+  ConsulServerFQDN:
+    Condition: SetupRoute53
+    Description: The public CNAME pointing to your Consul Load Balancer.
+    Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulServerFQDN"
