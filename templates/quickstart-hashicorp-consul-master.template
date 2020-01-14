@@ -294,13 +294,13 @@ Resources:
           - Outputs.PrivateSubnet3AID
         PublicSubnet1ID: !GetAtt 
           - VPCStack
-          - Outputs.PublicSubnet1AID
+          - Outputs.PublicSubnet1ID
         PublicSubnet2ID: !GetAtt 
           - VPCStack
-          - Outputs.PublicSubnet2AID
+          - Outputs.PublicSubnet2ID
         PublicSubnet3ID: !GetAtt 
           - VPCStack
-          - Outputs.PublicSubnet3AID
+          - Outputs.PublicSubnet3ID
         VPCID: !GetAtt 
           - VPCStack
           - Outputs.VPCID
