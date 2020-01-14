@@ -135,7 +135,16 @@ Parameters:
     Description: "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-xxxxxxxx)"
     Type: "AWS::EC2::Subnet::Id"
   PrivateSubnet3ID:
-    Description: "ID of the private subnet 2 in Availability Zone 3 (e.g., subnet-xxxxxxxx)"
+    Description: "ID of the private subnet 3 in Availability Zone 3 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet1ID:
+    Description: "ID of the public subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet2ID:
+    Description: "ID of the public subnet 2 in Availability Zone 2 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet3ID:
+    Description: "ID of the public subnet 3 in Availability Zone 3 (e.g., subnet-xxxxxxxx)"
     Type: "AWS::EC2::Subnet::Id"
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
