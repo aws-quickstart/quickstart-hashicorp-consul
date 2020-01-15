@@ -96,13 +96,13 @@ Full, comprehensive documentation is viewable on the [Consul docs pages](https:/
 Thank you for your interest in contributing! Please refer to [Quick Start Contributor's Guide](https://aws-quickstart.github.io) for instructions.
 
 ### Support
-HashiCorp Support: https://support.hashicorp.com | 
-AWS QuickStart Support: https://aws.amazon.com/quickstart
+- HashiCorp Support: https://support.hashicorp.com | 
+- AWS QuickStart Support: https://aws.amazon.com/quickstart
 
 ### License
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
-- **[MIT license](http://opensource.org/licenses/mit-license.php)**
+**[MIT license](http://opensource.org/licenses/mit-license.php)**
 
 
 
