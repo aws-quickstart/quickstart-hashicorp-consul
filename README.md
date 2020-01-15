@@ -96,7 +96,7 @@ Full, comprehensive documentation is viewable on the [Consul docs pages](https:/
 Thank you for your interest in contributing! Please refer to [Quick Start Contributor's Guide](https://aws-quickstart.github.io) for instructions.
 
 ### Support
-- HashiCorp Support: https://support.hashicorp.com | 
+- HashiCorp Support: https://support.hashicorp.com
 - AWS QuickStart Support: https://aws.amazon.com/quickstart
 
 ### License
