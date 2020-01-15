@@ -139,7 +139,7 @@ Parameters:
   KeyPair:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: "AWS::EC2::KeyPair::KeyName"
-    Default: id_rsa_aws
+    MinLength: 1
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
   PrivateSubnet1ID:
     Description: "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)"
@@ -309,21 +309,27 @@ Conditions:
       - !Equals
         - !Ref 'LoadBalancerFQDN'
         - ''
-Rules:
-  DomainNamePresentWithHostedID:
-    Assertions:
-      - Assert: !Or
-          - !Equals [!Ref HostedZoneID, '']
-          - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
-        AssertDescription: "Please specify a 'Domain Name' if you specify 'Route 53 Hosted Zone ID'"
-  GenerateOrProvideSSL:
-    Assertions:
-      - Assert: !Or
-        - !Not [!Equals [!Ref SSLCertificateArn, '']]
-        - !And
-            - !Not [!Equals [!Ref HostedZoneID, '']]
-            - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
-        AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+# Rules:
+#   DomainNamePresentWithHostedID:
+#     Assertions:
+#       - Assert: !Or
+#           - !Equals [!Ref HostedZoneID, '']
+#           - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+#         AssertDescription: "Please specify a 'Domain Name' if you specify 'Route 53 Hosted Zone ID'"
+#   GenerateOrProvideSSL:
+#     Assertions:
+#       - Assert: !Or
+#         - !Not [!Equals [!Ref SSLCertificateArn, '']]
+#         - !And
+#             - !Not [!Equals [!Ref HostedZoneID, '']]
+#             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+#         - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#   ProvideSSHKey:
+#     Assertions:
+#       - Assert:
+#         - !Not [!Equals [ !Ref KeyPair, '']]
+#         AssertDescription: "KeyPair must be provided."
 Resources:
   ConsulSecGroup:
     Type: "AWS::EC2::SecurityGroup"
