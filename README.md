@@ -10,7 +10,7 @@
 - [License](#license)
 
 ### Overview
-This repo contains a set of CloudFormation templates and modules for deploying an open-source HashiCorp Consul cluster and clients on AWS. HashiCorp Consul is a tool that provides the foundation of cloud networking automation using a central registry for service based networking. Consul’s core use cases include:
+This repo contains a set of CloudFormation templates and modules for deploying an open-source HashiCorp Consul cluster and clients on AWS. HashiCorp Consul is a tool that provides the foundation of cloud networking automation using a central registry for service-based networking. Consul’s core use cases include:
 
 * Service registry & health monitoring, to provide a real-time directory of all services with their health status;
 * Network middleware automation, with service discovery for dynamic reconfiguration as services scale up, down or move;
