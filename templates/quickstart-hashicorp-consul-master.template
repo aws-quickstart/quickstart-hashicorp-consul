@@ -74,8 +74,9 @@ Metadata:
 Parameters:
   AvailabilityZones:
     Description: >-
-      List of Availability Zones to use for the subnets in the VPC. Note: The
-      logical order is preserved (3 AZs are used for this deployment)
+      List of Availability Zones to use for the subnets in the VPC. 
+      Note: The logical order is preserved. (3 Three Availability 
+      ZonesAZs are used for this deployment.)
     Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   AccessCIDR:
     AllowedPattern: >-
@@ -86,7 +87,7 @@ Parameters:
     Type: String
   ConsulServerNodes:
     Type: String
-    Description: Number of Consul servers
+    Description: The number of Consul server nodes that will be created. You can choose 3, 5, or 7 nodes.
     AllowedValues:
       - '3'
       - '5'
@@ -94,12 +95,12 @@ Parameters:
     Default: '3'
   ConsulClientNodes:
     Type: String
-    Description: Number of Consul clients
+    Description: The number of Consul client nodes that will be created.
     Default: '0'
   ConsulInstanceType:
     Type: String
     Default: m5.large
-    Description: Consul Instance type
+    Description: The EC2 instance type for the Consul instances.
     AllowedValues:
       - t2.micro
       - t2.small
@@ -205,16 +206,16 @@ Parameters:
     Description: CIDR block for the VPC
     Type: String
   SSLCertificateArn:
-    Description: The ARN of the SSL certificate to use for the load balancer. Use 'SSLCertificateArn' if you are not using 'LoadBalancerFQDN' and 'HostedZoneID'.
+    Description: The Amazon resource Name(ARN) of the SSL certificate to use for the load balancer. Use 'SSLCertificateArn' if you are not using 'LoadBalancerFQDN' and 'HostedZoneID'.
     Type: String
     Default: ''
   HostedZoneID:
-    Description: Route 53 Hosted Zone ID of the domain name. Used in conjunction with a 'LoadBalancerFQDN'.
+    Description: Route 53 Hosted Zone ID of the domain name. Used in conjunction with 'LoadBalancerFQDN'.
     Type: String
     MaxLength: 32
     Default: ''
   LoadBalancerFQDN:
-    Description: The fully qualified domain name for the load balancer. Use with 'HostedZoneID' if you are not using SSL.
+    Description: The fully qualified domain name for the load balancer. Use with 'HostedZoneID' if you are NOT using SSL.
     Type: String
     Default: ''
 Conditions:
@@ -337,11 +338,12 @@ Resources:
 Outputs:
   ConsulEc2RetryTagKey:
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagKey"
-    Description: The Amazon EC2 instance tag key to filter on when joining to other Consul nodes.
+    Description: The EC2 instance tag key to filter on when joining to other Consul nodes.
   ConsulEc2RetryTagValue:
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagValue"
-    Description: The Amazon EC2 instance tag value to filter on when joining to other Consul nodes.
+    Description: The EC2 instance tag value to filter on when joining to other Consul nodes.
   ConsulServerELB:
+    Condition: !Not SetupRoute53
     Description: The public URL of your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulServerELB"
   ConsulServerFQDN:
