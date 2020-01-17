@@ -343,7 +343,6 @@ Outputs:
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagValue"
     Description: The EC2 instance tag value to filter on when joining to other Consul nodes.
   ConsulServerELB:
-    Condition: !Not SetupRoute53
     Description: The public URL of your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulServerELB"
   ConsulServerFQDN:
