@@ -16,6 +16,10 @@ Metadata:
           - PublicSubnet2ID
           - PublicSubnet3ID
       - Label:
+          default: "Bastion host configuration"
+        Parameters:
+          - BastionSecurityGroupID
+      - Label:
           default: Consul Setup
         Parameters:
           - ConsulInstanceType
@@ -25,20 +29,16 @@ Metadata:
           - ConsulEc2RetryTagValue
           - KeyPair
       - Label:
-          default: AWS Quick Start configuration
-        Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
-      - Label:
           default: "DNS and SSL configuration"
         Parameters:
           - LoadBalancerFQDN
           - HostedZoneID
           - SSLCertificateArn
       - Label:
-          default: "Bastion host configuration"
+          default: AWS Quick Start configuration
         Parameters:
-          - BastionSecurityGroupID
+          - QSS3BucketName
+          - QSS3KeyPrefix
     ParameterLabels:
       KeyPair:
         default: Key name
@@ -82,7 +82,7 @@ Metadata:
         default: Bastion host security group ID
 Parameters:
   BastionSecurityGroupID:
-    Description: ID of the bastion host security group to enable SSH connections (e.g. sg-7f16e910)
+    Description: ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)
     Type: "AWS::EC2::SecurityGroup::Id"
   ConsulInstanceType:
     Type: String
