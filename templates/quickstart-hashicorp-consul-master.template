@@ -24,16 +24,16 @@ Metadata:
           - ConsulClientNodes
           - KeyPairName
       - Label:
-          default: AWS Quick Start configuration
-        Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
-      - Label:
           default: "DNS and SSL configuration"
         Parameters:
           - LoadBalancerFQDN
           - HostedZoneID
           - SSLCertificateArn
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
     ParameterLabels:
       AccessCIDR:
         default: Permitted IP range
