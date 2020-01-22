@@ -1,0 +1,301 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "(qs-1ot302h6c) Creates R53 records and ACM Certificate.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "DNS Configuration"
+                    },
+                    "Parameters": [
+                        "DomainName",
+                        "HostedZoneID"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "LambdaZipsBucketName",
+                        "QSS3KeyPrefix"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "LambdaZipsBucketName": {
+                    "default": "Lambda Zips S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                },
+                "DomainName": {
+                    "default": "Domain Name"
+                },
+                "HostedZoneID": {
+                    "default": "Route 53 Hosted Zone ID"
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "LambdaZipsBucketName": {
+            "Default": "",
+            "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-/._]*$",
+            "ConstraintDescription": "S3 key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Default": "",
+            "Description": "Alphanumeric string which identifies the S3 key prefix used to simulate a folder for your copy of the Quick Start assets if you decided to customize or extend them for your own use.",
+            "Type": "String"
+        },
+        "HostedZoneID": {
+            "Description": "OPTIONAL: Route 53 Hosted Zone ID to use. If left blank, Route 53 will not be configured and DNS must be setup manually. If you specify this, you must also specify DomainName",
+            "Type": "String",
+            "MaxLength": "32",
+            "Default": ""
+        },
+        "DomainName": {
+            "Description": "OPTIONAL: Domain Name configured for the cluster. If left blank, DNS must be configured manually, and an existing certificate must be used.",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Conditions": {
+        "SetupRoute53": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "HostedZoneID"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "DomainName"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "UseEmailForACMValidation": {
+            "Fn::And": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "HostedZoneID"
+                        },
+                        ""
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "DomainName"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "ACMCertificateRole": {
+            "Condition": "SetupRoute53",
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "lambda-acm",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "acm:RequestCertificate",
+                                        "acm:DescribeCertificate",
+                                        "acm:DeleteCertificate"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "lambda:InvokeFunction"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "route53:ChangeResourceRecordSets"
+                                    ],
+                                    "Resource": [
+                                        {
+                                          "Fn::Sub": "arn:aws:route53:::hostedzone/${HostedZoneID}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:FilterLogEvents"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "ACMCertificateLambda": {
+            "Condition": "SetupRoute53",
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Creates and verifies an ACM certificate using DNS validation and route53",
+                "Handler": "lambda_function.handler",
+                "Runtime": "python2.7",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "ACMCertificateRole",
+                        "Arn"
+                    ]
+                },
+                "Timeout": 900,
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "LambdaZipsBucketName"
+                    },
+                    "S3Key": {
+                        "Fn::Sub": "${QSS3KeyPrefix}functions/packages/ACMCert/lambda.zip"
+                    }
+                }
+            }
+        },
+        "ACMCertificateDNS": {
+            "Condition": "SetupRoute53",
+            "Type": "AWS::CloudFormation::CustomResource",
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "ACMCertificateLambda",
+                        "Arn"
+                    ]
+                },
+                "HostedZoneId": {
+                    "Ref": "HostedZoneID"
+                },
+                "HostNames": [
+                    {
+                        "Ref": "DomainName"
+                    },
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "*.",
+                                {
+                                    "Ref": "DomainName"
+                                }
+                            ]
+                        ]
+                    }
+                ]
+            }
+        },
+        "ACMCertificateEmail": {
+            "Condition": "UseEmailForACMValidation",
+            "Type": "AWS::CertificateManager::Certificate",
+            "Properties": {
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "SubjectAlternativeNames": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "*.",
+                                {
+                                    "Ref": "DomainName"
+                                }
+                            ]
+                        ]
+                    }
+                ],
+                "DomainValidationOptions": [
+                    {
+                        "DomainName": {
+                            "Ref": "DomainName"
+                        },
+                        "ValidationDomain": {
+                            "Ref": "DomainName"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "ACMCertificate": {
+            "Description": "ARN of the ACM-Generated SSL Certificate",
+            "Value": {
+                "Fn::If": [
+                    "SetupRoute53",
+                    {
+                        "Fn::GetAtt": [
+                            "ACMCertificateDNS",
+                            "Arn"
+                        ]
+                    },
+                    {
+                        "Ref": "ACMCertificateEmail"
+                    }
+                ]
+            }
+        }
+    }
+}
