@@ -20,6 +20,18 @@
         "ParameterValue": "tonynv"
     },
     {
+        "ParameterKey": "HostedZoneID",
+        "ParameterValue": "Z3AUDQLV95DIKK"
+    },
+    {
+        "ParameterKey": "LoadBalancerFQDN",
+        "ParameterValue": "consul.t.quickstart.awspartner.com"
+    },
+    {
+        "ParameterKey": "SSLCertificateArn",
+        "ParameterValue": ""
+    }
+    {
         "ParameterKey": "QSS3BucketName",
         "ParameterValue": "$[taskcat_autobucket]"
     },
