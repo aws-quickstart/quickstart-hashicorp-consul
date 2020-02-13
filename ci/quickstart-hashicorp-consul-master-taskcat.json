@@ -20,23 +20,25 @@
         "ParameterValue": "tonynv"
     },
     {
-        "ParameterKey": "HostedZoneID",
-        "ParameterValue": "Z3AUDQLV95DIKK"
-    },
-    {
-        "ParameterKey": "LoadBalancerFQDN",
-        "ParameterValue": "consul.t.quickstart.awspartner.com"
-    },
-    {
-        "ParameterKey": "SSLCertificateArn",
-        "ParameterValue": ""
-    }
-    {
         "ParameterKey": "QSS3BucketName",
         "ParameterValue": "$[taskcat_autobucket]"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
         "ParameterValue": "quickstart-hashicorp-consul/"
+    },
+    {
+        "ParameterKey": "HostedZoneID",
+        "ParameterValue": "Z3XXXXXXXXKK"
+    },
+    {
+        "ParameterKey": "LoadBalancerFQDN",
+        "ParameterValue": "dummy.dns.name.com"
+    },
+    {
+        "ParameterKey": "SSLCertificateArn",
+        "ParameterValue": ""
     }
+	
+
 ]
