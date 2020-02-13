@@ -139,7 +139,7 @@ Parameters:
   KeyPair:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: "AWS::EC2::KeyPair::KeyName"
-    MinLength: 1
+#    MinLength: 1
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
   PrivateSubnet1ID:
     Description: "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)"
