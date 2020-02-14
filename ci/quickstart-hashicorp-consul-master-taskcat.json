@@ -26,5 +26,19 @@
     {
         "ParameterKey": "QSS3KeyPrefix",
         "ParameterValue": "quickstart-hashicorp-consul/"
+    },
+    {
+        "ParameterKey": "HostedZoneID",
+        "ParameterValue": "Z3XXXXXXXXKK"
+    },
+    {
+        "ParameterKey": "LoadBalancerFQDN",
+        "ParameterValue": "dummy.dns.name.com"
+    },
+    {
+        "ParameterKey": "SSLCertificateArn",
+        "ParameterValue": ""
     }
+	
+
 ]

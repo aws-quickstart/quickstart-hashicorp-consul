@@ -21,8 +21,8 @@ This repo contains a set of CloudFormation templates and modules for deploying a
 ![quickstart-hashicorp-consul](https://d0.awsstatic.com/partner-network/QuickStart/datasheets/hashicorp-consul-on-aws-architecture.png)
 
 Deployed Versions:
-* `CONSUL CLIENT VERSION`='1.7.0-beta2'
-* `CONSUL SERVER VERSION`='1.7.0-beta2'
+* `CONSUL CLIENT VERSION`='1.7.0'
+* `CONSUL SERVER VERSION`='1.7.0'
 * `CONSUL TEMPLATE VERSION`='0.24.0'
 
 For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://aws-quickstart.s3.amazonaws.com/quickstart-hashicorp-consul/doc/hashicorp-consul-on-the-aws-cloud.pdf).

@@ -139,7 +139,7 @@ Parameters:
   KeyPair:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: "AWS::EC2::KeyPair::KeyName"
-    MinLength: 1
+#    MinLength: 1
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
   PrivateSubnet1ID:
     Description: "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)"
@@ -587,7 +587,7 @@ Resources:
               command: mkdir -p /opt/consul/data
         install_consul:
           sources:
-            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0-beta2/consul_1.7.0-beta2_linux_amd64.zip
+            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0/consul_1.7.0_linux_amd64.zip
         install_consul_template:
           sources:
             /usr/bin/: https://releases.hashicorp.com/consul-template/0.24.0/consul-template_0.24.0_linux_amd64.zip
@@ -819,7 +819,7 @@ Resources:
               command: mkdir -p /opt/consul/data
         install_consul:
           sources:
-            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0-beta2/consul_1.7.0-beta2_linux_amd64.zip
+            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0/consul_1.7.0_linux_amd64.zip
         install_consul_template:
           sources:
             /usr/bin/: https://releases.hashicorp.com/consul-template/0.24.0/consul-template_0.24.0_linux_amd64.zip

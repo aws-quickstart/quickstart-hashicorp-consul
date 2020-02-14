@@ -140,7 +140,7 @@ Parameters:
       Public/private key pairs allow you to securely connect to your instance
       after it launches
     Type: 'AWS::EC2::KeyPair::KeyName'
-    MinLength: 1
+    #MinLength: 1
   PrivateSubnet1CIDR:
     AllowedPattern: >-
       ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
