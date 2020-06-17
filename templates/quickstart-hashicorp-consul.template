@@ -256,43 +256,41 @@ Mappings:
       AccountId: "797873946194"
   AWSAMIRegionMap:
     ap-east-1:
-      US1604HVM: ami-8380faf2
+      US1604HVM: ami-e5256594
     ap-northeast-1:
-      US1604HVM: ami-02be181636ed95ac5
+      US1604HVM: ami-078648cce0d33c256
     ap-northeast-2:
-      US1604HVM: ami-004b3430b806f3b1a
-    ap-northeast-3:
-      US1604HVM: ami-0166a1a40f68b6afc
+      US1604HVM: ami-0539a1389fedcbdc8
     ap-southeast-1:
-      US1604HVM: ami-08b3278ea6e379084
+      US1604HVM: ami-05f112c29645f0812
     ap-southeast-2:
-      US1604HVM: ami-00d7116c396e73b04
+      US1604HVM: ami-0e4bc04bd401729d6
     me-south-1:
-      US1604HVM: ami-0aff4c97b2c0968e0
+      US1604HVM: ami-0054116010789ce83
     ap-south-1:
-      US1604HVM: ami-0f59afa4a22fad2f0
+      US1604HVM: ami-03b8a287edc0c1253
     ca-central-1:
-      US1604HVM: ami-0062c497b55437b01
+      US1604HVM: ami-0e2df0719252d4491
     eu-central-1:
-      US1604HVM: ami-0410f42dd64e525be
+      US1604HVM: ami-05ed2c1359acd8af6
     eu-north-1:
-      US1604HVM: ami-0ca3b50bc99a41773
+      US1604HVM: ami-094ac8f5eb69dd943
     eu-west-1:
-      US1604HVM: ami-0987ee37af7792903
+      US1604HVM: ami-008320af74136c628
     eu-west-2:
-      US1604HVM: ami-05945867d79b7d926
+      US1604HVM: ami-004c1e61ae5d76090
     eu-west-3:
-      US1604HVM: ami-00c60f4df93ff408e
+      US1604HVM: ami-08eebff62e61110b7
     sa-east-1:
-      US1604HVM: ami-0fb487b6f6ab53ff4
+      US1604HVM: ami-0ddec8b41a3411374
     us-east-1:
-      US1604HVM: ami-09f9d773751b9d606
+      US1604HVM: ami-0a0ddd875a1ea2c7f
     us-east-2:
-      US1604HVM: ami-0891395d749676c2e
+      US1604HVM: ami-04781752c9b20ea41
     us-west-1:
-      US1604HVM: ami-0c0e5a396959508b0
+      US1604HVM: ami-0c1e832407373333f
     us-west-2:
-      US1604HVM: ami-0bbe9b07c5fe8e86e
+      US1604HVM: ami-0a4df59262c92cf19
 Conditions:
   GovCloudCondition: !Equals
     - !Ref AWS::Region
