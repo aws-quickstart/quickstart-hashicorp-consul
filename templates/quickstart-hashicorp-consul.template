@@ -670,8 +670,12 @@ Resources:
               command: myid=`echo $(curl -s http://169.254.169.254/latest/meta-data/instance-id)` && sed -i "s/InstanceId/${myid}/g" /opt/consul/config/server.json
             02_change_ownership:
               command: chown -R consul:consul /opt/consul
-            03_start_consul:
-              command: service consul start
+            03_reload_systemd:
+              command: systemctl daemon-reload
+            04_start_consul:
+              command: systemctl enable consul
+            05_start_consul:
+              command: systemctl start consul
         setup_dnsmasq:
           files:
             /etc/dnsmasq.d/consul:
@@ -731,7 +735,7 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err
             #cfn-init
             echo "Executing config-sets"
-            cfn-init -v --stack ${AWS::StackName} --resource ConsulServerLC --configsets cs_install --region ${AWS::Region} || cfn_fail
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulServerLC --configsets cs_install --region ${AWS::Region} || (cfn_fail && journalctl -b --no-pager -u consul && cat /opt/consul/config/server.json)
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
@@ -893,8 +897,12 @@ Resources:
               command: myid=`echo $(curl -s http://169.254.169.254/latest/meta-data/instance-id)` && sed -i "s/InstanceId/${myid}/g" /opt/consul/config/client.json
             02_change_ownership:
               command: chown -R consul:consul /opt/consul
-            03_start_consul:
-              command: service consul start
+            03_reload_systemd:
+              command: systemctl daemon-reload
+            04_enable_consul:
+              command: systemctl enable consul 
+            05_start_consul:
+              command: systemctl start consul
         setup_dnsmasq:
           files:
             /etc/dnsmasq.d/consul:
@@ -953,7 +961,7 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err
             #cfn-init
             echo "Executing config-sets"
-            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientLC --configsets cs_install --region ${AWS::Region} || cfn_fail
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientLC --configsets cs_install --region ${AWS::Region} || (cfn_fail && journalctl -b --no-pager -u consul && cat /opt/consul/config/client.json)
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
