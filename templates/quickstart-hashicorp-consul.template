@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 (qs-1qup6ra8j)"
 Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Launch into an existing VPC"
   LICENSE: "Apache License, Version 2.0"
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -28,6 +30,7 @@ Metadata:
           - ConsulEc2RetryTagKey
           - ConsulEc2RetryTagValue
           - KeyPair
+          - EnablegRPC
       - Label:
           default: "DNS and SSL configuration"
         Parameters:
@@ -68,6 +71,8 @@ Metadata:
         default: Route 53 hosted zone ID
       LoadBalancerFQDN:
         default: Load Balancer FQDN
+      EnablegRPC:
+        default: Enable gRPC on Consul
       ConsulInstanceType:
         default: Consul cluster node instance type
       ConsulServerNodes:
@@ -214,6 +219,13 @@ Parameters:
     Description: The fully qualified domain name for the consul load balancer. Use with 'HostedZoneID' if you are not using SSL.
     Type: String
     Default: ''
+  EnablegRPC:
+    Description: Enable gRPC on the Consul server cluster.
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
 Mappings:
   RegionELBAccountId:
     ap-east-1:
@@ -292,6 +304,7 @@ Mappings:
     us-west-2:
       US1604HVM: ami-0a4df59262c92cf19
 Conditions:
+  gRPCCondition: !Equals [!Ref EnablegRPC, "true"]
   GovCloudCondition: !Equals
     - !Ref AWS::Region
     - us-gov-west-1
@@ -624,6 +637,7 @@ Resources:
                     "upgrade_version_tag": ""
                   }
                 }
+              
               mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
@@ -735,7 +749,7 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err
             #cfn-init
             echo "Executing config-sets"
-            cfn-init -v --stack ${AWS::StackName} --resource ConsulServerLC --configsets cs_install --region ${AWS::Region} || (cfn_fail && journalctl -b --no-pager -u consul && cat /opt/consul/config/server.json)
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulServerLC --configsets cs_install --region ${AWS::Region} || (cfn_fail || (journalctl -b --no-pager -u consul && cat /opt/consul/config/server.json))
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
@@ -828,7 +842,8 @@ Resources:
         consul_bootstrap:
           files:
             /opt/consul/config/client.json:
-              content: !Sub |
+              content: !Sub
+              - |
                 {
                   "advertise_addr": "PrivateIpAddress",
                   "bind_addr": "PrivateIpAddress",
@@ -846,11 +861,9 @@ Resources:
                   "retry_join": ["provider=aws region=${AWS::Region} tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"],
                   "addresses": {
                     "http": "0.0.0.0"
-                  },
-                  "connect": {
-                    "enabled": true
-                  }
+                  }${gRPC}
                 }
+              - gRPC: !If [ gRPCCondition, "\"ports\": ,{ \"grpc\": 8502 },", "" ]   
               mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
@@ -941,7 +954,6 @@ Resources:
             function cfn_fail
             {
               cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
-              exit 1
             }
             function cfn_success
             {
@@ -961,7 +973,13 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err
             #cfn-init
             echo "Executing config-sets"
-            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientLC --configsets cs_install --region ${AWS::Region} || (cfn_fail && journalctl -b --no-pager -u consul && cat /opt/consul/config/client.json)
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientLC --configsets cs_install --region ${AWS::Region}
+            STATUS=$?
+            echo signal cfn success/failure
+            [ $STATUS == 0 ] || cfn_fail
+            echo log info on failure
+            [ $STATUS == 0 ] || (journalctl -b --no-pager -u consul && cat /opt/consul/config/client.json && systemctl status consul.service)
+            
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
