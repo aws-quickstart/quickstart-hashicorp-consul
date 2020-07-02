@@ -1,0 +1,1100 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 QS(0036)"
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Launch into an existing VPC"
+  LICENSE: "Apache License, Version 2.0"
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: 'VPC network configuration'
+        Parameters:
+          - VPCID
+          - VPCCIDR
+          - PrivateSubnet1ID
+          - PrivateSubnet2ID
+          - PrivateSubnet3ID
+          - PublicSubnet1ID
+          - PublicSubnet2ID
+          - PublicSubnet3ID
+      - Label:
+          default: "Bastion host configuration"
+        Parameters:
+          - BastionSecurityGroupID
+      - Label:
+          default: Consul Setup
+        Parameters:
+          - ConsulInstanceType
+          - ConsulServerNodes
+          - ConsulClientNodes
+          - ConsulEc2RetryTagKey
+          - ConsulEc2RetryTagValue
+          - KeyPair
+          - EnablegRPC
+      - Label:
+          default: "DNS and SSL configuration"
+        Parameters:
+          - LoadBalancerFQDN
+          - HostedZoneID
+          - SSLCertificateArn
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+    ParameterLabels:
+      KeyPair:
+        default: Key name
+      PrivateSubnet1ID:
+        default: Private Subnet 1 ID
+      PrivateSubnet2ID:
+        default: Private Subnet 2 ID
+      PrivateSubnet3ID:
+        default: Private Subnet 3 ID
+      PublicSubnet1ID:
+        default: Public Subnet 1 ID
+      PublicSubnet2ID:
+        default: Public Subnet 2 ID
+      PublicSubnet3ID:
+        default: Public Subnet 3 ID
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      VPCID:
+        default: VPC ID
+      VPCCIDR:
+        default: VPC CIDR block
+      SSLCertificateArn:
+        default: SSL certificate ARN
+      HostedZoneID:
+        default: Route 53 hosted zone ID
+      LoadBalancerFQDN:
+        default: Load Balancer FQDN
+      EnablegRPC:
+        default: Enable gRPC on Consul
+      ConsulInstanceType:
+        default: Consul cluster node instance type
+      ConsulServerNodes:
+        default: Number of Consul server nodes
+      ConsulClientNodes:
+        default: Number of Consul client nodes
+      ConsulEc2RetryTagKey: 
+        default: Tag key for Consul cluster nodes
+      ConsulEc2RetryTagValue: 
+        default: Tag value for Consul cluster nodes
+      BastionSecurityGroupID:
+        default: Bastion host security group ID
+Parameters:
+  BastionSecurityGroupID:
+    Description: ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)
+    Type: "AWS::EC2::SecurityGroup::Id"
+  ConsulInstanceType:
+    Type: String
+    Description: The EC2 instance type for the Consul instances.
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - c3.large
+      - c3.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - i2.xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+    ConstraintDescription: Choose an instance type.
+    Default: m5.large
+  ConsulEc2RetryTagKey:
+    Description:
+      The EC2 instance tag key to filter on when joining to other Consul
+      nodes.
+    Type: String
+    Default: "quickstart-consul-cluster"
+    ConstraintDescription: Must match EC2 Tag Name requirements.
+  ConsulEc2RetryTagValue:
+    Description:
+      The EC2 instance tag value to filter on when joining to other Consul
+      nodes.
+    Type: String
+    Default: "consul-member-node"
+    ConstraintDescription: Must match EC2 Tag Name requirements.
+  KeyPair:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: "AWS::EC2::KeyPair::KeyName"
+#    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  PrivateSubnet1ID:
+    Description: "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PrivateSubnet2ID:
+    Description: "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PrivateSubnet3ID:
+    Description: "ID of the private subnet 3 in Availability Zone 3 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet1ID:
+    Description: "ID of the public subnet 1 in Availability Zone 1 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet2ID:
+    Description: "ID of the public subnet 2 in Availability Zone 2 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  PublicSubnet3ID:
+    Description: "ID of the public subnet 3 in Availability Zone 3 (e.g., subnet-xxxxxxxx)"
+    Type: "AWS::EC2::Subnet::Id"
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: >-
+      Quick Start bucket name can include numbers, lowercase letters, uppercase
+      letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    Default: "aws-quickstart"
+    Description: >-
+      S3 bucket name for the Quick Start assets. Quick Start bucket name can
+      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
+      cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: >-
+      Quick Start key prefix can include numbers, lowercase letters, uppercase
+      letters, hyphens (-), and forward slash (/).
+    Default: "quickstart-hashicorp-consul/"
+    Description: >-
+      S3 key prefix for the Quick Start assets. Quick Start key prefix can
+      include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  VPCID:
+    Description: VPC ID
+    Type: "AWS::EC2::VPC::Id"
+  VPCCIDR:
+    AllowedPattern: >-
+      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: CIDR block for the VPC
+    Type: String
+  ConsulServerNodes:
+    Type: String
+    Description: The number of Consul server nodes that will be created. You can choose 3, 5, or 7 nodes.
+    AllowedValues:
+      - "3"
+      - "5"
+      - "7"
+    Default: "3"
+  ConsulClientNodes:
+    Type: String
+    Description: The number of Consul client nodes that will be created.
+    Default: "0"
+  SSLCertificateArn:
+    Description: The Amazon Resource Name (ARN) of the SSL certificate to use for the load balancer. Use 'SSLCertificateArn' if you are not using 'LoadBalancerFQDN' and 'HostedZoneID'.
+    Type: String
+    Default: ''
+  HostedZoneID:
+    Description: Route 53 Hosted Zone ID of the domain name. Used in conjunction with 'LoadBalancerFQDN'.
+    Type: String
+    MaxLength: 32
+    Default: ''
+  LoadBalancerFQDN:
+    Description: The fully qualified domain name for the consul load balancer. Use with 'HostedZoneID' if you are not using SSL.
+    Type: String
+    Default: ''
+  EnablegRPC:
+    Description: Enable gRPC on the Consul server cluster.
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+Mappings:
+  RegionELBAccountId:
+    ap-east-1:
+      AccountId: "754344448648"
+    ap-northeast-1:
+      AccountId: "582318560864"
+    ap-northeast-2:
+      AccountId: "600734575887"
+    ap-northeast-3:
+      AccountId: "383597477331"
+    ap-southeast-1:
+      AccountId: "114774131450"
+    ap-southeast-2:
+      AccountId: "783225319266"
+    ap-south-1:
+      AccountId: "718504428378"
+    me-south-1:
+      AccountId: "076674570225"
+    ca-central-1:
+      AccountId: "985666609251"
+    eu-central-1:
+      AccountId: "054676820928"
+    eu-north-1:
+      AccountId: "897822967062"
+    eu-west-1:
+      AccountId: "156460612806"
+    eu-west-2:
+      AccountId: "652711504416"
+    eu-west-3:
+      AccountId: "009996457667"
+    sa-east-1:
+      AccountId: "507241528517"
+    us-east-1:
+      AccountId: "127311923021"
+    us-east-2:
+      AccountId: "033677994240"
+    us-west-1:
+      AccountId: "027434742980"
+    us-west-2:
+      AccountId: "797873946194"
+  AWSAMIRegionMap:
+    ap-east-1:
+      US1604HVM: ami-e5256594
+    ap-northeast-1:
+      US1604HVM: ami-078648cce0d33c256
+    ap-northeast-2:
+      US1604HVM: ami-0539a1389fedcbdc8
+    ap-southeast-1:
+      US1604HVM: ami-05f112c29645f0812
+    ap-southeast-2:
+      US1604HVM: ami-0e4bc04bd401729d6
+    me-south-1:
+      US1604HVM: ami-0054116010789ce83
+    ap-south-1:
+      US1604HVM: ami-03b8a287edc0c1253
+    ca-central-1:
+      US1604HVM: ami-0e2df0719252d4491
+    eu-central-1:
+      US1604HVM: ami-05ed2c1359acd8af6
+    eu-north-1:
+      US1604HVM: ami-094ac8f5eb69dd943
+    eu-west-1:
+      US1604HVM: ami-008320af74136c628
+    eu-west-2:
+      US1604HVM: ami-004c1e61ae5d76090
+    eu-west-3:
+      US1604HVM: ami-08eebff62e61110b7
+    sa-east-1:
+      US1604HVM: ami-0ddec8b41a3411374
+    us-east-1:
+      US1604HVM: ami-0a0ddd875a1ea2c7f
+    us-east-2:
+      US1604HVM: ami-04781752c9b20ea41
+    us-west-1:
+      US1604HVM: ami-0c1e832407373333f
+    us-west-2:
+      US1604HVM: ami-0a4df59262c92cf19
+Conditions:
+  gRPCCondition: !Equals [!Ref EnablegRPC, "true"]
+  GovCloudCondition: !Equals
+    - !Ref AWS::Region
+    - us-gov-west-1
+  GenerateSSL: !And
+    - !Equals [!Ref SSLCertificateArn, '']
+    - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+  SetupRoute53: !And
+    - !Not
+      - !Equals
+        - !Ref 'HostedZoneID'
+        - ''
+    - !Not
+      - !Equals
+        - !Ref 'LoadBalancerFQDN'
+        - ''
+# Rules:
+#   DomainNamePresentWithHostedID:
+#     Assertions:
+#       - Assert: !Or
+#           - !Equals [!Ref HostedZoneID, '']
+#           - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+#         AssertDescription: "Please specify a 'Domain Name' if you specify 'Route 53 Hosted Zone ID'"
+#   GenerateOrProvideSSL:
+#     Assertions:
+#       - Assert: !Or
+#         - !Not [!Equals [!Ref SSLCertificateArn, '']]
+#         - !And
+#             - !Not [!Equals [!Ref HostedZoneID, '']]
+#             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+#         - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#   ProvideSSHKey:
+#     Assertions:
+#       - Assert:
+#         - !Not [!Equals [ !Ref KeyPair, '']]
+#         AssertDescription: "KeyPair must be provided."
+Resources:
+  ConsulSecGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: Enables SSH access.
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSecurityGroupID
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: !Ref VPCCIDR
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Ref "AWS::StackName"
+              - ConsulSecGroup
+  ConsulServerAsg:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      LaunchConfigurationName: !Ref ConsulServerLC
+      MinSize: !Ref ConsulServerNodes
+      MaxSize: !Ref ConsulServerNodes
+      DesiredCapacity: !Ref ConsulServerNodes
+      LoadBalancerNames: [!Ref ConsulServerELB]
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet1ID
+        - !Ref PrivateSubnet2ID
+        - !Ref PrivateSubnet3ID
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Ref "AWS::StackName"
+              - Consul-Server
+          PropagateAtLaunch: true
+        - Key: !Ref ConsulEc2RetryTagKey
+          Value: !Ref ConsulEc2RetryTagValue
+          PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref ConsulServerNodes
+        Timeout: PT20M
+  ConsulClientAsg:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      LaunchConfigurationName: !Ref ConsulClientLC
+      MinSize: !Ref ConsulClientNodes
+      MaxSize: !Ref ConsulClientNodes
+      DesiredCapacity: !Ref ConsulClientNodes
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet1ID
+        - !Ref PrivateSubnet2ID
+        - !Ref PrivateSubnet3ID
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Ref "AWS::StackName"
+              - Consul-Client
+          PropagateAtLaunch: true
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref ConsulClientNodes
+        Timeout: PT20M
+  ConsulServerELB:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Scheme: "internet-facing"
+      Subnets:
+        - !Ref PublicSubnet1ID
+        - !Ref PublicSubnet2ID
+        - !Ref PublicSubnet3ID
+      SecurityGroups:
+        - !Ref ConsulServerELBSecGroup
+      CrossZone: true
+      Listeners:
+        - LoadBalancerPort: "80"
+          InstancePort: "8500"
+          Protocol: HTTP
+        - LoadBalancerPort: "443"
+          InstancePort: "8500"
+          Protocol: HTTPS
+          SSLCertificateId:
+            !If
+              - GenerateSSL
+              - !GetAtt ConfigureSSLStack.Outputs.ACMCertificate
+              - !Ref SSLCertificateArn
+      HealthCheck:
+        Target: HTTP:8500/v1/status/leader
+        HealthyThreshold: "3"
+        UnhealthyThreshold: "2"
+        Interval: "30"
+        Timeout: "5"
+      ConnectionDrainingPolicy:
+        Enabled: true
+        Timeout: 300
+      AccessLoggingPolicy:
+        S3BucketName: !Ref ConsulServerLogsBucket
+        S3BucketPrefix: ConsulELBLogs
+        Enabled: true
+        EmitInterval: 60
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Ref "AWS::StackName"
+              - ConsulServerELB
+    DependsOn: ConsulServerLogsBucketPolicy
+  ConsulServerLogsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+  ConsulServerLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ConsulServerLogsBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ConsulQSGELBAccessLogs
+            Action:
+              - "s3:PutObject"
+            Effect: Allow
+            Resource:
+              !Join [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  !Ref "ConsulServerLogsBucket",
+                  "/ConsulELBLogs",
+                  "/*",
+                ],
+              ]
+            Principal:
+              AWS:
+                !Join [
+                  "",
+                  [
+                    "arn:aws:iam::",
+                    !FindInMap [
+                      RegionELBAccountId,
+                      !Ref "AWS::Region",
+                      AccountId,
+                    ],
+                    ":root",
+                  ],
+                ]
+  ConsulServerELBSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables ELB Access to cluster instances.
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        # - IpProtocol: tcp
+        #   FromPort: 80
+        #   ToPort: 80
+        #   CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Ref "AWS::StackName"
+              - ConsulServerELBSecGroup
+  ConsulServerLC:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          cs_install:
+            - install_and_enable_cfn_hup
+            - create_consul_group_user_dir
+            - install_consul
+            - install_consul_template
+            - consul_bootstrap
+            - setup_dnsmasq
+        install_and_enable_cfn_hup:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Join
+                - ""
+                - - |
+                    [main]
+                  - stack=
+                  - !Ref "AWS::StackId"
+                  - |+
+
+                  - region=
+                  - !Ref "AWS::Region"
+                  - |+
+              mode: "000400"
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Join
+                - ""
+                - - |
+                    [cfn-auto-reloader-hook]
+                  - |
+                    triggers=post.update
+                  - >
+                    path=Resources.ConsulClientLC.Metadata.AWS::CloudFormation::Init
+                  - "action=/usr/local/bin/cfn-init -v "
+                  - "         --stack "
+                  - !Ref "AWS::StackName"
+                  - "         --resource ConsulClientLC "
+                  - "         --configsets cs_install "
+                  - "         --region "
+                  - !Ref "AWS::Region"
+                  - |+
+
+                  - |
+                    runas=root
+            /lib/systemd/system/cfn-hup.service:
+              content: !Join
+                - ""
+                - - |
+                    [Unit]
+                  - |+
+                    Description=cfn-hup daemon
+
+                  - |
+                    [Service]
+                  - |
+                    Type=simple
+                  - |
+                    ExecStart=/usr/local/bin/cfn-hup
+                  - |+
+                    Restart=always
+                  - |
+                    [Install]
+                  - WantedBy=multi-user.target
+          commands:
+            01enable_cfn_hup:
+              command: systemctl enable cfn-hup.service
+            02start_cfn_hup:
+              command: systemctl start cfn-hup.service
+        create_consul_group_user_dir:
+          users:
+            consul:
+              homeDir: /srv/consul
+          commands:
+            01_create_data_dir:
+              command: mkdir -p /opt/consul/data
+        install_consul:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0/consul_1.7.0_linux_amd64.zip
+        install_consul_template:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul-template/0.24.0/consul-template_0.24.0_linux_amd64.zip
+        consul_bootstrap:
+          files:
+            /opt/consul/config/server.json:
+              content: !Sub |
+                {
+                  "advertise_addr": "PrivateIpAddress",
+                  "bind_addr": "PrivateIpAddress",
+                  "node_name": "InstanceId",
+                  "datacenter": "${AWS::Region}",
+                  "server": true,
+                  "ui": true,
+                  "leave_on_terminate" : true,
+                  "skip_leave_on_interrupt" : true,
+                  "disable_update_check": true,
+                  "log_level": "warn",
+                  "data_dir": "/opt/consul/data",
+                  "client_addr": "0.0.0.0",
+                  "bootstrap_expect": ${ConsulServerNodes},
+                  "retry_join": ["provider=aws region=${AWS::Region} tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"],
+                  "addresses": {
+                    "http": "0.0.0.0"
+                  },
+                  "connect": {
+                    "enabled": true
+                  },
+                  "autopilot": {
+                    "cleanup_dead_servers": true,
+                    "last_contact_threshold": "200ms",
+                    "max_trailing_logs": 250,
+                    "server_stabilization_time": "10s",
+                    "redundancy_zone_tag": "az",
+                    "disable_upgrade_migration": false,
+                    "upgrade_version_tag": ""
+                  }
+                }
+              
+              mode: 000644
+            /etc/systemd/system/consul.service:
+              content: !Join
+                - ""
+                - - |
+                    [Unit]
+                  - |
+                    Description="HashiCorp Consul - A service mesh solution"
+                  - |
+                    Documentation=https://www.consul.io/
+                  - |
+                    Requires=network-online.target
+                  - |
+                    After=network-online.target
+                  - |
+                    ConditionFileNotEmpty=/opt/consul/config/server.json
+                  - |+
+                    [Service]
+                  - |
+                    Type=notify
+                  - |
+                    User=consul
+                  - |
+                    Group=consul
+                  - |
+                    ExecStart=/usr/bin/consul agent -config-dir /opt/consul/config -data-dir /opt/consul/data
+                  - |
+                    ExecReload=/usr/bin/consul reload
+                  - |
+                    KillMode=process
+                  - |
+                    Restart=on-failure
+                  - |
+                    TimeoutSec=300s
+                  - |
+                    LimitNOFILE=65536
+                  - |+
+                    [Install]
+                  - WantedBy=multi-user.target
+          commands:
+            00_fill_consul_config_ip:
+              command: myip=`echo $(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)` && sed -i "s/PrivateIpAddress/${myip}/g" /opt/consul/config/server.json
+            01_fill_consul_config_instance_id:
+              command: myid=`echo $(curl -s http://169.254.169.254/latest/meta-data/instance-id)` && sed -i "s/InstanceId/${myid}/g" /opt/consul/config/server.json
+            02_change_ownership:
+              command: chown -R consul:consul /opt/consul
+            03_reload_systemd:
+              command: systemctl daemon-reload
+            04_start_consul:
+              command: systemctl enable consul
+            05_start_consul:
+              command: systemctl start consul
+        setup_dnsmasq:
+          files:
+            /etc/dnsmasq.d/consul:
+              content: !Join
+                - ""
+                - - |
+                    server=/consul/127.0.0.1#8600
+                  - |
+                    listen-address=127.0.0.1
+                  - |
+                    bind-interfaces
+                  - |
+          packages:
+            apt:
+              dnsmasq-base: []
+              dnsmasq: []
+              jq: []
+          commands:
+            01_start_dnsmasq:
+              command: service dnsmasq restart
+    Properties:
+      InstanceType: !Ref ConsulInstanceType
+      AssociatePublicIpAddress: false
+      SecurityGroups:
+        - !Ref ConsulSecGroup
+      KeyName: !Ref KeyPair
+      ImageId: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref "AWS::Region"
+        - US1604HVM
+      IamInstanceProfile: !Ref ConsulServerProfile
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash -x
+            #CFN Functions
+            function cfn_fail
+            {
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulServerAsg
+              exit 1
+            }
+            function cfn_success
+            {
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulServerAsg
+              exit 0
+            }
+            S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
+            apt-get -y update
+            # Install git
+            apt-get install -y git jq
+            #Load Linux utils
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+            cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
+            # Prep operating systems
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            #cfn-init
+            echo "Executing config-sets"
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulServerLC --configsets cs_install --region ${AWS::Region} || (cfn_fail || (journalctl -b --no-pager -u consul && cat /opt/consul/config/server.json))
+            # Signal cfn-init (final check)
+            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
+          - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
+  ConsulClientLC:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          cs_install:
+            - install_and_enable_cfn_hup
+            - create_consul_group_user_dir
+            - install_consul
+            - install_consul_template
+            - consul_bootstrap
+            - setup_dnsmasq
+        install_and_enable_cfn_hup:
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Join
+                - ""
+                - - |
+                    [main]
+                  - stack=
+                  - !Ref "AWS::StackId"
+                  - |+
+
+                  - region=
+                  - !Ref "AWS::Region"
+                  - |+
+              mode: "000400"
+              owner: root
+              group: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Join
+                - ""
+                - - |
+                    [cfn-auto-reloader-hook]
+                  - |
+                    triggers=post.update
+                  - >
+                    path=Resources.ConsulClientLC.Metadata.AWS::CloudFormation::Init
+                  - "action=/usr/local/bin/cfn-init -v "
+                  - "         --stack "
+                  - !Ref "AWS::StackName"
+                  - "         --resource ConsulClientLC "
+                  - "         --configsets cs_install "
+                  - "         --region "
+                  - !Ref "AWS::Region"
+                  - |+
+
+                  - |
+                    runas=root
+            /lib/systemd/system/cfn-hup.service:
+              content: !Join
+                - ""
+                - - |
+                    [Unit]
+                  - |+
+                    Description=cfn-hup daemon
+
+                  - |
+                    [Service]
+                  - |
+                    Type=simple
+                  - |
+                    ExecStart=/usr/local/bin/cfn-hup
+                  - |+
+                    Restart=always
+                  - |
+                    [Install]
+                  - WantedBy=multi-user.target
+          commands:
+            01enable_cfn_hup:
+              command: systemctl enable cfn-hup.service
+            02start_cfn_hup:
+              command: systemctl start cfn-hup.service
+        create_consul_group_user_dir:
+          users:
+            consul:
+              homeDir: /srv/consul
+          commands:
+            01_create_data_dir:
+              command: mkdir -p /opt/consul/data
+        install_consul:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul/1.7.0/consul_1.7.0_linux_amd64.zip
+        install_consul_template:
+          sources:
+            /usr/bin/: https://releases.hashicorp.com/consul-template/0.24.0/consul-template_0.24.0_linux_amd64.zip
+        consul_bootstrap:
+          files:
+            /opt/consul/config/client.json:
+              content: !Sub
+              - |
+                {
+                  "advertise_addr": "PrivateIpAddress",
+                  "bind_addr": "PrivateIpAddress",
+                  "node_name": "InstanceId",
+                  "datacenter": "${AWS::Region}",
+                  "server": false,
+                  "ui" : false,
+                  "leave_on_terminate" : true,
+                  "skip_leave_on_interrupt" : false,
+                  "disable_update_check": true,
+                  "log_level": "warn",
+                  "enable_local_script_checks": true,
+                  "data_dir": "/opt/consul/data",
+                  "client_addr": "0.0.0.0",
+                  "retry_join": ["provider=aws region=${AWS::Region} tag_key=${ConsulEc2RetryTagKey} tag_value=${ConsulEc2RetryTagValue}"],
+                  "addresses": {
+                    "http": "0.0.0.0"
+                  }${gRPC}
+                }
+              - gRPC: !If [ gRPCCondition, "\"ports\": ,{ \"grpc\": 8502 },", "" ]   
+              mode: 000644
+            /etc/systemd/system/consul.service:
+              content: !Join
+                - ""
+                - - |
+                    [Unit]
+                  - |
+                    Description="HashiCorp Consul - A service mesh solution"
+                  - |
+                    Documentation=https://www.consul.io/
+                  - |
+                    Requires=network-online.target
+                  - |
+                    After=network-online.target
+                  - |
+                    ConditionFileNotEmpty=/opt/consul/config/client.json
+                  - |+
+                    [Service]
+                  - |
+                    Type=notify
+                  - |
+                    User=consul
+                  - |
+                    Group=consul
+                  - |
+                    ExecStart=/usr/bin/consul agent -config-dir /opt/consul/config -data-dir /opt/consul/data
+                  - |
+                    ExecReload=/usr/bin/consul reload
+                  - |
+                    KillMode=process
+                  - |
+                    Restart=on-failure
+                  - |
+                    TimeoutSec=300s
+                  - |
+                    LimitNOFILE=65536
+                  - |+
+                    [Install]
+                  - WantedBy=multi-user.target
+          commands:
+            00_fill_consul_config_ip:
+              command: myip=`echo $(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)` && sed -i "s/PrivateIpAddress/${myip}/g" /opt/consul/config/client.json
+            01_fill_consul_config_instance_id:
+              command: myid=`echo $(curl -s http://169.254.169.254/latest/meta-data/instance-id)` && sed -i "s/InstanceId/${myid}/g" /opt/consul/config/client.json
+            02_change_ownership:
+              command: chown -R consul:consul /opt/consul
+            03_reload_systemd:
+              command: systemctl daemon-reload
+            04_enable_consul:
+              command: systemctl enable consul 
+            05_start_consul:
+              command: systemctl start consul
+        setup_dnsmasq:
+          files:
+            /etc/dnsmasq.d/consul:
+              content: !Join
+                - ""
+                - - |
+                    server=/consul/127.0.0.1#8600
+                  - |
+                    listen-address=127.0.0.1
+                  - |
+                    bind-interfaces
+                  - |
+          packages:
+            apt:
+              dnsmasq-base: []
+              dnsmasq: []
+          commands:
+            01_start_dnsmasq:
+              command: service dnsmasq restart
+    Properties:
+      InstanceType: !Ref ConsulInstanceType
+      AssociatePublicIpAddress: false
+      SecurityGroups:
+        - !Ref ConsulSecGroup
+      KeyName: !Ref KeyPair
+      ImageId: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref "AWS::Region"
+        - US1604HVM
+      IamInstanceProfile: !Ref ConsulClientProfile
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash -x
+            #CFN Functions
+            function cfn_fail
+            {
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
+            }
+            function cfn_success
+            {
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ConsulClientAsg
+              exit 0
+            }
+            S3URI=https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}
+            apt-get -y update
+            # Install git
+            apt-get install -y git jq
+            #Load Linux utils
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+            cd /quickstart-linux-utilities && source quickstart-cfn-tools.source
+            # Prep operating systems
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            #cfn-init
+            echo "Executing config-sets"
+            cfn-init -v --stack ${AWS::StackName} --resource ConsulClientLC --configsets cs_install --region ${AWS::Region}
+            STATUS=$?
+            echo signal cfn success/failure
+            [ $STATUS == 0 ] || cfn_fail
+            echo log info on failure
+            [ $STATUS == 0 ] || (journalctl -b --no-pager -u consul && cat /opt/consul/config/client.json && systemctl status consul.service)
+            
+            # Signal cfn-init (final check)
+            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
+          - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
+  ConsulClientRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: "sts:AssumeRole"
+            Principal:
+              Service: ec2.amazonaws.com
+            Effect: Allow
+            Sid: ""
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - "s3:GetObject"
+                Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                Effect: Allow
+          PolicyName: AuthenticatedS3GetObjects
+  ConsulClientPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: consul-client
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: "ec2:DescribeInstances"
+            Resource: "*"
+      Roles:
+        - !Ref ConsulClientRole
+  ConsulClientProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ConsulClientRole
+  ConsulServerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: "sts:AssumeRole"
+            Principal:
+              Service: ec2.amazonaws.com
+            Effect: Allow
+            Sid: ""
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - "s3:GetObject"
+                Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                Effect: Allow
+          PolicyName: AuthenticatedS3GetObjects
+  ConsulServerPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: consul-server
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - "ec2:DescribeInstances"
+            Resource: "*"
+      Roles:
+        - !Ref ConsulServerRole
+  ConsulServerProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ConsulServerRole
+  LoadBalancerFQDNRecord:
+    Condition: SetupRoute53
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Type: A
+      Name: !Ref 'LoadBalancerFQDN'
+      AliasTarget:
+        HostedZoneId: !GetAtt 'ConsulServerELB.CanonicalHostedZoneNameID'
+        DNSName: !GetAtt 'ConsulServerELB.DNSName'
+      HostedZoneId: !Ref 'HostedZoneID'
+  CopyLambdaStack:
+    Condition: GenerateSSL
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/copy-lambdas.template"
+      Parameters:
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+  ConfigureSSLStack:
+    Condition: GenerateSSL
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/acm-cert-r53-record.template.yaml"
+      Parameters:
+        LambdaZipsBucketName: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        DomainName: !Ref LoadBalancerFQDN
+        HostedZoneID: !Ref HostedZoneID
+Outputs:
+  ConsulEc2RetryTagKey:
+    Value: !Ref ConsulEc2RetryTagKey
+    Description: The EC2 instance tag key to filter on when joining to other Consul nodes.
+  ConsulEc2RetryTagValue:
+    Value: !Ref ConsulEc2RetryTagValue
+    Description: The EC2 instance tag value to filter on when joining to other Consul nodes.
+  ConsulServerELB:
+    Description: The public URL of your Consul Load Balancer. Create a CNAME record pointing at this Load Balancer.
+    Value: !Join ["", ["https://", !GetAtt ConsulServerELB.DNSName]]
+  ConsulServerFQDN:
+    Condition: SetupRoute53
+    Description: The public CNAME pointing to your Consul Load Balancer.
+    Value: !Join ["", ["https://", !Ref LoadBalancerFQDN]]
