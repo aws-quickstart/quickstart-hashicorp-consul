@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: 'HashiCorp Consul + VPC  Aug,28,2019 QS(0036)'
 Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Launch into a new VPC"
   LICENSE: 'Apache License, Version 2.0' 
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -23,6 +25,7 @@ Metadata:
           - ConsulServerNodes
           - ConsulClientNodes
           - KeyPairName
+          - EnablegRPC
       - Label:
           default: "DNS and SSL configuration"
         Parameters:
@@ -71,6 +74,8 @@ Metadata:
         default: Number of Consul server nodes
       ConsulClientNodes:
         default: Number of Consul client nodes
+      EnablegRPC:
+        default: Enable gRPC
 Parameters:
   AvailabilityZones:
     Description: >-
@@ -218,6 +223,13 @@ Parameters:
     Description: The fully qualified domain name for the load balancer. Use with 'HostedZoneID' if you are NOT using SSL.
     Type: String
     Default: ''
+  EnablegRPC:
+    Description: Enable gRPC on the Consul server cluster.
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
 Conditions:
   GovCloudCondition: !Equals
     - !Ref AWS::Region
@@ -327,6 +339,7 @@ Resources:
         ConsulServerNodes: !Ref ConsulServerNodes
         ConsulClientNodes: !Ref ConsulClientNodes
         ConsulInstanceType: !Ref ConsulInstanceType
+        EnablegRPC: !Ref EnablegRPC
         KeyPair: !Ref KeyPairName
         ConsulEc2RetryTagKey: "quickstart-consul-cluster"
         ConsulEc2RetryTagValue: "consul-member-node"
