@@ -197,7 +197,7 @@
             "Properties": {
                 "Description": "Creates and verifies an ACM certificate using DNS validation and route53",
                 "Handler": "lambda_function.handler",
-                "Runtime": "python2.7",
+                "Runtime": "python3.8",
                 "Role": {
                     "Fn::GetAtt": [
                         "ACMCertificateRole",
