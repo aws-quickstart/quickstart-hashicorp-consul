@@ -231,9 +231,6 @@ Parameters:
       - "true"
       - "false"
 Conditions:
-  GovCloudCondition: !Equals
-    - !Ref AWS::Region
-    - us-gov-west-1
   SetupRoute53: !And
     - !Not
       - !Equals
