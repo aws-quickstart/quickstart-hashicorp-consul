@@ -152,7 +152,9 @@
                     "Version": "2012-10-17"
                 },
                 "ManagedPolicyArns": [
-                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    {
+                        "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    }
                 ],
                 "Path": "/",
                 "Policies": [
@@ -166,7 +168,7 @@
                                     "Effect": "Allow",
                                     "Resource": [
                                         {
-                                            "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                                            "Fn::Sub": "arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
                                         }
                                     ]
                                 },
@@ -184,10 +186,10 @@
                                     "Effect": "Allow",
                                     "Resource": [
                                         {
-                                            "Fn::Sub": "arn:aws:s3:::${LambdaZipsBucket}/${QSS3KeyPrefix}*"
+                                            "Fn::Sub": "arn:${AWS::Partition}:s3:::${LambdaZipsBucket}/${QSS3KeyPrefix}*"
                                         },
                                         {
-                                            "Fn::Sub": "arn:aws:s3:::${LambdaZipsBucket}"
+                                            "Fn::Sub": "arn:${AWS::Partition}:s3:::${LambdaZipsBucket}"
                                         }
                                     ]
                                 }
@@ -344,7 +346,9 @@
                     "Version": "2012-10-17"
                 },
                 "ManagedPolicyArns": [
-                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    {
+                        "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    }
                 ],
                 "Path": "/",
                 "Policies": [
@@ -368,7 +372,7 @@
                                             "Fn::GetAtt":[ "LambdaZipsBucket","Arn"]
                                         },
                                         {
-                                            "Fn::Sub": "arn:aws:s3:::*"
+                                            "Fn::Sub": "arn:${AWS::Partition}:s3:::*"
                                         }
                                     ]
                                 }

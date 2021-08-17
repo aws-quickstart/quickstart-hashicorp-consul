@@ -999,7 +999,7 @@ Resources:
             Statement:
               - Action:
                   - "s3:GetObject"
-                Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
                 Effect: Allow
           PolicyName: AuthenticatedS3GetObjects
   ConsulClientPolicy:
@@ -1035,7 +1035,7 @@ Resources:
             Statement:
               - Action:
                   - "s3:GetObject"
-                Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
                 Effect: Allow
           PolicyName: AuthenticatedS3GetObjects
   ConsulServerPolicy:
