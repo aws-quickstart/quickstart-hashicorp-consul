@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 - QSID:0036"
+Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 (qs-1qup6ra81)"
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into an existing VPC"
