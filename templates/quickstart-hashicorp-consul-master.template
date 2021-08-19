@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'HashiCorp Consul + VPC  Aug,28,2019 (qs-1qup6ra81)'
+Description: 'HashiCorp Consul + VPC Aug,28,2019 (qs-1qup6ra81)'
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into a new VPC"

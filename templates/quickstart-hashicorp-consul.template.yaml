@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 (qs-1qup6ra81)"
+Description: "HashiCorp Consul (Please do not remove) Aug,28,2019 (qs-1qup6ra8j)"
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into an existing VPC"
@@ -312,6 +312,7 @@ Mappings:
     us-west-2:
       US1604HVM: ami-0a4df59262c92cf19
 Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   gRPCCondition: !Equals [!Ref EnablegRPC, "true"]
   GovCloudCondition: !Equals
     - !Ref AWS::Region
@@ -1074,19 +1075,15 @@ Resources:
         HostedZoneId: !GetAtt 'ConsulServerELB.CanonicalHostedZoneNameID'
         DNSName: !GetAtt 'ConsulServerELB.DNSName'
       HostedZoneId: !Ref 'HostedZoneID'
-  CopyLambdaStack:
-    Condition: GenerateSSL
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/copy-lambdas.template"
-      Parameters:
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
   ConfigureSSLStack:
     Condition: GenerateSSL
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-acm-certificate/templates/quickstart-aws-acm-certificate.template.yml"
+      TemplateURL:
+        !Sub
+          - "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-acm-certificate/templates/quickstart-aws-acm-certificate.template.yml"
+          - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+            S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
       Parameters:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
