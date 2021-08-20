@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'HashiCorp Consul + VPC  Aug,28,2019 (qs-1qup6ra81)'
+Description: 'HashiCorp Consul + VPC  Aug,28,2019 QS(0036)'
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into a new VPC"
@@ -231,6 +231,9 @@ Parameters:
       - "true"
       - "false"
 Conditions:
+  GovCloudCondition: !Equals
+    - !Ref AWS::Region
+    - us-gov-west-1
   SetupRoute53: !And
     - !Not
       - !Equals
@@ -267,11 +270,12 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
       Parameters:
         AvailabilityZones: !Join 
           - ','
           - !Ref AvailabilityZones
+        KeyPairName: !Ref KeyPairName
         NumberOfAZs: '3'
         PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
@@ -305,7 +309,7 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template.yaml
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template
       Parameters:
         BastionSecurityGroupID: !GetAtt 
           - BastionStack
