@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'HashiCorp Consul + VPC Aug,28,2019 (qs-1qup6ra81)'
+Description: 'HashiCorp Consul + VPC  Aug,28,2019 (qs-1qup6ra81)'
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into a new VPC"
-  LICENSE: 'Apache License, Version 2.0' 
+  LICENSE: 'Apache License, Version 2.0'
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
@@ -79,8 +79,8 @@ Metadata:
 Parameters:
   AvailabilityZones:
     Description: >-
-      List of Availability Zones to use for the subnets in the VPC. 
-      Note: The logical order is preserved. (3 Three Availability 
+      List of Availability Zones to use for the subnets in the VPC.
+      Note: The logical order is preserved. (3 Three Availability
       ZonesAZs are used for this deployment.)
     Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   AccessCIDR:
@@ -231,9 +231,6 @@ Parameters:
       - "true"
       - "false"
 Conditions:
-  GovCloudCondition: !Equals
-    - !Ref AWS::Region
-    - us-gov-west-1
   SetupRoute53: !And
     - !Not
       - !Equals
@@ -260,11 +257,11 @@ Conditions:
 #         - !And
 #             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
 #             - !Equals [!Ref SSLCertificateArn, '']
-#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided."
 #   ProvideSSHKey:
 #     Assertions:
 #       - Assert: !Not [!Equals [ !Ref KeyPairName, '']]
-#         AssertDescription: "KeyPairName must be provided." 
+#         AssertDescription: "KeyPairName must be provided."
 Resources:
   VPCStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -272,7 +269,7 @@ Resources:
       TemplateURL: !Sub >-
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
       Parameters:
-        AvailabilityZones: !Join 
+        AvailabilityZones: !Join
           - ','
           - !Ref AvailabilityZones
         NumberOfAZs: '3'
@@ -292,23 +289,23 @@ Resources:
         BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
         BastionInstanceType: 't3.medium'
         KeyPairName: !Ref KeyPairName
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Sub '${QSS3KeyPrefix}submodules/quickstart-linux-bastion/'
         RemoteAccessCIDR: !Ref AccessCIDR
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
   HashiCorpConsulStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template.yaml
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template
       Parameters:
         BastionSecurityGroupID: !GetAtt 
           - BastionStack
