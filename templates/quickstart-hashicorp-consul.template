@@ -41,6 +41,7 @@ Metadata:
           default: AWS Quick Start configuration
         Parameters:
           - QSS3BucketName
+          - QSS3BucketRegion
           - QSS3KeyPrefix
     ParameterLabels:
       KeyPair:
@@ -59,6 +60,8 @@ Metadata:
         default: Public Subnet 3 ID
       QSS3BucketName:
         default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
       VPCID:
@@ -79,9 +82,9 @@ Metadata:
         default: Number of Consul server nodes
       ConsulClientNodes:
         default: Number of Consul client nodes
-      ConsulEc2RetryTagKey: 
+      ConsulEc2RetryTagKey:
         default: Tag key for Consul cluster nodes
-      ConsulEc2RetryTagValue: 
+      ConsulEc2RetryTagValue:
         default: Tag value for Consul cluster nodes
       BastionSecurityGroupID:
         default: Bastion host security group ID
@@ -174,6 +177,11 @@ Parameters:
       S3 bucket name for the Quick Start assets. Quick Start bucket name can
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
       cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: Region where the Quick Start S3 bucket (QSS3BucketName) is
+      hosted. If you use your own bucket, you must specify this value.
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
@@ -304,6 +312,7 @@ Mappings:
     us-west-2:
       US1604HVM: ami-0a4df59262c92cf19
 Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   gRPCCondition: !Equals [!Ref EnablegRPC, "true"]
   GovCloudCondition: !Equals
     - !Ref AWS::Region
@@ -335,7 +344,7 @@ Conditions:
 #             - !Not [!Equals [!Ref HostedZoneID, '']]
 #             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
 #         - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
-#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided."
 #   ProvideSSHKey:
 #     Assertions:
 #       - Assert:
@@ -637,7 +646,7 @@ Resources:
                     "upgrade_version_tag": ""
                   }
                 }
-              
+
               mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
@@ -863,7 +872,7 @@ Resources:
                     "http": "0.0.0.0"
                   }${gRPC}
                 }
-              - gRPC: !If [ gRPCCondition, "\"ports\": ,{ \"grpc\": 8502 },", "" ]   
+              - gRPC: !If [ gRPCCondition, "\"ports\": ,{ \"grpc\": 8502 },", "" ]
               mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
@@ -913,7 +922,7 @@ Resources:
             03_reload_systemd:
               command: systemctl daemon-reload
             04_enable_consul:
-              command: systemctl enable consul 
+              command: systemctl enable consul
             05_start_consul:
               command: systemctl start consul
         setup_dnsmasq:
@@ -979,7 +988,7 @@ Resources:
             [ $STATUS == 0 ] || cfn_fail
             echo log info on failure
             [ $STATUS == 0 ] || (journalctl -b --no-pager -u consul && cat /opt/consul/config/client.json && systemctl status consul.service)
-            
+
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
@@ -999,7 +1008,7 @@ Resources:
             Statement:
               - Action:
                   - "s3:GetObject"
-                Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
                 Effect: Allow
           PolicyName: AuthenticatedS3GetObjects
   ConsulClientPolicy:
@@ -1035,7 +1044,7 @@ Resources:
             Statement:
               - Action:
                   - "s3:GetObject"
-                Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
                 Effect: Allow
           PolicyName: AuthenticatedS3GetObjects
   ConsulServerPolicy:
@@ -1066,22 +1075,19 @@ Resources:
         HostedZoneId: !GetAtt 'ConsulServerELB.CanonicalHostedZoneNameID'
         DNSName: !GetAtt 'ConsulServerELB.DNSName'
       HostedZoneId: !Ref 'HostedZoneID'
-  CopyLambdaStack:
-    Condition: GenerateSSL
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/copy-lambdas.template"
-      Parameters:
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
   ConfigureSSLStack:
     Condition: GenerateSSL
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/acm-cert-r53-record.template.yaml"
+      TemplateURL:
+        !Sub
+          - "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-acm-certificate/templates/quickstart-aws-acm-certificate.template.yml"
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        LambdaZipsBucketName: !GetAtt 'CopyLambdaStack.Outputs.LambdaZipsBucket'
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Sub ${QSS3KeyPrefix}submodules/quickstart-aws-acm-certificate/
         DomainName: !Ref LoadBalancerFQDN
         HostedZoneID: !Ref HostedZoneID
 Outputs:
