@@ -10,7 +10,3 @@
 	path = docs/boilerplate
 	url = https://github.com/aws-quickstart/quickstart-documentation-base-common.git
 	branch = main
-[submodule "quickstart-aws-acm-certificate"]
-	path = quickstart-aws-acm-certificate
-	url = https://github.com/aws-quickstart/quickstart-aws-acm-certificate
-	branch = main
