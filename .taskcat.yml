@@ -2,7 +2,6 @@ project:
   name: quickstart-hashicorp-consul
   owner: quickstart-eng@amazon.com
   package_lambda: false
-  s3_regional_buckets: false
   regions:
   - us-west-2
   - us-east-1
@@ -21,12 +20,12 @@ project:
 tests:
   consul:
     parameters:
-      AccessCIDR: 0.0.0.0/0
+      AccessCIDR: --overrides--
       AvailabilityZones: $[taskcat_genaz_3]
       ConsulClientNodes: '3'
       ConsulServerNodes: '3'
-      HostedZoneID: overrides
-      KeyPairName: tonynv
+      HostedZoneID: --overrides-- 
+      KeyPairName: --overrides--
       LoadBalancerFQDN: dummy.dns.name.com
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: quickstart-hashicorp-consul/
