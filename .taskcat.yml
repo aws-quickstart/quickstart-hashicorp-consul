@@ -1,36 +1,9 @@
 project:
   name: quickstart-hashicorp-consul
   owner: quickstart-eng@amazon.com
-  package_lambda: false
+  shorten_stack_name: true
+  package_lambda: true
   regions:
-  - us-west-2
-  - us-east-1
-  - us-east-2
-  - ap-south-1
-  - eu-west-1
-  - eu-north-1
-  - eu-central-1
-  - eu-west-3
-  - eu-west-2
-  - ap-southeast-1
-  - ap-northeast-1
-  - ap-southeast-2
-  - ap-northeast-2
-  - sa-east-1
-tests:
-  consul:
-    parameters:
-      AccessCIDR: --overrides--
-      AvailabilityZones: $[taskcat_genaz_3]
-      ConsulClientNodes: '3'
-      ConsulServerNodes: '3'
-      HostedZoneID: --overrides-- 
-      KeyPairName: --overrides--
-      LoadBalancerFQDN: dummy.dns.name.com
-      QSS3BucketName: $[taskcat_autobucket]
-      QSS3KeyPrefix: quickstart-hashicorp-consul/
-      SSLCertificateArn: ''
-    regions:
     - us-west-2
     - us-east-1
     - us-east-2
@@ -45,4 +18,18 @@ tests:
     - ap-southeast-2
     - ap-northeast-2
     - sa-east-1
+  parameters:
+    QSS3BucketName: $[taskcat_autobucket]
+    QSS3BucketRegion: $[taskcat_current_region]
+tests:
+  consul:
+    parameters:
+      AccessCIDR: --overrides--
+      AvailabilityZones: $[taskcat_genaz_3]
+      ConsulClientNodes: '3'
+      ConsulServerNodes: '3'
+      HostedZoneID: --overrides-- 
+      KeyPairName: --overrides--
+      LoadBalancerFQDN: dummy.dns.name.com
+      SSLCertificateArn: ''
     template: templates/quickstart-hashicorp-consul-master.template.yaml
