@@ -36,6 +36,7 @@ Metadata:
           default: AWS Quick Start configuration
         Parameters:
           - QSS3BucketName
+          - QSS3BucketRegion
           - QSS3KeyPrefix
     ParameterLabels:
       AccessCIDR:
@@ -58,6 +59,8 @@ Metadata:
         default: Public Subnet 3 CIDR
       QSS3BucketName:
         default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
       VPCCIDR:
@@ -193,6 +196,10 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
       cannot start or end with a hyphen (-).
     Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: '^[0-9a-zA-Z-/]*$'
     ConstraintDescription: >-
@@ -286,7 +293,7 @@ Resources:
       TemplateURL: !Sub >-
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template
       Parameters:
-        BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
+        BastionAMIOS: Amazon-Linux2-HVM
         BastionInstanceType: 't3.medium'
         KeyPairName: !Ref KeyPairName
         PublicSubnet1ID: !GetAtt
@@ -296,6 +303,7 @@ Resources:
           - VPCStack
           - Outputs.PublicSubnet2ID
         QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Sub '${QSS3KeyPrefix}submodules/quickstart-linux-bastion/'
         RemoteAccessCIDR: !Ref AccessCIDR
         VPCID: !GetAtt
@@ -305,30 +313,30 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template
+        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template.yaml
       Parameters:
-        BastionSecurityGroupID: !GetAtt 
+        BastionSecurityGroupID: !GetAtt
           - BastionStack
           - Outputs.BastionSecurityGroupID
-        PrivateSubnet1ID: !GetAtt 
+        PrivateSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet1AID
-        PrivateSubnet2ID: !GetAtt 
+        PrivateSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet2AID
-        PrivateSubnet3ID: !GetAtt 
+        PrivateSubnet3ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet3AID
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
-        PublicSubnet3ID: !GetAtt 
+        PublicSubnet3ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet3ID
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
         VPCCIDR: !Ref VPCCIDR
@@ -340,6 +348,7 @@ Resources:
         ConsulEc2RetryTagKey: "quickstart-consul-cluster"
         ConsulEc2RetryTagValue: "consul-member-node"
         QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         SSLCertificateArn: !Ref SSLCertificateArn
         HostedZoneID: !Ref HostedZoneID
