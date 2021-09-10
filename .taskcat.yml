@@ -2,7 +2,6 @@ project:
   name: quickstart-hashicorp-consul
   owner: quickstart-eng@amazon.com
   package_lambda: false
-  s3_regional_buckets: true
   regions:
     - us-west-2
     - us-east-1
@@ -29,6 +28,7 @@ tests:
       KeyPairName: --overrides--
       LoadBalancerFQDN: dummy.dns.name.com
       QSS3BucketName: $[taskcat_autobucket]
+      QSS3BucketRegion: $[taskcat_current_region]
       QSS3KeyPrefix: quickstart-hashicorp-consul/
       SSLCertificateArn: ''
       regions:
