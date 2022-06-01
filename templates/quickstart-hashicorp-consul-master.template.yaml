@@ -295,11 +295,6 @@ Conditions:
 #         AssertDescription: "KeyPairName must be provided." 
 Resources:
   VPCStack:
-    Metadata:
-      cfn-lint:
-        config:
-          ignore_checks:
-          - W9198
     Properties:
       Parameters:
         AvailabilityZones:
