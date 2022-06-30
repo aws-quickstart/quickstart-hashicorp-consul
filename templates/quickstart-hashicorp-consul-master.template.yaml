@@ -3,7 +3,7 @@ Description: 'HashiCorp Consul + VPC  Aug,28,2019 (qs-1qup6ra8j)'
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into a new VPC"
-  LICENSE: 'Apache License, Version 2.0' 
+  LICENSE: 'Apache License, Version 2.0'
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
@@ -88,8 +88,8 @@ Metadata:
 Parameters:
   AvailabilityZones:
     Description: >-
-      List of Availability Zones to use for the subnets in the VPC. 
-      Note: The logical order is preserved. (3 Three Availability 
+      List of Availability Zones to use for the subnets in the VPC.
+      Note: The logical order is preserved. (3 Three Availability
       ZonesAZs are used for this deployment.)
     Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   AccessCIDR:
@@ -288,11 +288,11 @@ Conditions:
 #         - !And
 #             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
 #             - !Equals [!Ref SSLCertificateArn, '']
-#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided."
 #   ProvideSSHKey:
 #     Assertions:
 #       - Assert: !Not [!Equals [ !Ref KeyPairName, '']]
-#         AssertDescription: "KeyPairName must be provided." 
+#         AssertDescription: "KeyPairName must be provided."
 Resources:
   VPCStack:
     Properties:
@@ -333,16 +333,16 @@ Resources:
         BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
         BastionInstanceType: 't3.medium'
         KeyPairName: !Ref KeyPairName
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Sub '${QSS3KeyPrefix}submodules/quickstart-linux-bastion/'
         RemoteAccessCIDR: !Ref AccessCIDR
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
   HashiCorpConsulStack:
@@ -351,28 +351,28 @@ Resources:
       TemplateURL: !Sub >-
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template
       Parameters:
-        BastionSecurityGroupID: !GetAtt 
+        BastionSecurityGroupID: !GetAtt
           - BastionStack
           - Outputs.BastionSecurityGroupID
-        PrivateSubnet1ID: !GetAtt 
+        PrivateSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet1AID
-        PrivateSubnet2ID: !GetAtt 
+        PrivateSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet2AID
-        PrivateSubnet3ID: !GetAtt 
+        PrivateSubnet3ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet3AID
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
-        PublicSubnet3ID: !GetAtt 
+        PublicSubnet3ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet3ID
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
         VPCCIDR: !Ref VPCCIDR
@@ -389,7 +389,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         SSLCertificateArn: !Ref SSLCertificateArn
         HostedZoneID: !Ref HostedZoneID
-        LoadBalancerFQDN: !Ref LoadBalancerFQDN 
+        LoadBalancerFQDN: !Ref LoadBalancerFQDN
 Outputs:
   ConsulEc2RetryTagKey:
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagKey"
