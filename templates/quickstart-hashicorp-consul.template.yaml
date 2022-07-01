@@ -1103,8 +1103,8 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: GenerateSSL
     Properties:
-      TemplateURL: 
-        !Sub 
+      TemplateURL:
+        !Sub
           - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-acm-certificate/templates/quickstart-aws-acm-certificate.template.yml'
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
