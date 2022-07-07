@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'HashiCorp Consul + VPC  Aug,28,2019 QS(0036)'
+Description: 'HashiCorp Consul + VPC  Aug,28,2019 (qs-1qup6ra81)'
 Metadata:
   QuickStartDocumentation:
     EntrypointName: "Launch into a new VPC"
-  LICENSE: 'Apache License, Version 2.0' 
+  LICENSE: 'Apache License, Version 2.0'
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
@@ -22,6 +22,8 @@ Metadata:
           default: Consul setup
         Parameters:
           - ConsulInstanceType
+          - ConsulVersion
+          - ConsulTemplateVersion
           - ConsulServerNodes
           - ConsulClientNodes
           - KeyPairName
@@ -37,6 +39,7 @@ Metadata:
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
+          - QSS3BucketRegion
     ParameterLabels:
       AccessCIDR:
         default: Permitted IP range
@@ -60,6 +63,8 @@ Metadata:
         default: Quick Start S3 bucket name
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
       VPCCIDR:
         default: VPC CIDR
       SSLCertificateArn:
@@ -70,6 +75,10 @@ Metadata:
         default: Load Balancer FQDN
       ConsulInstanceType:
         default: Consul cluster node instance type
+      ConsulVersion:
+        default: Consul version
+      ConsulTemplateVersion:
+        default: Consul template version
       ConsulServerNodes:
         default: Number of Consul server nodes
       ConsulClientNodes:
@@ -79,8 +88,8 @@ Metadata:
 Parameters:
   AvailabilityZones:
     Description: >-
-      List of Availability Zones to use for the subnets in the VPC. 
-      Note: The logical order is preserved. (3 Three Availability 
+      List of Availability Zones to use for the subnets in the VPC.
+      Note: The logical order is preserved. (3 Three Availability
       ZonesAZs are used for this deployment.)
     Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   AccessCIDR:
@@ -90,6 +99,20 @@ Parameters:
       The CIDR IP range that is permitted to access Consul. Note: a value of
       0.0.0.0/0 will allow access from ANY ip address
     Type: String
+  ConsulVersion:
+    Type: String
+    Description: The version of Consul to be created.
+    AllowedValues:
+      - '1.7.0'
+      - '1.12.0'
+    Default: '1.12.0'
+  ConsulTemplateVersion:
+    Type: String
+    Description: The version of Consul template to be used.
+    AllowedValues:
+      - '0.24.0'
+      - '0.29.0'
+    Default: '0.29.0'
   ConsulServerNodes:
     Type: String
     Description: The number of Consul server nodes that will be created. You can choose 3, 5, or 7 nodes.
@@ -193,6 +216,10 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
       cannot start or end with a hyphen (-).
     Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. If you use your own bucket, specify the applicable Region."
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: '^[0-9a-zA-Z-/]*$'
     ConstraintDescription: >-
@@ -231,6 +258,7 @@ Parameters:
       - "true"
       - "false"
 Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   GovCloudCondition: !Equals
     - !Ref AWS::Region
     - us-gov-west-1
@@ -260,30 +288,42 @@ Conditions:
 #         - !And
 #             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
 #             - !Equals [!Ref SSLCertificateArn, '']
-#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided."
 #   ProvideSSHKey:
 #     Assertions:
 #       - Assert: !Not [!Equals [ !Ref KeyPairName, '']]
-#         AssertDescription: "KeyPairName must be provided." 
+#         AssertDescription: "KeyPairName must be provided."
 Resources:
   VPCStack:
-    Type: 'AWS::CloudFormation::Stack'
     Properties:
-      TemplateURL: !Sub >-
-        https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
       Parameters:
-        AvailabilityZones: !Join 
-          - ','
-          - !Ref AvailabilityZones
-        KeyPairName: !Ref KeyPairName
+        AvailabilityZones:
+          Fn::Join:
+          - ","
+          - Ref: AvailabilityZones
+        KeyPairName:
+          Ref: KeyPairName
         NumberOfAZs: '3'
-        PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
-        PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
-        PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
-        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
-        PublicSubnet2CIDR: !Ref PublicSubnet2CIDR
-        PublicSubnet3CIDR: !Ref PublicSubnet3CIDR
-        VPCCIDR: !Ref VPCCIDR
+        PrivateSubnet1ACIDR:
+          Ref: PrivateSubnet1CIDR
+        PrivateSubnet2ACIDR:
+          Ref: PrivateSubnet2CIDR
+        PrivateSubnet3ACIDR:
+          Ref: PrivateSubnet3CIDR
+        PublicSubnet1CIDR:
+          Ref: PublicSubnet1CIDR
+        PublicSubnet2CIDR:
+          Ref: PublicSubnet2CIDR
+        PublicSubnet3CIDR:
+          Ref: PublicSubnet3CIDR
+        VPCCIDR:
+          Ref: VPCCIDR
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+    Type: AWS::CloudFormation::Stack
   BastionStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -293,16 +333,16 @@ Resources:
         BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
         BastionInstanceType: 't3.medium'
         KeyPairName: !Ref KeyPairName
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Sub '${QSS3KeyPrefix}submodules/quickstart-linux-bastion/'
         RemoteAccessCIDR: !Ref AccessCIDR
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
   HashiCorpConsulStack:
@@ -311,31 +351,33 @@ Resources:
       TemplateURL: !Sub >-
         https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/quickstart-hashicorp-consul.template
       Parameters:
-        BastionSecurityGroupID: !GetAtt 
+        BastionSecurityGroupID: !GetAtt
           - BastionStack
           - Outputs.BastionSecurityGroupID
-        PrivateSubnet1ID: !GetAtt 
+        PrivateSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet1AID
-        PrivateSubnet2ID: !GetAtt 
+        PrivateSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet2AID
-        PrivateSubnet3ID: !GetAtt 
+        PrivateSubnet3ID: !GetAtt
           - VPCStack
           - Outputs.PrivateSubnet3AID
-        PublicSubnet1ID: !GetAtt 
+        PublicSubnet1ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt 
+        PublicSubnet2ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet2ID
-        PublicSubnet3ID: !GetAtt 
+        PublicSubnet3ID: !GetAtt
           - VPCStack
           - Outputs.PublicSubnet3ID
-        VPCID: !GetAtt 
+        VPCID: !GetAtt
           - VPCStack
           - Outputs.VPCID
         VPCCIDR: !Ref VPCCIDR
+        ConsulVersion: !Ref ConsulVersion
+        ConsulTemplateVersion: !Ref ConsulTemplateVersion
         ConsulServerNodes: !Ref ConsulServerNodes
         ConsulClientNodes: !Ref ConsulClientNodes
         ConsulInstanceType: !Ref ConsulInstanceType
@@ -347,7 +389,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         SSLCertificateArn: !Ref SSLCertificateArn
         HostedZoneID: !Ref HostedZoneID
-        LoadBalancerFQDN: !Ref LoadBalancerFQDN 
+        LoadBalancerFQDN: !Ref LoadBalancerFQDN
 Outputs:
   ConsulEc2RetryTagKey:
     Value: !GetAtt "HashiCorpConsulStack.Outputs.ConsulEc2RetryTagKey"

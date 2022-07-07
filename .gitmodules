@@ -1,12 +1,16 @@
 [submodule "submodules/quickstart-aws-vpc"]
   path = submodules/quickstart-aws-vpc
-  url = ../../aws-quickstart/quickstart-aws-vpc.git
+  url = https://github.com/aws-quickstart/quickstart-aws-vpc.git
   branch = main
 [submodule "submodules/quickstart-linux-bastion"]
 	path = submodules/quickstart-linux-bastion
-	url = ../../aws-quickstart/quickstart-linux-bastion.git
+	url = https://github.com/aws-quickstart/quickstart-linux-bastion.git
 	branch = main
 [submodule "docs/boilerplate"]
 	path = docs/boilerplate
 	url = https://github.com/aws-quickstart/quickstart-documentation-base-common.git
+	branch = main
+[submodule "submodules/quickstart-aws-acm-certificate"]
+	path = submodules/quickstart-aws-acm-certificate
+	url = https://github.com/aws-quickstart/quickstart-aws-acm-certificate.git
 	branch = main
