@@ -1,10 +1,10 @@
-:quickstart-project-name: quickstart-documentation-base
-:partner-product-name: Example Product Name
-:partner-company-name: Example Company Name, Ltd.
-:doc-month: May
-:doc-year: 2020
-:partner-contributors: John Doe and Jane Doe
-:quickstart-contributors: Jim Smith - AWS Global Partner SA, AWS + Joe Jones - Technical Product Manager, AWS
+:quickstart-project-name: quickstart-hashicorp-consul
+:partner-product-name: Consul
+:partner-company-name: HashiCorp
+:doc-month: July
+:doc-year: 2022
+:partner-contributors: HashiCorp Alliances Team
+:quickstart-contributors: HashiCorp Alliances Team, AWS Alliances Team
 :deployment_time: 30 minutes / 1 hour
 :default_deployment_region: us-east-1
 // Uncomment these two attributes if you are leveraging

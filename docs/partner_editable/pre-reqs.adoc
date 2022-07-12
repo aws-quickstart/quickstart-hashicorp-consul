@@ -2,8 +2,19 @@
 
 ==== Prepare your AWS account
 
-_Describe any setup required in the AWS account prior to template launch_
+1. If you don’t already have an AWS account, create one at http://aws.amazon.com by
+following the on-screen instructions.
 
-==== Prepare your {partner-company-name} account
+2. Use the region selector in the navigation bar to choose the AWS Region where you want
+to deploy HashiCorp Consul on AWS.
 
-_Describe any setup required in the partner portal/account prior to template launch_
+3. Create a http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html[key pair] in your preferred region.
+
+4. If necessary, request a https://console.aws.amazon.com/servicequotas/home?region=us-east-1#!/[service quota increase] for the Amazon EC2 t2.medium instance
+type. You might need to do this if you already have an existing deployment that uses this
+instance type, and you think you might exceed the http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html[default quota] with this reference
+deployment. 
+
+// ==== Prepare your {partner-company-name} account
+
+// _Describe any setup required in the partner portal/account prior to template launch_

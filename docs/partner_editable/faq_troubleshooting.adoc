@@ -18,4 +18,14 @@ For additional information, see https://docs.aws.amazon.com/AWSCloudFormation/la
 
 == Troubleshooting
 
-<Steps for troubleshooting the deployment go here.>
+* AWS Services
+    ** http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/[Amazon EC2]
+    ** http://aws.amazon.com/documentation/vpc/[Amazon VPC]
+
+* {partner-company-name} {partner-product-name}
+    ** https://www.consul.io/[Consul]
+    ** https://www.hashicorp.com/products/consul[Consul Enterprise]
+
+* Quick Start reference deployments
+    ** https://aws.amazon.com/quickstart/[AWS Quick Start home page]
+    ** https://s3.amazonaws.com/quickstart-reference/hashicorp/vault/latest/doc/hashicorp-vault-on-the-aws-cloud.pdf[AWS Quick Start for {partner-company-name} Vault]
