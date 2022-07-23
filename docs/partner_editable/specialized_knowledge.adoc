@@ -1,6 +1,8 @@
 // Replace the content in <>
 // Describe or link to specific knowledge requirements; for example: “familiarity with basic concepts in the areas of networking, database operations, and data encryption” or “familiarity with <software>.”
 
-This Quick Start assumes familiarity with <knowledge expectations>.
+Before you deploy this Quick Start, we recommend that you become familiar with the
+following AWS services. (If you are new to AWS, see https://aws.amazon.com/getting-started/[Getting Started with AWS].)
 
-
+* https://docs.aws.amazon.com/vpc/index.html[Amazon VPC]
+* https://docs.aws.amazon.com/ec2/index.html[Amazon EC2]
