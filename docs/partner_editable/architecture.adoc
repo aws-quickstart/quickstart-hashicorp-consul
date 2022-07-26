@@ -1,6 +1,6 @@
 Deploying this Quick Start for a new virtual private cloud (VPC) with
 *default parameters* builds the following _{partner-product-name}_ environment in the
-AWS Cloud.For details about the VPC architecture, see the Amazon VPC Quick Start Guide.)
+AWS Cloud.For details about the VPC architecture, see the https://aws.amazon.com/quickstart/architecture/vpc/[Amazon VPC Quick Start Guide].)
 
 // Replace this example diagram with your own. Send us your source PowerPoint file. Be sure to follow our guidelines here : http://(we should include these points on our contributors giude)
 [#architecture1]

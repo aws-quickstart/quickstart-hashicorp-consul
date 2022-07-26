@@ -27,8 +27,8 @@ monitoring, or a key/value store. The Quick Start is built using the open-source
 {partner-product-name}, but is also compatible with {partner-product-name} Enterprise.
 An expanded version of this deployment guide with detailed instructions and screen
 illustrations is available on the {partner-product-name} and {partner-product-name} Enterprise websites.
-For other solutions from HashiCorp and AWS, see the AWS Quick Start for HashiCorp
-Vault.
+For other solutions from HashiCorp and AWS, see the https://aws.amazon.com/quickstart/architecture/vault/[AWS Quick Start for HashiCorp
+Vault].
 
 Please know that we may share who uses AWS Quick Starts with the AWS partner that
 collaborated with AWS on the content of the Quick Start.
