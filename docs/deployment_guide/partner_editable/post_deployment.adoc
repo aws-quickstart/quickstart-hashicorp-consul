@@ -34,7 +34,7 @@ address.
 [#ec2panel]
 .Finding the Elastic IP address for the bastion host instance
 [link=images/ec2-panel.png]
-image::../images/ec2-panel.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,height=439]
 
 In the example in Figure 2, the Elastic IP address for LinuxBastion1 is *34.198.50.12*.
 
@@ -46,7 +46,7 @@ ssh –A ubuntu@34.198.50.12
 ----
 
 [#ec2ssh]
-image::../images/ec2-ssh-1.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/ec2-ssh-1.png[Architecture,width=648,height=439]
 
 [start=5]
 . In the Amazon EC2 console, select one of the Consul-Server or Consul-Client hosts and note its private IP address.
@@ -54,7 +54,7 @@ image::../images/ec2-ssh-1.png[Architecture,width=648,height=439]
 [#ec2consulip]
 .Finding the private IP address for Consul-Server
 [link=images/ec2-consul-ip.png]
-image::../images/ec2-consul-ip.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/ec2-consul-ip.png[Architecture,width=648,height=439]
 
 In the example in Figure 2, the private IP for Consul-Server is *172.31.35.7*.
 
@@ -62,7 +62,7 @@ In the example in Figure 2, the private IP for Consul-Server is *172.31.35.7*.
 . From the bastion host, connect to the Consul-Server or Consul-Client host, using Ubuntu as the user:
 
 [#ec2ssh2]
-image::../images/ec2-ssh-2.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/ec2-ssh-2.png[Architecture,width=648,height=439]
 
 [start=7]
 . View Consul members:
@@ -72,7 +72,7 @@ consul members
 ----
 
 [#ec2ssh3]
-image::../images/ec2-ssh-3.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/ec2-ssh-3.png[Architecture,width=648,height=439]
 
 === Test the deployment
 To access the Consul server cluster environment, access the Elastic Load Balancing (ELB)
@@ -82,7 +82,7 @@ endpoint that was created during the deployment.
 . Locate the ELB endpoint address from the Outputs tab of the AWS CloudFormation console.
 
 [#elb]
-image::../images/elb.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/elb.png[Architecture,width=648,height=439]
 
 [start=2]
 . Use your preferred web browser to open the URL. You will see the Consul server cluster dashboard.
@@ -90,7 +90,7 @@ image::../images/elb.png[Architecture,width=648,height=439]
 [#consul-ui]
 .Consul web UI
 [link=images/consul-ui.png]
-image::../images/consul-ui.png[Architecture,width=648,height=439]
+image::../docs/deployment_guide/images/consul-ui.png[Architecture,width=648,height=439]
 
 === Get started with Consul
 To integrate Consul with your environment and get started with Consul services, see the https://www.consul.io/intro/getting-started/services.html[Getting Started] section of the HashiCorp Consul website. 

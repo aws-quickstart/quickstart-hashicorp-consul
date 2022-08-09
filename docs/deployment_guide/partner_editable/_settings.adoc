@@ -5,9 +5,9 @@
 :partner-company-name: HashiCorp
 :doc-month: August
 :doc-year: 2022
-:partner-contributors: {partner-company-name}
+:partner-contributors: {partner-company-name} & AWS team
 // :other-contributors: Akua Mansa, Trek10
-:aws-contributors: AWS team
+// :aws-contributors: AWS team
 // :aws-ia-contributors: Toni Jones, AWS Integration & Automation team
 :deployment_time: 30 minutes / 1 hour
 :default_deployment_region: us-east-1

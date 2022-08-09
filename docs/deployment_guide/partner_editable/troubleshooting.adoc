@@ -5,8 +5,6 @@ For troubleshooting common Quick Start issues, refer to the https://fwd.aws/rA69
 // == Resources
 // Uncomment section and add links to any external resources that are specified by the partner.
 
-== Troubleshooting
-
 *Q.* I encountered a *CREATE_FAILED* error when I launched the Quick Start.
 
 *A.* If AWS CloudFormation fails to create the stack, we recommend that you relaunch the template with *Rollback on failure* set to *No*. (This setting is under *Advanced* in the AWS CloudFormation console, *Options* page.) With this setting, the stack’s state is retained and the instance is left running, so you can troubleshoot the issue. (For Windows, look at the log files in %ProgramFiles%\Amazon\EC2ConfigService and C:\cfn\log.)

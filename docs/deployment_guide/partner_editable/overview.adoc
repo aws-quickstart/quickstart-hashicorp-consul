@@ -28,7 +28,7 @@ This Quick Start is for users who are looking for a solution for service discove
 monitoring, or a key/value store. The Quick Start is built using the open-source version of
 {partner-product-name}, but is also compatible with {partner-product-name} Enterprise.
 An expanded version of this deployment guide with detailed instructions and screen
-illustrations is available on the {partner-product-name} and {partner-product-name} Enterprise websites.
+illustrations is available on the https://www.consul.io/docs/index.html[{partner-product-name}] and https://www.hashicorp.com/consul.html[{partner-product-name} Enterprise] websites.
 For other solutions from HashiCorp and AWS, see the https://aws.amazon.com/quickstart/architecture/vault/[AWS Quick Start for HashiCorp
 Vault].
 
