@@ -1,5 +1,36 @@
-This Quick Start deploys {partner-product-name} on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.
+// This Quick Start deploys {partner-product-name} on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.
 
 // For advanced information about the product, troubleshooting, or additional functionality, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/operational/index.html[Operational Guide^].
 
 // For information about using this Quick Start for migrations, refer to the https://{quickstart-github-org}.github.io/{quickstart-project-name}/migration/index.html[Migration Guide^].
+
+This Quick Start reference deployment guide provides step-by-step instructions for
+deploying https://www.hashicorp.com/products/consul[{partner-product-name}] on the Amazon Web Services (AWS) Cloud. http://aws.amazon.com/quickstart/[Quick Starts] are
+automated reference deployments that use AWS CloudFormation templates to launch,
+configure, and run the AWS compute, network, storage, and other services required to
+deploy a specific workload on AWS.
+{partner-product-name} is a tool that provides a foundation for cloud networking automation by
+using a central registry for service-based networking. {partner-product-name}'s core use cases include the
+following:
+
+* Service registry and health monitoring, to provide a real-time directory of all services
+with their health status
+
+* Network middleware automation, with service discovery for dynamic reconfiguration as
+services scale up, scale down, or move
+
+* Zero Trust network with service mesh, to secure service-to-service traffic with identitybased security policies and encrypted traffic with Mutual-Transport Layer Security
+(TLS)
+
+{partner-product-name} is designed to be friendly to both the DevOps community and application
+developers, making it a good fit for modern, elastic infrastructures.
+This Quick Start is for users who are looking for a solution for service discovery,
+monitoring, or a key/value store. The Quick Start is built using the open-source version of
+{partner-product-name}, but is also compatible with {partner-product-name} Enterprise.
+An expanded version of this deployment guide with detailed instructions and screen
+illustrations is available on the {partner-product-name} and {partner-product-name} Enterprise websites.
+For other solutions from HashiCorp and AWS, see the https://aws.amazon.com/quickstart/architecture/vault/[AWS Quick Start for HashiCorp
+Vault].
+
+Please know that we may share who uses AWS Quick Starts with the AWS partner that
+collaborated with AWS on the content of the Quick Start.
