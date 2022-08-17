@@ -1,3 +1,153 @@
 // Include any postdeployment steps here, such as steps necessary to test that the deployment was successful. If there are no postdeployment steps, leave this file empty.
 
 == Postdeployment steps
+
+=== Access Consul via SSH
+To access the Consul environment, first connect to one of the bastion hosts. Use an SSH agent to forward your private key on connection. 
+
+WARNING: Do not copy your private key to the bastion host.
+
+For more information on SSH agents, see the https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[GitHub documentation].
+
+To use an SSH agent to access the Consul environment on Mac or Linux:
+
+[start=1]
+. Use the command:
+[source, bash]
+----
+ssh-add ~/.ssh/id_rsa
+----
+
+[start=2]
+. At the prompt, type your passphrase or press Enter for no passphrase.
+[source, bash]
+----
+Enter passphrase (empty for no passphrase): [Hit Enter Again or
+Enter passphrase]
+Enter same passphrase again: [Hit Enter Again or Enter passphrase]
+----
+
+[start=3]
+. In the Amazon EC2 console, select one of the two bastion hosts and note its Elastic IP
+address.
+
+[#ec2panel]
+.Finding the Elastic IP address for the bastion host instance
+[link=images/ec2-panel.png]
+image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,height=439]
+
+In the example in Figure 2, the Elastic IP address for LinuxBastion1 is *34.198.50.12*.
+
+[start=4]
+. Log in, and type yes when prompted to continue connecting:
+[source, bash]
+----
+ssh –A ubuntu@34.198.50.12
+----
+
+[#ec2ssh]
+image::../docs/deployment_guide/images/ec2-ssh-1.png[Architecture,width=648,height=439]
+
+[start=5]
+. In the Amazon EC2 console, select one of the Consul-Server or Consul-Client hosts and note its private IP address.
+
+[#ec2consulip]
+.Finding the private IP address for Consul-Server
+[link=images/ec2-consul-ip.png]
+image::../docs/deployment_guide/images/ec2-consul-ip.png[Architecture,width=648,height=439]
+
+In the example in Figure 2, the private IP for Consul-Server is *172.31.35.7*.
+
+[start=6]
+. From the bastion host, connect to the Consul-Server or Consul-Client host, using Ubuntu as the user:
+
+[#ec2ssh2]
+image::../docs/deployment_guide/images/ec2-ssh-2.png[Architecture,width=648,height=439]
+
+[start=7]
+. View Consul members:
+[source, bash]
+----
+consul members
+----
+
+[#ec2ssh3]
+image::../docs/deployment_guide/images/ec2-ssh-3.png[Architecture,width=648,height=439]
+
+=== Test the deployment
+To access the Consul server cluster environment, access the Elastic Load Balancing (ELB)
+endpoint that was created during the deployment.
+
+[start=1]
+. Locate the ELB endpoint address from the Outputs tab of the AWS CloudFormation console.
+
+[#elb]
+image::../docs/deployment_guide/images/elb.png[Architecture,width=648,height=439]
+
+[start=2]
+. Use your preferred web browser to open the URL. You will see the Consul server cluster dashboard.
+
+[#consul-ui]
+.Consul web UI
+[link=images/consul-ui.png]
+image::../docs/deployment_guide/images/consul-ui.png[Architecture,width=648,height=439]
+
+=== Get started with Consul
+To integrate Consul with your environment and get started with Consul services, see the https://www.consul.io/intro/getting-started/services.html[Getting Started] section of the HashiCorp Consul website. 
+
+https://www.consul.io/docs/connect/index.html[Consul Connect] and Autopilot are enabled by default.
+
+[start=1]
+. How to set up a service with Consul Connect - service mesh
+Consul Connect is enabled by default. To set up a service on the Consul client nodes, you
+will need to register the service and proxy with Consul. For more information, please visit
+the following HashiCorp Learn pages:
+
+* https://learn.hashicorp.com/consul/getting-started/connect#register-the-service-and-proxy-with-consul[Register the Service and Proxy with Consul]
+* https://learn.hashicorp.com/consul/getting-started/connect#register-a-dependent-service-and-proxy[Register a Dependent Service and Proxy]
+* https://learn.hashicorp.com/consul/getting-started/connect#control-communication-with-intentions[Control Communication with Intentions]
+
+[start=2]
+. How to manage Consul Autopilot
+https://www.consul.io/docs/commands/operator/autopilot.html[Consul Autopilot] is enabled by default with the following settings:
+
+[source, bash]
+----
+"autopilot": {
+ "cleanup_dead_servers": true,
+ "last_contact_threshold": "200ms",
+ "max_trailing_logs": 250,
+ "server_stabilization_time": "10s",
+ "redundancy_zone_tag": "az",
+ "disable_upgrade_migration": false,
+ "upgrade_version_tag": ""
+}
+----
+
+// == Post deployment steps
+// If Post-deployment steps are required, add them here. If not, remove the heading
+
+// == Best practices for using {partner-product-name} on AWS
+// Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
+
+// _Add any best practices for using the software._
+
+// == Security
+// Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
+
+// _Add any security-related information._
+
+=== Other useful information
+//Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
+
+* AWS Services
+    ** http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/[Amazon EC2]
+    ** http://aws.amazon.com/documentation/vpc/[Amazon VPC]
+
+* {partner-product-name}
+    ** https://www.consul.io/[Consul]
+    ** https://www.hashicorp.com/products/consul[Consul Enterprise]
+
+* Quick Start reference deployments
+    ** https://aws.amazon.com/quickstart/[AWS Quick Start home page]
+    ** https://s3.amazonaws.com/quickstart-reference/hashicorp/vault/latest/doc/hashicorp-vault-on-the-aws-cloud.pdf[AWS Quick Start for {partner-company-name} Vault]

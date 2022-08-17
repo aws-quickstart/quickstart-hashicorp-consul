@@ -11,18 +11,27 @@ image::../docs/deployment_guide/images/architecture_diagram.png[Architecture]
 
 As shown in <<architecture1>>, this Quick Start sets up the following:
 
-* A highly available architecture that spans two Availability Zones.*
-* A virtual private cloud (VPC) configured with public and private subnets, according to AWS
-best practices, to provide you with your own virtual network on AWS.*
-* In the public subnets:
-** Managed network address translation (NAT) gateways to allow outbound
-internet access for resources in the private subnets.*
-** A Linux bastion host in an Auto Scaling group to allow inbound Secure
-Shell (SSH) access to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.*
-* In the private subnets:
-** <item>.
-** <item>.
-// Add bullet points for any additional components that are included in the deployment. Ensure that the additional components are shown in the architecture diagram. End each bullet with a period.
-* <describe any additional components>.
+* A highly available architecture that spans three Availability Zones.*
+
+* A Virtual Private Cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
+
+In the public subnets:
+
+* Linux bastion hosts to allow inbound Secure Shell (SSH) access to EC2 instances in the private subnets.*
+
+* Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*
+
+* A Classic Load Balancer with AWS Certificate Manager (ACM) attached to the {partner-product-name} server cluster Auto Scaling group. You can choose to add your own Secure Sockets Layer (SSL) certificate to it. 
+
+In the private subnets:
+
+* An Auto Scaling group for {partner-product-name} clients. The number of clients is set to 0 by default,
+but is user-configurable.
+
+* An Auto Scaling group for a {partner-product-name} server cluster in the private subnets. You can choose to create 3, 5, or 7 servers.
+
+* {partner-product-name} Template (the {partner-product-name}-template daemon) installed on all nodes for integrating applications with {partner-product-name}'s service catalog and key/value store.
+
+* *Dnsmasq* installed on all nodes for integrating applications with {partner-product-name}'s Domain Name System (DNS) interface for service discovery
 
 [.small]#* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
