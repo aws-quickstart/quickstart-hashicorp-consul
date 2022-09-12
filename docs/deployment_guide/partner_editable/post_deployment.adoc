@@ -2,24 +2,22 @@
 
 == Postdeployment steps
 
-=== Access Consul via SSH
-To access the Consul environment, first connect to one of the bastion hosts. Use an SSH agent to forward your private key on connection. 
+=== Access Consul using SSH (Secure Shell)
+To access the Consul environment, first connect to one of the deployed bastion hosts. Then, use an SSH agent to forward your private key on connection. For more information on SSH agents, see the https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[Generating a new SSH key and adding it to the ssh-agent].
 
 WARNING: Do not copy your private key to the bastion host.
 
-For more information on SSH agents, see the https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[GitHub documentation].
-
-To use an SSH agent to access the Consul environment on Mac or Linux:
+To use an SSH agent to access the Consul environment on Mac or Linux, complete the following steps.
 
 [start=1]
-. Use the command:
+. Run the following command.
 [source, bash]
 ----
 ssh-add ~/.ssh/id_rsa
 ----
 
 [start=2]
-. At the prompt, type your passphrase or press Enter for no passphrase.
+. When prompted, enter your passphrase, or press `Enter` for no passphrase.
 [source, bash]
 ----
 Enter passphrase (empty for no passphrase): [Hit Enter Again or
@@ -93,7 +91,7 @@ image::../docs/deployment_guide/images/elb.png[Architecture,width=648,height=439
 image::../docs/deployment_guide/images/consul-ui.png[Architecture,width=648,height=439]
 
 === Get started with Consul
-To integrate Consul with your environment and get started with Consul services, see the https://www.consul.io/intro/getting-started/services.html[Getting Started] section of the HashiCorp Consul website. 
+To integrate Consul with your environment and get started with Consul services, see the https://www.consul.io/intro/getting-started/services.html[Getting Started] section of the HashiCorp Consul website.
 
 https://www.consul.io/docs/connect/index.html[Consul Connect] and Autopilot are enabled by default.
 
