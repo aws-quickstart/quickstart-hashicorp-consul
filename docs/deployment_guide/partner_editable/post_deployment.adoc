@@ -3,14 +3,14 @@
 == Postdeployment steps
 
 === Access Consul using SSH (Secure Shell)
-To access the Consul environment, first connect to one of the deployed bastion hosts. Then, use an SSH agent to forward your private key on connection. For more information on SSH agents, refer to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[Generating a new SSH key and adding it to the ssh-agent].
+To access the Consul environment, first connect to one of the deployed bastion hosts. Then, use an SSH agent to forward your private key on connection. For more information on SSH agents, refer to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[Generating a new SSH key and adding it to the ssh-agent^].
 
 WARNING: Do not copy your private key to the bastion host.
 
 If you use macOS or Linux, complete the following steps.
 
 [start=1]
-. Sign in to the https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1#[AWS Management Console]. Then open the Amazon EC2 console.
+. Sign in to the https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1#[AWS Management Console^]. Then open the Amazon EC2 console.
 . Choose *Instances* from the left navigation pane.
 . Choose one of the two deployed bastion hosts (*LinuxBastion1* or *LinuxBastion2*). Note the *Elastic IP* value for the selected instance. You will enter this in Step 7.
 
@@ -90,7 +90,9 @@ image::../docs/deployment_guide/images/ec2-ssh-3.png[Architecture,width=648,heig
 
 === Test the deployment
 
-. Sign in to the https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1#[AWS Management Console]. Then open the Amazon CloudFormation console.
+Test the deployment by accessing the Consul dashboard.
+
+. Sign in to the https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1#[AWS Management Console^]. Then open the Amazon CloudFormation console.
 . Choose *Stacks* from the left navigation pane.
 . Choose the Hashicorp Consul stack.
 . Choose the *Outputs* tab.
@@ -103,33 +105,16 @@ image::../docs/deployment_guide/images/ec2-ssh-3.png[Architecture,width=648,heig
 image::../docs/deployment_guide/images/elb.png[Architecture,width=648,height=439]
 
 +
-The landing page for the Consul dashboard is the *Services* page. For more information, refer to https://learn.hashicorp.com/tutorials/consul/get-started-explore-the-ui?in=consul/getting-started[Explore the Consul UI].
-
-+
-[#consul-ui]
-.Consul web UI
-[link=images/consul-ui.png]
-image::../docs/deployment_guide/images/consul-ui.png[Architecture,width=648,height=439]
+The landing page for the Consul dashboard is the *Services* page. For more information, refer to https://learn.hashicorp.com/tutorials/consul/get-started-explore-the-ui?in=consul/getting-started[Explore the Consul UI^].
 
 === Get started with Consul
-To integrate Consul with your environment and get started with Consul services, see the https://www.consul.io/intro/getting-started/services.html[Getting Started] section of the HashiCorp Consul website.
+* To integrate Consul with your environment and get started with Consul services, refer to https://www.consul.io/intro/getting-started/services.html[Register a Service with Consul Service Discovery^].
 
-https://www.consul.io/docs/connect/index.html[Consul Connect] and Autopilot are enabled by default.
+* To set up a service on the Consul client nodes, you must register the service and proxy with Consul. For more information, refer to https://learn.hashicorp.com/consul/getting-started/connect#register-the-service-and-proxy-with-consul[Register a Service with Consul Service Discovery^]
 
-[start=1]
-. How to set up a service with Consul Connect - service mesh
-Consul Connect is enabled by default. To set up a service on the Consul client nodes, you
-will need to register the service and proxy with Consul. For more information, please visit
-the following HashiCorp Learn pages:
+* Autopilot operator command is enabled by default with the following settings.
 
-* https://learn.hashicorp.com/consul/getting-started/connect#register-the-service-and-proxy-with-consul[Register the Service and Proxy with Consul]
-* https://learn.hashicorp.com/consul/getting-started/connect#register-a-dependent-service-and-proxy[Register a Dependent Service and Proxy]
-* https://learn.hashicorp.com/consul/getting-started/connect#control-communication-with-intentions[Control Communication with Intentions]
-
-[start=2]
-. How to manage Consul Autopilot
-https://www.consul.io/docs/commands/operator/autopilot.html[Consul Autopilot] is enabled by default with the following settings:
-
++
 [source, bash]
 ----
 "autopilot": {
@@ -142,6 +127,9 @@ https://www.consul.io/docs/commands/operator/autopilot.html[Consul Autopilot] is
  "upgrade_version_tag": ""
 }
 ----
+
++
+For more information, refer to https://www.consul.io/docs/commands/operator/autopilot.html[Consul Operator Autopilot^].
 
 // == Post deployment steps
 // If Post-deployment steps are required, add them here. If not, remove the heading
