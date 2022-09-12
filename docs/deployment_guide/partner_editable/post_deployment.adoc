@@ -7,9 +7,19 @@ To access the Consul environment, first connect to one of the deployed bastion h
 
 WARNING: Do not copy your private key to the bastion host.
 
-To use an SSH agent to access the Consul environment on Mac or Linux, complete the following steps.
+If you use macOS or Linux, complete the following steps.
 
 [start=1]
+. Sign into the https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1#[AWS Management Console]. Then open the Amazon EC2 console.
+. Choose *Instances* from the left navigation pane.
+. Choose one of the two deployed bastion hosts. Note the Elastic IP address for the selected instance.
+
+[#ec2panel]
+.Elastic IP address for a bastion host instance
+[link=images/ec2-panel.png]
+image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,height=439]
+
+[start=4]
 . Run the following command.
 [source, bash]
 ----
@@ -17,7 +27,7 @@ ssh-add ~/.ssh/id_rsa
 ----
 
 [start=2]
-. When prompted, enter your passphrase, or press `Enter` for no passphrase.
+. Enter your passphrase when prompted. If you have no passphrase, press `Enter`.
 [source, bash]
 ----
 Enter passphrase (empty for no passphrase): [Hit Enter Again or
@@ -25,23 +35,17 @@ Enter passphrase]
 Enter same passphrase again: [Hit Enter Again or Enter passphrase]
 ----
 
-[start=3]
-. In the Amazon EC2 console, select one of the two bastion hosts and note its Elastic IP
-address.
-
-[#ec2panel]
-.Finding the Elastic IP address for the bastion host instance
-[link=images/ec2-panel.png]
-image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,height=439]
-
-In the example in Figure 2, the Elastic IP address for LinuxBastion1 is *34.198.50.12*.
 
 [start=4]
-. Log in, and type yes when prompted to continue connecting:
+. Run the following command. Substitute the Elastic IP value for your instance for `34.198.50.12`.
+
 [source, bash]
 ----
 ssh –A ubuntu@34.198.50.12
 ----
+
+[start=5]
+. Enter `yes` when prompted to continue connecting.
 
 [#ec2ssh]
 image::../docs/deployment_guide/images/ec2-ssh-1.png[Architecture,width=648,height=439]
