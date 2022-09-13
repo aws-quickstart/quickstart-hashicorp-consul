@@ -28,7 +28,6 @@ ssh-add ~/.ssh/id_rsa
 +
 [#ec2panel]
 .Elastic IP address for a bastion host instance
-[link=images/ec2-panel.png]
 image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,height=439]
 
 [start=5]
@@ -37,13 +36,7 @@ image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,heig
 +
 `ssh –A ubuntu@_<bastion-host-ip-address>_`
 +
-For example, `ssh –A ubuntu@34.198.50.12`
-
-+
-[#ec2ssh]
-.Connecting to bastion host
-[link=images/ec2-ssh-1.png]
-image::../docs/deployment_guide/images/ec2-ssh-1.png[Architecture,width=648,height=439]
+For example, `ssh –A ubuntu@34.198.50.12`.
 
 [start=6]
 . Enter `yes` when prompted to continue connecting.
@@ -54,7 +47,6 @@ image::../docs/deployment_guide/images/ec2-ssh-1.png[Architecture,width=648,heig
 +
 [#ec2consulip]
 .Finding the private IP address for Consul-Server
-[link=images/ec2-consul-ip.png]
 image::../docs/deployment_guide/images/ec2-consul-ip.png[Architecture,width=648,height=439]
 
 
@@ -64,12 +56,11 @@ image::../docs/deployment_guide/images/ec2-consul-ip.png[Architecture,width=648,
 +
 `ssh –A ubuntu@_<consul-private-ip-address>_`
 +
-For example, `ssh –A ubuntu@172.31.35.7`
+For example, `ssh –A ubuntu@172.31.35.7`.
 
 +
 [#ec2ssh2]
 .Connecting to Consul-Server or Consul-Client
-[link=images/ec2-ssh-2.png]
 image::../docs/deployment_guide/images/ec2-ssh-2.png[Architecture,width=648,height=439]
 
 [start=9]
@@ -81,7 +72,6 @@ image::../docs/deployment_guide/images/ec2-ssh-2.png[Architecture,width=648,heig
 +
 [#ec2ssh3]
 .Consul members
-[link=images/ec2-ssh-3.png]
 image::../docs/deployment_guide/images/ec2-ssh-3.png[Architecture,width=648,height=439]
 
 === Test the deployment
@@ -97,7 +87,6 @@ Test the deployment by accessing the Consul dashboard.
 +
 [#elb]
 .ConsulServerELB
-[link=images/elb.png]
 image::../docs/deployment_guide/images/elb.png[Architecture,width=648,height=439]
 
 +
