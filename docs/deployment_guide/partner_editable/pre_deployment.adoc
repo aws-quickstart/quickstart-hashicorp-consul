@@ -1,3 +1,5 @@
 //Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
 
 == Predeployment steps
+
+Refer to https://aws-ia.github.io/content/qs_info.html#_planning_the_deployment[Planning the deployment^] in the AWS Quick Starts General Information Guide.
