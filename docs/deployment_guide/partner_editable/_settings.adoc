@@ -8,7 +8,7 @@
 :partner-contributors: Daniel Callao, {partner-company-name}
 // :other-contributors: Akua Mansa, Trek10
 // :aws-contributors: AWS team
-:aws-ia-contributors: Tony Vattahil and Andrew Gargan, AWS Integration & Automation team
+:aws-ia-contributors: Tony Vattathil and Andrew Gargan, AWS Integration & Automation team
 :deployment_time: 30 minutes / 1 hour
 :default_deployment_region: us-east-1
 // :private_repo:
