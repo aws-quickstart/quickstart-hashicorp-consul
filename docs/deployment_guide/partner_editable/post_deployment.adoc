@@ -1,116 +1,102 @@
 // Include any postdeployment steps here, such as steps necessary to test that the deployment was successful. If there are no postdeployment steps, leave this file empty.
-
+:xrefstyle: short
 == Postdeployment steps
 
-=== Access Consul via SSH
-To access the Consul environment, first connect to one of the bastion hosts. Use an SSH agent to forward your private key on connection. 
+=== Access Consul using SSH (Secure Shell)
+To access the Consul environment, first connect to one of the deployed bastion hosts. Then, use an SSH agent to forward your private key on connection. For more information on SSH agents, refer to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[Generating a new SSH key and adding it to the ssh-agent^].
 
 WARNING: Do not copy your private key to the bastion host.
 
-For more information on SSH agents, see the https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent[GitHub documentation].
-
-To use an SSH agent to access the Consul environment on Mac or Linux:
+To use an SSH agent to access the Consul dashboard on macOS or Linux, complete the following steps.
 
 [start=1]
-. Use the command:
-[source, bash]
-----
-ssh-add ~/.ssh/id_rsa
-----
+. Run the following command.
+
++
+`ssh-add ~/.ssh/id_rsa`
 
 [start=2]
-. At the prompt, type your passphrase or press Enter for no passphrase.
-[source, bash]
-----
-Enter passphrase (empty for no passphrase): [Hit Enter Again or
-Enter passphrase]
-Enter same passphrase again: [Hit Enter Again or Enter passphrase]
-----
+. Enter your passphrase or press `Enter`.
 
 [start=3]
-. In the Amazon EC2 console, select one of the two bastion hosts and note its Elastic IP
-address.
+. In the https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Home:[Amazon EC2 console], choose *Instances* from the left navigation pane.
+. Choose one of the two deployed bastion hosts (*LinuxBastion1* or *LinuxBastion2*). Note the *Elastic IP* value for the selected instance. You will enter this in Step 5. In the example shown in <<ec2panel>>, the elastic IP address of the selected bastion host is `34.198.50.12`.
 
++
 [#ec2panel]
-.Finding the Elastic IP address for the bastion host instance
-[link=images/ec2-panel.png]
+.Elastic IP address for a bastion host instance
 image::../docs/deployment_guide/images/ec2-panel.png[Architecture,width=648,height=439]
 
-In the example in Figure 2, the Elastic IP address for LinuxBastion1 is *34.198.50.12*.
-
-[start=4]
-. Log in, and type yes when prompted to continue connecting:
-[source, bash]
-----
-ssh –A ubuntu@34.198.50.12
-----
-
-[#ec2ssh]
-image::../docs/deployment_guide/images/ec2-ssh-1.png[Architecture,width=648,height=439]
-
 [start=5]
-. In the Amazon EC2 console, select one of the Consul-Server or Consul-Client hosts and note its private IP address.
+. Run the following command. Substitute your *Elastic IP* value from Step 4 for `_<bastion-host-ip-address>_`.
 
-[#ec2consulip]
-.Finding the private IP address for Consul-Server
-[link=images/ec2-consul-ip.png]
-image::../docs/deployment_guide/images/ec2-consul-ip.png[Architecture,width=648,height=439]
-
-In the example in Figure 2, the private IP for Consul-Server is *172.31.35.7*.
++
+`ssh –A ubuntu@_<bastion-host-ip-address>_`
++
+For example, `ssh –A ubuntu@34.198.50.12`.
 
 [start=6]
-. From the bastion host, connect to the Consul-Server or Consul-Client host, using Ubuntu as the user:
-
-[#ec2ssh2]
-image::../docs/deployment_guide/images/ec2-ssh-2.png[Architecture,width=648,height=439]
+. Enter `yes` when prompted to continue connecting.
 
 [start=7]
-. View Consul members:
-[source, bash]
-----
-consul members
-----
+. In the Amazon EC2 console, choose a *Consul-Server* or *Consul-Client* instance and note its *Private IPs* value. You will enter this in Step 8. In the example shown in <<ec2consulip>>, the *Private IPs* value for the selected instance is `172.31.35.7`.
 
++
+[#ec2consulip]
+.Finding the private IP address for Consul-Server
+image::../docs/deployment_guide/images/ec2-consul-ip.png[Architecture,width=648,height=439]
+
+
+[start=8]
+. From the bastion host, connect to the Consul-Server or Consul-Client host using Ubuntu as the user. Substitute your *Private IPs* value from Step 7 for `_<consul-private-ip-address>_`.
+
++
+`ssh –A ubuntu@_<consul-private-ip-address>_`
++
+For example, `ssh –A ubuntu@172.31.35.7`.
+
++
+[#ec2ssh2]
+.Connecting to Consul-Server or Consul-Client
+image::../docs/deployment_guide/images/ec2-ssh-2.png[Architecture,width=648,height=439]
+
+[start=9]
+. Run the following command to view a list of current Consul members.
+
++
+`consul members`
+
++
 [#ec2ssh3]
+.Consul members
 image::../docs/deployment_guide/images/ec2-ssh-3.png[Architecture,width=648,height=439]
 
 === Test the deployment
-To access the Consul server cluster environment, access the Elastic Load Balancing (ELB)
-endpoint that was created during the deployment.
 
-[start=1]
-. Locate the ELB endpoint address from the Outputs tab of the AWS CloudFormation console.
+Test the deployment by accessing the Consul dashboard.
 
+. Sign in to the https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1#[AWS Management Console^]. Then open the Amazon CloudFormation console.
+. Choose *Stacks* from the left navigation pane.
+. Choose the Hashicorp Consul stack.
+. Choose the *Outputs* tab.
+. To access the Consul dashboard, navigate to the URL in the *Value* column for the *ConsulServerELB* key.
+
++
 [#elb]
+.ConsulServerELB
 image::../docs/deployment_guide/images/elb.png[Architecture,width=648,height=439]
 
-[start=2]
-. Use your preferred web browser to open the URL. You will see the Consul server cluster dashboard.
-
-[#consul-ui]
-.Consul web UI
-[link=images/consul-ui.png]
-image::../docs/deployment_guide/images/consul-ui.png[Architecture,width=648,height=439]
++
+The landing page for the Consul dashboard is the *Services* page. For more information, refer to https://learn.hashicorp.com/tutorials/consul/get-started-explore-the-ui?in=consul/getting-started[Explore the Consul UI^].
 
 === Get started with Consul
-To integrate Consul with your environment and get started with Consul services, see the https://www.consul.io/intro/getting-started/services.html[Getting Started] section of the HashiCorp Consul website. 
+* To integrate Consul with your environment and get started with Consul services, refer to https://www.consul.io/intro/getting-started/services.html[Register a Service with Consul Service Discovery^].
 
-https://www.consul.io/docs/connect/index.html[Consul Connect] and Autopilot are enabled by default.
+* To set up a service on the Consul client nodes, you must register the service and proxy with Consul. For more information, refer to https://learn.hashicorp.com/consul/getting-started/connect#register-the-service-and-proxy-with-consul[Register a Service with Consul Service Discovery^]
 
-[start=1]
-. How to set up a service with Consul Connect - service mesh
-Consul Connect is enabled by default. To set up a service on the Consul client nodes, you
-will need to register the service and proxy with Consul. For more information, please visit
-the following HashiCorp Learn pages:
+* Autopilot operator command is enabled by default with the following settings.
 
-* https://learn.hashicorp.com/consul/getting-started/connect#register-the-service-and-proxy-with-consul[Register the Service and Proxy with Consul]
-* https://learn.hashicorp.com/consul/getting-started/connect#register-a-dependent-service-and-proxy[Register a Dependent Service and Proxy]
-* https://learn.hashicorp.com/consul/getting-started/connect#control-communication-with-intentions[Control Communication with Intentions]
-
-[start=2]
-. How to manage Consul Autopilot
-https://www.consul.io/docs/commands/operator/autopilot.html[Consul Autopilot] is enabled by default with the following settings:
-
++
 [source, bash]
 ----
 "autopilot": {
@@ -123,6 +109,9 @@ https://www.consul.io/docs/commands/operator/autopilot.html[Consul Autopilot] is
  "upgrade_version_tag": ""
 }
 ----
+
++
+For more information, refer to https://www.consul.io/docs/commands/operator/autopilot.html[Consul Operator Autopilot^].
 
 // == Post deployment steps
 // If Post-deployment steps are required, add them here. If not, remove the heading

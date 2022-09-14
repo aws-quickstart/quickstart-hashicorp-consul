@@ -3,7 +3,7 @@
 :partner-product-name: HashiCorp Consul
 :partner-product-short-name: Consul
 :partner-company-name: HashiCorp
-:doc-month: August
+:doc-month: September
 :doc-year: 2022
 :partner-contributors: {partner-company-name} & AWS team
 // :other-contributors: Akua Mansa, Trek10

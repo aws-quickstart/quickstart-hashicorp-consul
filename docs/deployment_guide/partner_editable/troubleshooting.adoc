@@ -12,23 +12,23 @@ For troubleshooting common Quick Start issues, refer to the https://fwd.aws/rA69
 
 WARNING: When you set *Rollback on failure* to *Disabled*, you continue to incur AWS charges for this stack. Please make sure to delete the stack when you finish troubleshooting.
 
-For additional information, see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting AWS CloudFormation] on the AWS website.
+For additional information, see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting AWS CloudFormation^] on the AWS website.
 
 *Q.* I encountered a size limitation error when I deployed the AWS CloudFormation templates.
 
-*A.* We recommend that you launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template size limitations. For more information about AWS CloudFormation quotas, see the http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html[AWS documentation].
+*A.* We recommend that you launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template size limitations. For more information about AWS CloudFormation quotas, see the http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html[AWS documentation^].
 
 === Resources
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
 
-* AWS Services
-    ** http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/[Amazon EC2]
-    ** http://aws.amazon.com/documentation/vpc/[Amazon VPC]
+* AWS services
+    ** http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/[What is Amazon EC2?^]
+    ** http://aws.amazon.com/documentation/vpc/[Amazon Virtual Private Cloud Documentation^]
 
 * {partner-product-name}
-    ** https://www.consul.io/[Consul]
-    ** https://www.hashicorp.com/products/consul[Consul Enterprise]
+    ** https://www.consul.io/
+    ** https://www.consul.io/docs/enterprise[Consul Enterprise^]
 
 * Quick Start reference deployments
-    ** https://aws.amazon.com/quickstart/[AWS Quick Start home page]
-    ** https://s3.amazonaws.com/quickstart-reference/hashicorp/vault/latest/doc/hashicorp-vault-on-the-aws-cloud.pdf[AWS Quick Start for {partner-company-name} Vault]
+    ** https://aws.amazon.com/quickstart/[AWS Quick Starts^]
+    ** https://fwd.aws/zmVkX?[{partner-company-name} Vault on Amazon EKS^]

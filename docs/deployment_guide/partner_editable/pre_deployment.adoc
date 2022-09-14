@@ -2,16 +2,4 @@
 
 == Predeployment steps
 
-=== Specialized knowledge
-Before you deploy this Quick Start, we recommend that you become familiar with the following AWS services. (If you are new to AWS, see http://docs.aws.amazon.com/gettingstarted/latest/awsgsg-intro/intro.html[Getting Started with AWS].)
-
-* http://aws.amazon.com/documentation/vpc/[Amazon VPC]
-* http://aws.amazon.com/documentation/ec2/[Amazon EC2]
-
-=== Prepare an AWS account
-
-1. If you don’t already have an AWS account, create one at http://aws.amazon.com by following the on-screen instructions.
-2. Use the region selector in the navigation bar to choose the AWS Region where you want to deploy HashiCorp Consul on AWS.
-3. Create a http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html[key pair] in your preferred region.
-If necessary, request a https://console.aws.amazon.com/servicequotas/home?region=us-east-1#!/[service quota increase] for the Amazon EC2 *t2.medium* instance
-type. You might need to do this if you already have an existing deployment that uses this instance type, and you think you might exceed the default quota with this reference deployment. 
+Refer to https://aws-ia.github.io/content/qs_info.html#_planning_the_deployment[Planning the deployment^] in the AWS Quick Starts General Information Guide.
