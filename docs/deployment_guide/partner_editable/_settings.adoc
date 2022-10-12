@@ -5,7 +5,7 @@
 :partner-company-name: HashiCorp
 :doc-month: September
 :doc-year: 2022
-:partner-contributors: {partner-company-name} & AWS Integration and Automation team
+:partner-contributors: {partner-company-name} and AWS Integration & Automation team
 // :other-contributors: Akua Mansa, Trek10
 // :aws-contributors: AWS team
 // :aws-ia-contributors: Tony Vattathil and Andrew Gargan, AWS Integration & Automation team
