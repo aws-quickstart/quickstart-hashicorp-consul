@@ -2,4 +2,4 @@
 
 == Predeployment steps
 
-Refer to https://aws-ia.github.io/content/qs_info.html#_planning_the_deployment[Planning the deployment^] in the AWS Quick Starts General Information Guide.
+Refer to https://aws-ia.github.io/content/qs_info.html#_planning_the_deployment[Planning the deployment^] in the AWS Partner Solutions General Information Guide.

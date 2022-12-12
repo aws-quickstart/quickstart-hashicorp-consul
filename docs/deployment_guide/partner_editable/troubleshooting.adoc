@@ -1,11 +1,11 @@
 // Add any unique troubleshooting steps here.
 
-For troubleshooting common Quick Start issues, refer to the https://fwd.aws/rA69w?[AWS Quick Start General Information Guide^] and https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting CloudFormation^].
+For troubleshooting common Partner Solution issues, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^] and https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting CloudFormation^].
 
 // == Resources
 // Uncomment section and add links to any external resources that are specified by the partner.
 
-*Q.* I encountered a *CREATE_FAILED* error when I launched the Quick Start.
+*Q.* I encountered a *CREATE_FAILED* error when I launched the Partner Solution.
 
 *A.* If AWS CloudFormation fails to create the stack, we recommend that you relaunch the template with *Rollback on failure* set to *No*. (This setting is under *Advanced* in the AWS CloudFormation console, *Options* page.) With this setting, the stack’s state is retained and the instance is left running, so you can troubleshoot the issue. (For Windows, look at the log files in %ProgramFiles%\Amazon\EC2ConfigService and C:\cfn\log.)
 // If you’re deploying on Linux instances, provide the location for log files on Linux, or omit this sentence.
@@ -16,7 +16,7 @@ For additional information, see https://docs.aws.amazon.com/AWSCloudFormation/la
 
 *Q.* I encountered a size limitation error when I deployed the AWS CloudFormation templates.
 
-*A.* We recommend that you launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template size limitations. For more information about AWS CloudFormation quotas, see the http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html[AWS documentation^].
+*A.* We recommend that you launch the Partner Solution templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template size limitations. For more information about AWS CloudFormation quotas, see the http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html[AWS documentation^].
 
 === Resources
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
@@ -29,6 +29,6 @@ For additional information, see https://docs.aws.amazon.com/AWSCloudFormation/la
     ** https://www.consul.io/
     ** https://www.consul.io/docs/enterprise[Consul Enterprise^]
 
-* Quick Start reference deployments
-    ** https://aws.amazon.com/quickstart/[AWS Quick Starts^]
+* Partner Solution reference deployments
+    ** https://aws.amazon.com/quickstart/[AWS Partner Solutions^]
     ** https://fwd.aws/zmVkX?[{partner-company-name} Vault on Amazon EKS^]
