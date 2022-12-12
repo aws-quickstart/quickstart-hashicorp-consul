@@ -1,15 +1,15 @@
 :xrefstyle: short
 
-Deploying this Quick Start with default parameters builds the following {partner-product-short-name} environment in the
+Deploying this Partner Solution with default parameters builds the following {partner-product-short-name} environment in the
 AWS Cloud.
 
 // Replace this example diagram with your own. Follow our wiki guidelines: https://w.amazon.com/bin/view/AWS_Quick_Starts/Process_for_PSAs/#HPrepareyourarchitecturediagram. Upload your source PowerPoint file to the GitHub {deployment name}/docs/images/ directory in its repository.
 
 [#architecture1]
-.Quick Start architecture for {partner-product-name} on AWS
+.Partner Solution architecture for {partner-product-name} on AWS
 image::../docs/deployment_guide/images/architecture_diagram.png[Architecture]
 
-As shown in <<architecture1>>, this Quick Start sets up the following:
+As shown in <<architecture1>>, this Partner Solution sets up the following:
 
 * A highly available architecture that spans three Availability Zones.
 * A VPC configured with public and private subnets according to AWS best practices, to provide you with your own virtual network on AWS.*
@@ -24,4 +24,4 @@ As shown in <<architecture1>>, this Quick Start sets up the following:
 ** Dnsmasq installed to client and server nodes to integrate applications with the Consul Domain Name System (DNS) interface for service discovery (not shown).
 ** Amazon Certificate Manager (ACM) to create or import a Secure Sockets Layer (SSL) certificate to associate with the Classic Load Balancer.
 
-[.small]#* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
+[.small]#* The template that deploys this Partner Solution into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
