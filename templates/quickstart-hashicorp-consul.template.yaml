@@ -88,9 +88,9 @@ Metadata:
         default: Number of Consul server nodes
       ConsulClientNodes:
         default: Number of Consul client nodes
-      ConsulEc2RetryTagKey: 
+      ConsulEc2RetryTagKey:
         default: Tag key for Consul cluster nodes
-      ConsulEc2RetryTagValue: 
+      ConsulEc2RetryTagValue:
         default: Tag value for Consul cluster nodes
       BastionSecurityGroupID:
         default: Bastion host security group ID
@@ -363,7 +363,7 @@ Conditions:
 #             - !Not [!Equals [!Ref HostedZoneID, '']]
 #             - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
 #         - !Not [!Equals [!Ref LoadBalancerFQDN, '']]
-#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided." 
+#         AssertDescription: "Using an SSL certificate is enforced. A CertificateArn or a HostedZoneID and LoadBalancerFQDN must be provided."
 #   ProvideSSHKey:
 #     Assertions:
 #       - Assert:
@@ -486,6 +486,16 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
   ConsulServerLogsBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -665,7 +675,7 @@ Resources:
                     "upgrade_version_tag": ""
                   }
                 }
-              
+
               mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
@@ -891,7 +901,7 @@ Resources:
                     "http": "0.0.0.0"
                   }${gRPC}
                 }
-              - gRPC: !If [ gRPCCondition, "\"ports\": ,{ \"grpc\": 8502 },", "" ]   
+              - gRPC: !If [ gRPCCondition, "\"ports\": ,{ \"grpc\": 8502 },", "" ]
               mode: 000644
             /etc/systemd/system/consul.service:
               content: !Join
@@ -941,7 +951,7 @@ Resources:
             03_reload_systemd:
               command: systemctl daemon-reload
             04_enable_consul:
-              command: systemctl enable consul 
+              command: systemctl enable consul
             05_start_consul:
               command: systemctl start consul
         setup_dnsmasq:
@@ -1007,7 +1017,7 @@ Resources:
             [ $STATUS == 0 ] || cfn_fail
             echo log info on failure
             [ $STATUS == 0 ] || (journalctl -b --no-pager -u consul && cat /opt/consul/config/client.json && systemctl status consul.service)
-            
+
             # Signal cfn-init (final check)
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - S3Region: !If [GovCloudCondition, s3-us-gov-west-1, s3]
